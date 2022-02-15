@@ -60,7 +60,7 @@ module.exports = {
     });
   },
   getUsers: (req, res) => {
-    console.log(req.user);
+    //console.log(req.user);
     let queryObj = {};
 
     let { status, orderby, dir, offset, rpp } = req.body;
@@ -165,7 +165,7 @@ module.exports = {
       }
       const result = compareSync(body.password, results.password);
       if (result) {
-        console.log(results);
+        //console.log(results);
         const { password, ...rest } = results;
         //results.password = undefined;
         const jsontoken = sign({ result: rest }, process.env.JWT_SECRET, {
