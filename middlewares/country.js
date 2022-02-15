@@ -1,4 +1,6 @@
 const path = require("path");
+//const imageThumbnail = require("image-thumbnail");
+const fs = require("fs");
 
 const {
   checkCountryId,
@@ -99,7 +101,7 @@ module.exports = {
     });
   },
 
-  validateImg: (req, res, next) => {
+  validateImg: async (req, res, next) => {
     if (!req.files) {
       req.body.flag = "";
       return next();
@@ -129,14 +131,13 @@ module.exports = {
         Date.now() +
         path.extname(fileName);
 
-      const file_destination = `./public/images/country/${sanitizedFileName}`;
+      const file_destination = `public/images/country/${sanitizedFileName}`;
 
       file.mv(file_destination, (err) => {
         if (err) {
           console.log(err);
           return res.status(500).send(err);
         } else {
-          console.log("File uploaded to => ", file_destination);
           req.body.flag = sanitizedFileName;
           next();
         }

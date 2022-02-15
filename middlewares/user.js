@@ -175,7 +175,7 @@ module.exports = {
       } else if (!row) {
         return res.status(400).json({
           success: false,
-          message: "Invalid User",
+          message: "Invalid User id",
         });
       } else {
         next();

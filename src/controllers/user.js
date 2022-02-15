@@ -169,7 +169,7 @@ module.exports = {
         const { password, ...rest } = results;
         //results.password = undefined;
         const jsontoken = sign({ result: rest }, process.env.JWT_SECRET, {
-          expiresIn: "24h",
+          expiresIn: "90d",
         });
         return res.json({
           success: true,
@@ -210,6 +210,7 @@ module.exports = {
       }
     });
   },
+
   gitOauth: (req, res) => {
     axios({
       method: "POST",
