@@ -964,3 +964,9 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+/*
+LEFT JOIN for pr_functionalities and pr_subfunctions
+"SELECT f.uid as `fun_uid`, f.name AS `fun_name`, f.icon AS `fun_icon`, sf.uid AS `subfun_uid`, sf.name AS `subfun_name`, sf.icon AS `subfun_icon` FROM pr_functionalities f LEFT JOIN pr_subfunctions sf ON f.uid = sf.func_id LIMIT 0, 25;
+*/

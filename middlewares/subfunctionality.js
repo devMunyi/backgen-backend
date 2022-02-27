@@ -8,13 +8,23 @@ const {
 module.exports = {
   subfunAddValidation: (req, res, next) => {
     const { name, func_id, added_by } = req.body;
-    if (!name) {
-      return res.status(400).json({
+    // console.log("Incoming subfun data =>" + JSON.stringify(req.body));
+    // console.log("SUBFUNCTION NAME => " + name);
+    // console.log("FUNCTION ID => " + func_id);
+    // console.log("ADDED BY => " + added_by);
+    if (!name || name.trim().length < 3) {
+      return res.json({
         success: false,
-        message: "Subfunctionality name is required",
+        message:
+          "Subfunctionality name is required and should be at least three characters",
       });
     } else if (!func_id) {
-      return res.status(400).json({
+      return res.json({
+        success: false,
+        message: "Please select functionality",
+      });
+    } else if (parseInt(func_id) < 1) {
+      return res.json({
         success: false,
         message: "Please select functionality",
       });
@@ -44,13 +54,19 @@ module.exports = {
   subfunEditValidation: (req, res, next) => {
     const { func_id, name, added_by } = req.body;
 
-    if (!name) {
-      return res.status(400).json({
+    if (!name || name.trim().length < 3) {
+      return res.json({
         success: false,
-        message: "Subfunctionality name is required",
+        message:
+          "Subfunctionality name is required and should be at least three characters",
       });
     } else if (!func_id) {
-      return res.status(400).json({
+      return res.json({
+        success: false,
+        message: "Please select functionality",
+      });
+    } else if (parseInt(func_id) < 1) {
+      return res.json({
         success: false,
         message: "Please select functionality",
       });
@@ -66,7 +82,7 @@ module.exports = {
           console.log(err);
           return;
         } else if (result) {
-          return res.status(400).json({
+          return res.json({
             success: false,
             message: "Subfunctionality name already exists",
           });

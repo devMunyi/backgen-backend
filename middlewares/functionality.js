@@ -8,11 +8,17 @@ const {
 module.exports = {
   funAddValidation: (req, res, next) => {
     const { name, added_by } = req.body;
-    console.log(req.body.name);
-    if (!name) {
-      return res.status(400).json({
+    // console.log(
+    //   "FUNCTIONALITY BODY INCOMING DATA =>" + JSON.stringify(req.body)
+    // );
+    // console.log("FUNCTION NAME => " + req.body.name);
+    // console.log("Function Icon => " + req.body.icon);
+    // console.log(req.body.name);
+    if (!name || name.trim().length < 3) {
+      return res.json({
         success: false,
-        message: "Functionality name is required",
+        message:
+          "Functionality name is required and should be at least three characters",
       });
     } else if (!added_by) {
       return res.json({
@@ -40,10 +46,11 @@ module.exports = {
   funEditValidation: (req, res, next) => {
     const { name, added_by } = req.body;
 
-    if (!name) {
-      return res.status(400).json({
+    if (!name || name.trim().length < 3) {
+      return res.json({
         success: false,
-        message: "Functionality name is required",
+        message:
+          "Functionality name is required and should be at least three characters",
       });
     } else if (!added_by) {
       return res.json({
@@ -57,7 +64,7 @@ module.exports = {
           console.log(err);
           return;
         } else if (result) {
-          return res.status(400).json({
+          return res.json({
             success: false,
             message: "Functionality name already exists",
           });
@@ -74,7 +81,7 @@ module.exports = {
       if (err) {
         console.log(err);
       } else if (!row) {
-        return res.status(400).json({
+        return res.json({
           success: false,
           message: "Invalid functionality id",
         });
@@ -96,13 +103,13 @@ module.exports = {
       const allowedExtensions = [".png", ".jpg", "jpeg"];
 
       if (!allowedExtensions.includes(extensionName)) {
-        return res.status(400).json({
+        return res.json({
           success: false,
           message:
             "Invalid image. Only .jpeg, .jpg and .png file types are allowed",
         });
       } else if (fileSize > miniFileSize) {
-        return res.status(400).json({
+        return res.json({
           success: false,
           message: "File size exceeds minimum required 5mbs",
         });

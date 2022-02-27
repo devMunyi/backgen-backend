@@ -18,29 +18,16 @@ const {
 /////----End imported custom middlewares
 
 ////----Begin routes defination
-router.post(
-  "/add-subfunctionality",
-  checkToken,
-  validateImg,
-  subfunAddValidation,
-  addSubfunc
-);
+router.post("/add-subfunctionality", subfunAddValidation, addSubfunc);
 router.get("/subfunctionalities", getSubfuncs);
 router.get("/subfunctionality/:id", subfunIdValidation, getSubfuncBySubfuncId);
 router.put(
   "/edit-subfunctionality/:id",
-  checkToken,
   subfunIdValidation,
-  validateImg,
   subfunEditValidation,
   updateSubfunc
 );
-router.delete(
-  "/del-subfunctionality/:id",
-  checkToken,
-  subfunIdValidation,
-  deleteSubfunc
-);
+router.delete("/del-subfunctionality/:id", subfunIdValidation, deleteSubfunc);
 ////----End routes defination
 
 module.exports = router; ////make the module available for imports

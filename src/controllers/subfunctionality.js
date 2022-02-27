@@ -40,8 +40,8 @@ module.exports = {
       }
 
       if (results) {
-        const { icon } = results;
-        results.icon = `images/subfunctionality/${icon}`;
+        // const { icon } = results;
+        // results.icon = `/images/subfunctionality/${icon}`;
 
         return res.json({
           success: true,
@@ -90,11 +90,11 @@ module.exports = {
       }
 
       if (results) {
-        results.map((result) => {
-          const icon = `images/subfunctionality/${result.icon}`;
-          result.icon = icon;
-          //console.log(result);
-        });
+        // results.map((result) => {
+        //   const icon = `/images/subfunctionality/${result.icon}`;
+        //   result.icon = icon;
+        //   //console.log(result);
+        // });
 
         return res.json({
           success: true,
@@ -103,6 +103,7 @@ module.exports = {
       }
     });
   },
+
   updateSubfunc: (req, res) => {
     const { body } = req;
 

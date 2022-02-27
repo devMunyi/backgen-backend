@@ -41,7 +41,7 @@ module.exports = {
 
       if (results) {
         const { icon } = results;
-        results.icon = `images/functionality/${icon}`;
+        results.icon = `/images/functionality/${icon}`;
 
         return res.json({
           success: true,
@@ -92,8 +92,15 @@ module.exports = {
 
       if (results) {
         results.map((result) => {
-          const icon = `images/functionality/${result.icon}`;
+          const icon = `/images/functionality/${result.icon}`;
           result.icon = icon;
+
+          // const fun_icon = `images/functionality/${result.fun_icon}`;
+          // result.fun_icon = fun_icon;
+
+          // const subfun_icon = `images/subfunctionality/${result.subfun_icon}`;
+          // result.subfun_icon = subfun_icon;
+
           //console.log(result);
         });
 
