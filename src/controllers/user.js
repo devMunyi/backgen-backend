@@ -32,7 +32,7 @@ module.exports = {
           message: "Error occured in adding a new user",
         });
       } else {
-        return res.status(200).json({
+        return res.json({
           success: true,
           data: results,
           message: "User added Successfully",
@@ -197,13 +197,13 @@ module.exports = {
         return;
       }
       if (!results) {
-        return res.status(400).json({
+        return res.json({
           success: false,
           message: "No recod found",
         });
       }
       if (results) {
-        return res.status(200).json({
+        return res.json({
           success: true,
           sameUser: results,
         });

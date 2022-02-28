@@ -13,10 +13,10 @@ module.exports = {
       }
     );
   },
-  getFuncs: ({ status }, callback) => {
+  getFuncs: ({ status, offset, rpp }, callback) => {
     pool.query(
-      `SELECT uid, name, icon, added_at, added_by, updated_at FROM pr_functionalities WHERE status = ? ORDER BY name`,
-      [status],
+      `SELECT uid, name, icon, added_at, added_by, updated_at FROM pr_functionalities WHERE status = ? ORDER BY name LIMIT ?,?`,
+      [status, offset, rpp],
       (error, results, fields) => {
         if (error) {
           return callback(error);

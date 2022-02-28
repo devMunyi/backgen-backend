@@ -4,17 +4,17 @@ module.exports = {
   commentAddValidation: (req, res, next) => {
     const { code_snippet_id, text, added_by, replies_to } = req.body;
     if (!code_snippet_id) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Code snippet id required",
       });
     } else if (!text) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Comment content required",
       });
     } else if (!added_by) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Author is required",
       });
@@ -32,17 +32,17 @@ module.exports = {
     const { code_snippet_id, text, added_by, replies_to } = req.body;
 
     if (!code_snippet_id) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Code snippet id required",
       });
     } else if (!text) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Comment content required",
       });
     } else if (!added_by) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Author is required",
       });
@@ -62,7 +62,7 @@ module.exports = {
       if (err) {
         console.log(err);
       } else if (!row) {
-        return res.status(400).json({
+        return res.json({
           success: false,
           message: "Invalid comment id",
         });

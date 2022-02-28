@@ -14,10 +14,10 @@ module.exports = {
       }
     );
   },
-  getSubfuncs: ({ status }, callback) => {
+  getSubfuncs: ({ status, rpp, offset }, callback) => {
     pool.query(
-      `SELECT uid, func_id, name, added_by, added_at, updated_at FROM pr_subfunctions WHERE status = ? ORDER BY name`,
-      [status],
+      `SELECT uid, func_id, name, added_by, added_at, updated_at FROM pr_subfunctions WHERE status = ? ORDER BY name LIMIT ?,?`,
+      [status, offset, rpp],
       (error, results, fields) => {
         if (error) {
           return callback(error);

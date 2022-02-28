@@ -17,7 +17,7 @@ module.exports = {
           message: "Error occured in adding a new implementation",
         });
       }
-      return res.status(200).json({
+      return res.json({
         success: true,
         data: results,
         message: "Implementation added Successfully",
@@ -74,7 +74,7 @@ module.exports = {
     }
 
     if (!rpp) {
-      10;
+      rpp = 10;
     }
 
     //add data to fObj object

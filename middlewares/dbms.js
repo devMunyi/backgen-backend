@@ -10,7 +10,7 @@ module.exports = {
     const { name, added_by } = req.body;
     console.log(req.body.name);
     if (!name) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Dbms name is required",
       });
@@ -41,7 +41,7 @@ module.exports = {
     const { name, added_by } = req.body;
 
     if (!name) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Dbms name is required",
       });
@@ -57,7 +57,7 @@ module.exports = {
           console.log(err);
           return;
         } else if (result) {
-          return res.status(400).json({
+          return res.json({
             success: false,
             message: "Dbms name already exists",
           });
@@ -74,7 +74,7 @@ module.exports = {
       if (err) {
         console.log(err);
       } else if (!row) {
-        return res.status(400).json({
+        return res.json({
           success: false,
           message: "Invalid dbms id",
         });
@@ -97,13 +97,13 @@ module.exports = {
       const allowedExtensions = [".png", ".jpg", "jpeg"];
 
       if (!allowedExtensions.includes(extensionName)) {
-        return res.status(400).json({
+        return res.json({
           success: false,
           message:
             "Invalid image. Only .jpeg, .jpg and .png file types are allowed",
         });
       } else if (fileSize > miniFileSize) {
-        return res.status(400).json({
+        return res.json({
           success: false,
           message: "File size exceeds minimum required 5mbs",
         });

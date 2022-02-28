@@ -18,7 +18,7 @@ module.exports = {
           message: "Error occured in adding a new dbms",
         });
       }
-      return res.status(200).json({
+      return res.json({
         success: true,
         data: results,
         message: "Dbms added Successfully",

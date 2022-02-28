@@ -52,29 +52,32 @@ module.exports = {
   },
   getSubfuncs: (req, res) => {
     let queryObj = {};
-
-    //let function_id = parseInt(req.query.function_id);
-    let status = parseInt(req.query.status);
-    let orderby = req.query.orderby;
-    let dir = req.query.dir;
+    let { status, orderby, dir, offset, rpp } = req.query;
 
     if (!status) {
       status = 1;
     }
-
     if (!orderby) {
       orderby = "name";
     }
-
     if (!dir) {
       dir = "ASC";
     }
+    if (!offset) {
+      offset = 0;
+    }
+
+    if (!rpp) {
+      rpp = 10;
+    }
 
     //add data to queryObj object
-    //queryObj.function_id = function_id;
-    queryObj.status = status;
+    queryObj.status = parseInt(status);
     queryObj.orderby = orderby;
     queryObj.dir = dir;
+    queryObj.offset = parseInt(offset);
+    queryObj.rpp = parseInt(rpp);
+
     getSubfuncs(queryObj, (err, results) => {
       if (err) {
         console.log(err);

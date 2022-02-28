@@ -44,7 +44,7 @@ module.exports = {
   userRegisterValidation: (req, res, next) => {
     const { username, email, country, password, cpassword } = req.body;
     if (!username || username.length < 3) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Username is required and should be min 3 characters",
       });
@@ -54,22 +54,22 @@ module.exports = {
         message: "Email is required",
       });
     } else if (!country) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Country is required",
       });
     } else if (!password || password.length < 6) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Password is required and should be min 6 characters long",
       });
     } else if (!cpassword) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Confirm password is required",
       });
     } else if (password !== cpassword) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Passwords do not match.",
       });
@@ -79,7 +79,7 @@ module.exports = {
           console.log(err);
           return;
         } else if (result) {
-          return res.status(400).json({
+          return res.json({
             success: false,
             message: "Username already taken",
           });
@@ -90,7 +90,7 @@ module.exports = {
                 console.log(err);
                 return;
               } else if (result) {
-                return res.status(400).json({
+                return res.json({
                   success: false,
                   message: "Email already taken",
                 });
@@ -109,7 +109,7 @@ module.exports = {
     const userid = parseInt(req.params.id);
     //console.log(userid);
     if (!username || username.length < 3) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Username is required and should be min 3 characters",
       });
@@ -119,22 +119,22 @@ module.exports = {
         message: "Email is required",
       });
     } else if (!country) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Country is required",
       });
     } else if (!password || password.length < 6) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Password is required and should be min 6 characters long",
       });
     } else if (!cpassword) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Confirm password is required",
       });
     } else if (password !== cpassword) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Passwords do not match.",
       });
@@ -144,7 +144,7 @@ module.exports = {
           console.log(err);
           return;
         } else if (result) {
-          return res.status(400).json({
+          return res.json({
             success: false,
             message: "Username already taken",
           });
@@ -154,7 +154,7 @@ module.exports = {
               console.log(err);
               return;
             } else if (result) {
-              return res.status(400).json({
+              return res.json({
                 success: false,
                 message: "Email already taken",
               });
@@ -173,7 +173,7 @@ module.exports = {
       if (err) {
         console.log(err);
       } else if (!row) {
-        return res.status(400).json({
+        return res.json({
           success: false,
           message: "Invalid User id",
         });

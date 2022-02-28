@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 05, 2022 at 04:02 PM
+-- Generation Time: Feb 28, 2022 at 10:53 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.0.13
 
@@ -613,9 +613,7 @@ CREATE TABLE `pr_functionalities` (
 --
 
 INSERT INTO `pr_functionalities` (`uid`, `name`, `icon`, `added_by`, `added_at`, `updated_at`, `status`) VALUES
-(1, 'Email', 'email-1641232612475.png', 1, '2021-12-20 11:06:31', '2022-01-03 22:21:22', 1),
-(2, 'File', 'file.png', 1, '2021-12-20 11:06:31', '2022-01-03 22:21:22', 1),
-(3, 'HTTP', 'http.png', 1, '2021-12-20 11:06:31', '2022-01-29 14:31:16', 1);
+(1, 'Email', 'email.png', 1, '2021-12-20 11:06:31', '2022-02-26 16:07:06', 1);
 
 -- --------------------------------------------------------
 
@@ -636,13 +634,6 @@ CREATE TABLE `pr_implementations` (
   `downvoters` int(11) NOT NULL DEFAULT 0,
   `status` int(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Dumping data for table `pr_implementations`
---
-
-INSERT INTO `pr_implementations` (`uid`, `func_id`, `subfunc_id`, `title`, `description`, `added_by`, `added_date`, `updated_date`, `upvoters`, `downvoters`, `status`) VALUES
-(1, 2, 3, 'File Upload', 'testing', 1, '2022-01-31 20:36:28', '2022-01-31 20:37:47', 25, 3, 1);
 
 -- --------------------------------------------------------
 
@@ -708,14 +699,14 @@ INSERT INTO `pr_languages` (`uid`, `name`, `description`, `icon`, `added_by`, `a
 --
 
 CREATE TABLE `pr_platforms` (
-  `uid` int(5) NOT NULL,
+  `uid` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
   `description` text NOT NULL,
   `icon` varchar(50) NOT NULL,
-  `added_by` int(1) NOT NULL,
+  `added_by` int(11) NOT NULL,
   `added_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `status` int(1) NOT NULL DEFAULT 1
+  `status` int(11) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -723,9 +714,10 @@ CREATE TABLE `pr_platforms` (
 --
 
 INSERT INTO `pr_platforms` (`uid`, `name`, `description`, `icon`, `added_by`, `added_at`, `updated_at`, `status`) VALUES
-(1, 'Web', 'A web application (or web app) is application software that runs on a web server, unlike computer-based software programs that are run locally on the operating system (OS) of the device. Web applications are accessed by the user through a web browser with an active network connection.', 'web-1643373546926.png', 1, '2021-12-27 11:38:50', '2022-01-29 07:40:38', 1),
-(2, 'Desktop', 'Desktop apps operate as stand-alone software, which means they can be used offline and do not require access to the internet or web browser to work.', 'computer.png', 0, '2021-12-27 11:38:50', '2022-01-29 07:41:06', 1),
-(3, 'Mobile', 'A mobile application, also referred to as a mobile app or simply an app, is a computer program or software application designed to run on a mobile device such as a phone, tablet, or watch', 'smartphone.png', 0, '2021-12-27 11:38:50', '2022-01-29 07:41:36', 1);
+(1, 'WEB', 'A web application (or web app) is application software that runs on a web server, unlike computer-based software programs that are run locally on the operating system (OS) of the device. Web applications are accessed by the user through a web browser with an active network connection', '001-world-wide-web-1645590897017.png', 1, '2021-12-27 11:38:50', '2022-02-23 01:34:57', 1),
+(2, 'DESKTOP', 'Desktop apps operate as stand-alone software, which means they can be used offline and do not require access to the internet or web browser to work.', '003-monitor-1645590994423.png', 1, '2021-12-27 11:38:50', '2022-02-23 01:36:34', 1),
+(3, 'MOBILE', 'A mobile application, also referred to as a mobile app or simply an app, is a computer program or software application designed to run on a mobile device such as a phone, tablet, or watch', '002-smartphone-1645590759340.png', 1, '2021-12-27 11:38:50', '2022-02-23 01:32:39', 1),
+(7, 'Test3', 'The Android operating system is a mobile operating system that was developed by Google (GOOGL​) to be primarily used for touchscreen devices, cell phones, and tablets. ... Google also employs Android software in televisions, cars, and wristwatches—each of which is fitted with a unique user interface', 'web-1644905652591.png', 1, '2022-02-15 06:14:12', '2022-02-15 03:14:37', 0);
 
 -- --------------------------------------------------------
 
@@ -737,7 +729,6 @@ CREATE TABLE `pr_subfunctions` (
   `uid` int(11) NOT NULL,
   `func_id` int(11) NOT NULL COMMENT 'From pr_functionalities table',
   `name` varchar(100) NOT NULL,
-  `icon` varchar(50) NOT NULL,
   `added_by` int(5) NOT NULL,
   `added_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -748,8 +739,8 @@ CREATE TABLE `pr_subfunctions` (
 -- Dumping data for table `pr_subfunctions`
 --
 
-INSERT INTO `pr_subfunctions` (`uid`, `func_id`, `name`, `icon`, `added_by`, `added_at`, `updated_at`, `status`) VALUES
-(3, 2, 'Upload', 'upload.png', 0, '2021-12-26 10:15:07', '2021-12-26 13:15:34', 1);
+INSERT INTO `pr_subfunctions` (`uid`, `func_id`, `name`, `added_by`, `added_at`, `updated_at`, `status`) VALUES
+(1, 1, 'Send', 1, '2021-12-26 10:15:07', '2022-02-28 12:46:35', 1);
 
 -- --------------------------------------------------------
 
@@ -910,7 +901,7 @@ ALTER TABLE `pr_environment_details`
 -- AUTO_INCREMENT for table `pr_functionalities`
 --
 ALTER TABLE `pr_functionalities`
-  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `pr_implementations`
@@ -922,13 +913,13 @@ ALTER TABLE `pr_implementations`
 -- AUTO_INCREMENT for table `pr_platforms`
 --
 ALTER TABLE `pr_platforms`
-  MODIFY `uid` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `pr_subfunctions`
 --
 ALTER TABLE `pr_subfunctions`
-  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `pr_users`
@@ -964,9 +955,3 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-
-
-/*
-LEFT JOIN for pr_functionalities and pr_subfunctions
-"SELECT f.uid as `fun_uid`, f.name AS `fun_name`, f.icon AS `fun_icon`, sf.uid AS `subfun_uid`, sf.name AS `subfun_name`, sf.icon AS `subfun_icon` FROM pr_functionalities f LEFT JOIN pr_subfunctions sf ON f.uid = sf.func_id LIMIT 0, 25;
-*/

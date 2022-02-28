@@ -17,7 +17,7 @@ module.exports = {
           message: "Error occured in adding a new code snippet",
         });
       }
-      return res.status(200).json({
+      return res.json({
         success: true,
         data: results,
         message: "Code snippet added Successfully",

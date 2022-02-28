@@ -5,17 +5,17 @@ module.exports = {
     const { func_id, subfunc_id, title, added_by } = req.body;
     console.log(req.body.name);
     if (!func_id) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Please select function",
       });
     } else if (!subfunc_id) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Please select sub-function",
       });
     } else if (!title) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Implementation title is required",
       });
@@ -33,17 +33,17 @@ module.exports = {
     const { func_id, subfunc_id, title, added_by } = req.body;
 
     if (!func_id) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Please select function",
       });
     } else if (!subfunc_id) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Please select sub-function",
       });
     } else if (!title) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Title is required",
       });
@@ -63,7 +63,7 @@ module.exports = {
       if (err) {
         console.log(err);
       } else if (!row) {
-        return res.status(400).json({
+        return res.json({
           success: false,
           message: "Invalid code snippet id",
         });
