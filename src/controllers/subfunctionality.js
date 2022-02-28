@@ -123,7 +123,7 @@ module.exports = {
 
       return res.json({
         success: true,
-        message: "Sub-functionality updated successfully!",
+        message: "Sub-functionality updated successfully",
       });
     });
   },
@@ -143,7 +143,7 @@ module.exports = {
 
       return res.json({
         success: true,
-        message: "Sub-functionality deleted successfully!",
+        message: "Sub-functionality deleted successfully",
       });
     });
   },

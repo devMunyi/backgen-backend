@@ -130,7 +130,7 @@ module.exports = {
 
       return res.json({
         success: true,
-        message: "Functionality updated successfully!",
+        message: "Functionality updated successfully",
       });
     });
   },
@@ -149,7 +149,7 @@ module.exports = {
       }
       return res.json({
         success: true,
-        message: "Functionality deleted successfully!",
+        message: "Functionality deleted successfully",
       });
     });
   },
