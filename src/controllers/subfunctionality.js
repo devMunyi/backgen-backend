@@ -13,12 +13,12 @@ module.exports = {
     addSubfunc(body, (err, results) => {
       if (err) {
         console.log(err);
-        return res.status(500).json({
+        return res.json({
           success: false,
           message: "Error occured in adding a new sub-functionality",
         });
       }
-      return res.status(200).json({
+      return res.json({
         success: true,
         data: results,
         message: "Sub-functionality added Successfully",
