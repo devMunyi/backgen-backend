@@ -8,7 +8,7 @@ module.exports = {
         success: false,
         message: "Code snippet id required",
       });
-    } else if (!text) {
+    } else if (!text || text.trim().length < 1) {
       return res.json({
         success: false,
         message: "Comment content required",
@@ -24,6 +24,7 @@ module.exports = {
         message: "Comment reply to is required",
       });
     } else {
+      req.body.text = text.trim();
       next();
     }
   },
@@ -36,7 +37,7 @@ module.exports = {
         success: false,
         message: "Code snippet id required",
       });
-    } else if (!text) {
+    } else if (!text || text.trim().length < 1) {
       return res.json({
         success: false,
         message: "Comment content required",
@@ -52,6 +53,7 @@ module.exports = {
         message: "Comment reply to is required",
       });
     } else {
+      req.body.text = text.trim();
       next();
     }
   },

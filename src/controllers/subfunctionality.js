@@ -4,6 +4,7 @@ const {
   getSubfuncs,
   updateSubfunc,
   deleteSubfunc,
+  reactivateSubfunc,
 } = require("../models/subfunctionality");
 
 module.exports = {
@@ -52,7 +53,7 @@ module.exports = {
   },
   getSubfuncs: (req, res) => {
     let queryObj = {};
-    let { status, orderby, dir, offset, rpp } = req.query;
+    let { status, orStatus, orderby, dir, offset, rpp } = req.query;
 
     if (!status) {
       status = 1;
@@ -73,6 +74,10 @@ module.exports = {
 
     //add data to queryObj object
     queryObj.status = parseInt(status);
+    if (!orStatus) {
+    } else {
+      queryObj.orStatus = parseInt(orStatus);
+    }
     queryObj.orderby = orderby;
     queryObj.dir = dir;
     queryObj.offset = parseInt(offset);
@@ -147,6 +152,27 @@ module.exports = {
       return res.json({
         success: true,
         message: "Sub-functionality deleted successfully",
+      });
+    });
+  },
+
+  reactivateSubfunc: (req, res) => {
+    const { subfun_id } = req.body;
+    reactivateSubfunc(parseInt(subfun_id), (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "Record Not Found",
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: "Sub-functionality activated successfully",
       });
     });
   },

@@ -14,17 +14,30 @@ module.exports = {
       }
     );
   },
-  getSubfuncs: ({ status, rpp, offset }, callback) => {
-    pool.query(
-      `SELECT uid, func_id, name, added_by, added_at, updated_at FROM pr_subfunctions WHERE status = ? ORDER BY name LIMIT ?,?`,
-      [status, offset, rpp],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
+  getSubfuncs: ({ status, orStatus, rpp, offset }, callback) => {
+    if (orStatus === 0) {
+      pool.query(
+        `SELECT uid, func_id, name, added_by, added_at, updated_at, status FROM pr_subfunctions WHERE status = ? OR status = ? ORDER BY name LIMIT ?,?`,
+        [status, orStatus, offset, rpp],
+        (error, results, fields) => {
+          if (error) {
+            return callback(error);
+          }
+          return callback(null, results);
         }
-        return callback(null, results);
-      }
-    );
+      );
+    } else {
+      pool.query(
+        `SELECT uid, func_id, name, added_by, added_at, updated_at FROM pr_subfunctions WHERE status = ? ORDER BY name LIMIT ?,?`,
+        [status, offset, rpp],
+        (error, results, fields) => {
+          if (error) {
+            return callback(error);
+          }
+          return callback(null, results);
+        }
+      );
+    }
   },
   getSubfuncBySubfuncId: (id, callback) => {
     pool.query(
@@ -55,6 +68,19 @@ module.exports = {
     pool.query(
       `UPDATE pr_subfunctions SET status = ? WHERE uid =?`,
       [0, id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
+      }
+    );
+  },
+
+  reactivateSubfunc: (id, callback) => {
+    pool.query(
+      `UPDATE pr_subfunctions SET status = ? WHERE uid =?`,
+      [1, id],
       (error, results, fields) => {
         if (error) {
           return callback(error);

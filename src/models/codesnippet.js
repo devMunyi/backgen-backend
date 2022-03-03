@@ -12,13 +12,11 @@ module.exports = {
       platform_id,
       instructions,
       added_by,
-      upvoters,
-      downvoters,
     },
     callback
   ) => {
     pool.query(
-      `INSERT INTO pr_code_snippets(row_code, file_extension, language_id, framework_id, implementation_id, dbms_id, platform_id, instructions, added_by, upvoters, downvoters) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO pr_code_snippets(row_code, file_extension, language_id, framework_id, implementation_id, dbms_id, platform_id, instructions, added_by) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         row_code,
         file_extension,
@@ -29,8 +27,6 @@ module.exports = {
         platform_id,
         instructions,
         added_by,
-        upvoters,
-        downvoters,
       ],
       (error, results, fields) => {
         if (error) {
@@ -79,13 +75,11 @@ module.exports = {
       platform_id,
       instructions,
       added_by,
-      upvoters,
-      downvoters,
     },
     callback
   ) => {
     pool.query(
-      `UPDATE pr_code_snippets SET row_code=?, file_extension=?, language_id=?, framework_id=?, implementation_id=?, dbms_id=?, platform_id=?, instructions=?, added_by=?, upvoters=?, downvoters=? WHERE uid =?`,
+      `UPDATE pr_code_snippets SET row_code=?, file_extension=?, language_id=?, framework_id=?, implementation_id=?, dbms_id=?, platform_id=?, instructions=?, added_by=? WHERE uid =?`,
       [
         row_code,
         file_extension,
@@ -96,8 +90,6 @@ module.exports = {
         platform_id,
         instructions,
         added_by,
-        upvoters,
-        downvoters,
         id,
       ],
       (error, results, fields) => {

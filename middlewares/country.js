@@ -12,7 +12,7 @@ module.exports = {
   countryAddValidation: (req, res, next) => {
     const { name, abbrev, added_by } = req.body;
     console.log(req.body.name);
-    if (!name) {
+    if (!name || name.trim().length < 1) {
       return res.json({
         success: false,
         message: "Country name is required",
@@ -39,6 +39,7 @@ module.exports = {
             message: "Country name already exists",
           });
         } else {
+          req.body.name = name.trim();
           const abbrev_ = abbrev.toUpperCase();
           req.body.abbrev = abbrev_;
           next();
@@ -50,7 +51,7 @@ module.exports = {
   countryEditValidation: (req, res, next) => {
     const { name, abbrev, added_by } = req.body;
 
-    if (!name) {
+    if (!name || name.trim().length < 1) {
       return res.json({
         success: false,
         message: "Country name is required",

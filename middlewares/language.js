@@ -9,7 +9,7 @@ module.exports = {
   languageAddValidation: (req, res, next) => {
     const { name, added_by } = req.body;
     console.log(req.body.name);
-    if (!name) {
+    if (!name || name.trim().length < 1) {
       return res.json({
         success: false,
         message: "Language name is required",
@@ -31,6 +31,7 @@ module.exports = {
             message: "Language name already exists",
           });
         } else {
+          req.body.name = name.trim();
           next();
         }
       });
@@ -41,7 +42,7 @@ module.exports = {
     const { name, added_by } = req.body;
     const langId = parseInt(req.params.id);
 
-    if (!name) {
+    if (!name || name.trim().length < 1) {
       return res.json({
         success: false,
         message: "Language name is required",
@@ -62,6 +63,7 @@ module.exports = {
             message: "Language name already exists",
           });
         } else {
+          req.body.name = name.trim();
           next();
         }
       });

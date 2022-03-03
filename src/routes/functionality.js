@@ -4,6 +4,7 @@ const {
   getFuncByFuncId,
   updateFunc,
   deleteFunc,
+  reactivateFunc,
 } = require("../controllers/functionality");
 const router = require("express").Router();
 
@@ -29,6 +30,7 @@ router.put(
   updateFunc
 );
 router.delete("/del-functionality/:id", funIdValidation, deleteFunc);
+router.put("/reactivate-functionality", reactivateFunc);
 ////------End routes definations
 
 module.exports = router; ////make the module available for imports

@@ -9,7 +9,7 @@ module.exports = {
   dbmsAddValidation: (req, res, next) => {
     const { name, added_by } = req.body;
     console.log(req.body.name);
-    if (!name) {
+    if (!name || name.trim().length < 1) {
       return res.json({
         success: false,
         message: "Dbms name is required",
@@ -31,6 +31,7 @@ module.exports = {
             message: "Dbms name already exists",
           });
         } else {
+          req.body.name = name.trim();
           next();
         }
       });
@@ -40,7 +41,7 @@ module.exports = {
   dbmsEditValidation: (req, res, next) => {
     const { name, added_by } = req.body;
 
-    if (!name) {
+    if (!name || name.trim().length < 1) {
       return res.json({
         success: false,
         message: "Dbms name is required",
@@ -62,6 +63,7 @@ module.exports = {
             message: "Dbms name already exists",
           });
         } else {
+          req.body.name = name.trim();
           next();
         }
       });

@@ -12,11 +12,10 @@ module.exports = {
     // console.log("SUBFUNCTION NAME => " + name);
     // console.log("FUNCTION ID => " + func_id);
     // console.log("ADDED BY => " + added_by);
-    if (!name || name.trim().length < 3) {
+    if (!name || name.trim().length < 1) {
       return res.json({
         success: false,
-        message:
-          "Subfunctionality name is required and should be at least three characters",
+        message: "Subfunctionality name is required",
       });
     } else if (!func_id) {
       return res.json({
@@ -45,6 +44,7 @@ module.exports = {
             message: "Subfunctionality name already exists",
           });
         } else {
+          req.body.name = name.trim();
           next();
         }
       });
@@ -87,6 +87,7 @@ module.exports = {
             message: "Subfunctionality name already exists",
           });
         } else {
+          req.body.name = name.trim();
           next();
         }
       });

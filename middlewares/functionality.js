@@ -37,6 +37,7 @@ module.exports = {
             message: "Functionality name already exists",
           });
         } else {
+          req.body.name = name.trim();
           next();
         }
       });
@@ -69,6 +70,7 @@ module.exports = {
             message: "Functionality name already exists",
           });
         } else {
+          req.body.name = name.trim();
           next();
         }
       });

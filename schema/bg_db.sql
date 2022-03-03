@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 28, 2022 at 10:53 AM
+-- Generation Time: Mar 03, 2022 at 07:15 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.0.13
 
@@ -602,18 +602,26 @@ CREATE TABLE `pr_functionalities` (
   `uid` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `icon` varchar(50) NOT NULL,
-  `added_by` int(5) NOT NULL DEFAULT 1,
+  `added_by` int(11) NOT NULL DEFAULT 1,
   `added_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `status` int(1) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `status` int(11) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `pr_functionalities`
 --
 
 INSERT INTO `pr_functionalities` (`uid`, `name`, `icon`, `added_by`, `added_at`, `updated_at`, `status`) VALUES
-(1, 'Email', 'email.png', 1, '2021-12-20 11:06:31', '2022-02-26 16:07:06', 1);
+(1, 'Email', '42-email-1646235077472.png', 1, '2021-12-20 11:06:31', '2022-03-03 21:06:15', 1),
+(2, 'Variables', '64-arrow-1646234904190.png', 1, '2022-03-02 18:28:24', '2022-03-02 18:28:24', 1),
+(3, 'Conditions', '500-planning-1646235378758.png', 1, '2022-03-02 18:36:18', '2022-03-02 18:36:18', 1),
+(4, 'Loops', 'looping-arrows-1646236133242.png', 1, '2022-03-02 18:41:10', '2022-03-02 18:48:53', 1),
+(5, 'Flow Control', '17-denied-1646235756261.png', 1, '2022-03-02 18:42:36', '2022-03-02 18:42:36', 1),
+(6, 'Scripting', '356-document-code-1646236369113.png', 1, '2022-03-02 18:52:49', '2022-03-02 18:52:49', 1),
+(7, 'File', '322-document-1646236743950.png', 1, '2022-03-02 18:59:03', '2022-03-02 18:59:03', 1),
+(8, 'Folder', '59-folder-1646236930628.png', 1, '2022-03-02 19:02:10', '2022-03-02 19:02:10', 1),
+(9, 'Compression', 'folder-1646237108195.png', 1, '2022-03-02 19:05:08', '2022-03-02 19:05:08', 1);
 
 -- --------------------------------------------------------
 
@@ -740,7 +748,7 @@ CREATE TABLE `pr_subfunctions` (
 --
 
 INSERT INTO `pr_subfunctions` (`uid`, `func_id`, `name`, `added_by`, `added_at`, `updated_at`, `status`) VALUES
-(1, 1, 'Send', 1, '2021-12-26 10:15:07', '2022-02-28 12:46:35', 1);
+(1, 1, 'Send ', 1, '2021-12-26 10:15:07', '2022-03-03 20:52:54', 1);
 
 -- --------------------------------------------------------
 
@@ -827,10 +835,7 @@ ALTER TABLE `pr_functionalities`
 -- Indexes for table `pr_implementations`
 --
 ALTER TABLE `pr_implementations`
-  ADD PRIMARY KEY (`uid`),
-  ADD KEY `implementation_fk1` (`subfunc_id`),
-  ADD KEY `fk1` (`func_id`),
-  ADD KEY `fk3` (`added_by`);
+  ADD PRIMARY KEY (`uid`);
 
 --
 -- Indexes for table `pr_languages`
@@ -848,8 +853,7 @@ ALTER TABLE `pr_platforms`
 -- Indexes for table `pr_subfunctions`
 --
 ALTER TABLE `pr_subfunctions`
-  ADD PRIMARY KEY (`uid`),
-  ADD KEY `subfunctions_fk1` (`func_id`);
+  ADD PRIMARY KEY (`uid`);
 
 --
 -- Indexes for table `pr_users`
@@ -901,7 +905,7 @@ ALTER TABLE `pr_environment_details`
 -- AUTO_INCREMENT for table `pr_functionalities`
 --
 ALTER TABLE `pr_functionalities`
-  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `pr_implementations`
@@ -936,20 +940,6 @@ ALTER TABLE `pr_users`
 --
 ALTER TABLE `pr_comments`
   ADD CONSTRAINT `comments_fk1` FOREIGN KEY (`code_snippet_id`) REFERENCES `pr_code_snippets` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `pr_implementations`
---
-ALTER TABLE `pr_implementations`
-  ADD CONSTRAINT `fk1` FOREIGN KEY (`func_id`) REFERENCES `pr_functionalities` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk2` FOREIGN KEY (`subfunc_id`) REFERENCES `pr_subfunctions` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk3` FOREIGN KEY (`added_by`) REFERENCES `pr_users` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `pr_subfunctions`
---
-ALTER TABLE `pr_subfunctions`
-  ADD CONSTRAINT `subfunctions_fk1` FOREIGN KEY (`func_id`) REFERENCES `pr_functionalities` (`uid`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

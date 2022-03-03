@@ -4,6 +4,7 @@ const {
   getSubfuncBySubfuncId,
   updateSubfunc,
   deleteSubfunc,
+  reactivateSubfunc,
 } = require("../controllers/subfunctionality");
 const router = require("express").Router();
 
@@ -28,6 +29,7 @@ router.put(
   updateSubfunc
 );
 router.delete("/del-subfunctionality/:id", subfunIdValidation, deleteSubfunc);
+router.put("/reactivate-subfunctionality", reactivateSubfunc);
 ////----End routes defination
 
 module.exports = router; ////make the module available for imports

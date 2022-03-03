@@ -15,7 +15,7 @@ module.exports = {
         success: false,
         message: "Please select language",
       });
-    } else if (!name) {
+    } else if (!name || name.trim().length < 1) {
       return res.json({
         success: false,
         message: "Framework name is required",
@@ -37,6 +37,7 @@ module.exports = {
             message: "Framework name already exists",
           });
         } else {
+          req.body.name = name.trim();
           next();
         }
       });
@@ -51,7 +52,7 @@ module.exports = {
         success: false,
         message: "Please select language",
       });
-    } else if (!name) {
+    } else if (!name || name.trim().length < 1) {
       return res.json({
         success: false,
         message: "Framework name is required",
@@ -73,6 +74,7 @@ module.exports = {
             message: "Framework name already exists",
           });
         } else {
+          req.body.name = name.trim();
           next();
         }
       });

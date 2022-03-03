@@ -13,7 +13,7 @@ module.exports = {
         success: false,
         message: "Please select sub-function",
       });
-    } else if (!title) {
+    } else if (!title || title.trim().length < 1) {
       return res.json({
         success: false,
         message: "Implementation title is required",
@@ -24,6 +24,7 @@ module.exports = {
         message: "Author is required",
       });
     } else {
+      req.body.title = title.trim();
       next();
     }
   },
@@ -41,7 +42,7 @@ module.exports = {
         success: false,
         message: "Please select sub-function",
       });
-    } else if (!title) {
+    } else if (!title || title.trim().length < 1) {
       return res.json({
         success: false,
         message: "Title is required",
@@ -52,6 +53,7 @@ module.exports = {
         message: "Author is required",
       });
     } else {
+      req.body.title = title.trim();
       next();
     }
   },

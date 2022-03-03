@@ -13,17 +13,30 @@ module.exports = {
       }
     );
   },
-  getFuncs: ({ status, offset, rpp }, callback) => {
-    pool.query(
-      `SELECT uid, name, icon, added_at, added_by, updated_at FROM pr_functionalities WHERE status = ? ORDER BY name LIMIT ?,?`,
-      [status, offset, rpp],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
+  getFuncs: ({ status, orStatus, offset, rpp }, callback) => {
+    if (orStatus === 0) {
+      pool.query(
+        "SELECT uid, name, icon, added_at, added_by, updated_at, status FROM pr_functionalities WHERE status = ? OR status = ? ORDER BY name ASC LIMIT ?,?",
+        [status, orStatus, offset, rpp],
+        (error, results, fields) => {
+          if (error) {
+            return callback(error);
+          }
+          return callback(null, results);
         }
-        return callback(null, results);
-      }
-    );
+      );
+    } else {
+      pool.query(
+        "SELECT uid, name, icon, added_at, added_by, updated_at, status FROM pr_functionalities WHERE status = ? ORDER BY name LIMIT ?,?",
+        [status, offset, rpp],
+        (error, results, fields) => {
+          if (error) {
+            return callback(error);
+          }
+          return callback(null, results);
+        }
+      );
+    }
   },
 
   // getFuncs: ({ status }, callback) => {
@@ -67,6 +80,19 @@ module.exports = {
     pool.query(
       `UPDATE pr_functionalities SET status = ? WHERE uid =?`,
       [0, id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
+      }
+    );
+  },
+
+  reactivateFunc: (id, callback) => {
+    pool.query(
+      `UPDATE pr_functionalities SET status = ? WHERE uid =?`,
+      [1, id],
       (error, results, fields) => {
         if (error) {
           return callback(error);

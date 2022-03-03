@@ -4,6 +4,7 @@ const {
   getFuncs,
   updateFunc,
   deleteFunc,
+  reactivateFunc,
 } = require("../models/functionality");
 
 module.exports = {
@@ -53,8 +54,8 @@ module.exports = {
   getFuncs: (req, res) => {
     let queryObj = {};
 
-    let { status, orderby, dir, offset, rpp } = req.query;
-
+    let { status, orStatus, orderby, dir, offset, rpp } = req.query;
+    // console.log("OR STATUS =>", orStatus);
     if (!status) {
       status = 1;
     }
@@ -74,6 +75,10 @@ module.exports = {
 
     //add data to queryObj object
     queryObj.status = parseInt(status);
+    if (!orStatus) {
+    } else {
+      queryObj.orStatus = parseInt(orStatus);
+    }
     queryObj.orderby = orderby;
     queryObj.dir = dir;
     queryObj.offset = parseInt(offset);
@@ -150,6 +155,26 @@ module.exports = {
       return res.json({
         success: true,
         message: "Functionality deleted successfully",
+      });
+    });
+  },
+
+  reactivateFunc: (req, res) => {
+    const { function_id } = req.body;
+    reactivateFunc(parseInt(function_id), (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "Record Not Found",
+        });
+      }
+      return res.json({
+        success: true,
+        message: "Functionality activated successfully",
       });
     });
   },
