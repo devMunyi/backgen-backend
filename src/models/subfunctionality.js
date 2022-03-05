@@ -39,17 +39,30 @@ module.exports = {
       );
     }
   },
-  getSubfuncBySubfuncId: (id, callback) => {
-    pool.query(
-      `SELECT uid, func_id, name, added_by, added_at, updated_at FROM pr_subfunctions WHERE uid = ?`,
-      [id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
+  getSubfuncBySubfuncId: (id, { orStatus }, callback) => {
+    if (orStatus === 0) {
+      pool.query(
+        "SELECT uid, func_id, name, added_by, added_at, updated_at FROM pr_subfunctions WHERE uid = ? AND (status = 1 OR status = 0) LIMIT 0,1",
+        [id],
+        (error, results, fields) => {
+          if (error) {
+            return callback(error);
+          }
+          return callback(null, results[0]);
         }
-        return callback(null, results[0]);
-      }
-    );
+      );
+    } else {
+      pool.query(
+        `SELECT uid, func_id, name, added_by, added_at, updated_at FROM pr_subfunctions WHERE uid = ? AND status = 1 LIMIT 0,1`,
+        [id],
+        (error, results, fields) => {
+          if (error) {
+            return callback(error);
+          }
+          return callback(null, results[0]);
+        }
+      );
+    }
   },
   updateSubfunc: (id, { func_id, name, added_by }, callback) => {
     pool.query(

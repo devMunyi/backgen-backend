@@ -27,8 +27,22 @@ module.exports = {
     });
   },
   getSubfuncBySubfuncId: (req, res) => {
+    let obj = {};
+
+    let { status, orStatus } = req.query;
+    if (!status) {
+    } else {
+      obj.status = parseInt(status);
+    }
+
+    if (!orStatus) {
+    } else {
+      obj.orStatus = parseInt(orStatus);
+    }
+
     const { id } = req.params;
-    getSubfuncBySubfuncId(parseInt(id), (err, results) => {
+    // console.log("REQUEST PARAM ID =>", id);
+    getSubfuncBySubfuncId(parseInt(id), obj, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -41,9 +55,6 @@ module.exports = {
       }
 
       if (results) {
-        // const { icon } = results;
-        // results.icon = `/images/subfunctionality/${icon}`;
-
         return res.json({
           success: true,
           data: results,

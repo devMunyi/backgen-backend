@@ -21,10 +21,9 @@ const {
 ////----Begin routes defination
 router.post("/add-functionality", validateImg, funAddValidation, addFunc);
 router.get("/functionalities", getFuncs);
-router.get("/functionality/:id", funIdValidation, getFuncByFuncId);
+router.get("/functionality/:id", getFuncByFuncId);
 router.put(
   "/edit-functionality/:id",
-  funIdValidation,
   validateImg,
   funEditValidation,
   updateFunc

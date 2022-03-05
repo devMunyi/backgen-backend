@@ -27,8 +27,25 @@ module.exports = {
     });
   },
   getFuncByFuncId: (req, res) => {
+    // console.log("REQUEST QUERY INFO =>", req.query);
+    // console.log("REQUEST PARAMS INFO =>", req.params);
+
+    let obj = {};
+
+    let { status, orStatus } = req.query;
+    if (!status) {
+    } else {
+      obj.status = parseInt(status);
+    }
+
+    if (!orStatus) {
+    } else {
+      obj.orStatus = parseInt(orStatus);
+    }
+
     const { id } = req.params;
-    getFuncByFuncId(parseInt(id), (err, results) => {
+    // console.log("FUN REQUEST PARAM ID =>", id);
+    getFuncByFuncId(id, obj, (err, results) => {
       if (err) {
         console.log(err);
         return;
