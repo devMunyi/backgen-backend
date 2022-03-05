@@ -2,7 +2,7 @@ const { checkCodesnippetId } = require("../helpers/codesnippet");
 
 module.exports = {
   codesnippetAddValidation: (req, res, next) => {
-    const {
+    let {
       row_code,
       file_extension,
       language_id,
@@ -13,37 +13,48 @@ module.exports = {
       instructions,
       added_by,
     } = req.body;
-    if (!row_code || row_code.trim().length < 1) {
+
+    row_code = row_code.trim();
+    instructions = instructions.trim();
+    file_extension = file_extension.trim();
+    language_id = parseInt(language_id);
+    framework_id = parseInt(framework_id);
+    implementation_id = parseInt(implementation_id);
+    dbms_id = parseInt(dbms_id);
+    platform_id = parseInt(platform_id);
+    added_by = parseInt(added_by);
+
+    if (!row_code || row_code.length < 20) {
       return res.json({
         success: false,
         message: "Code snippet is required",
       });
-    } else if (!file_extension || parseInt(row_extension) < 1) {
+    } else if (!file_extension || file_extension.length < 1) {
       return res.json({
         success: false,
         message: "File extension required",
       });
-    } else if (!language_id || parseInt(language_id) < 1) {
+    } else if (!language_id || language_id < 1) {
       return res.json({
         success: false,
         message: "Please select language",
       });
-    } else if (!framework_id || parseInt(framework_id) < 1) {
+    } else if (!framework_id || framework_id < 1) {
       return res.json({
         success: false,
         message: "Please select framework",
       });
-    } else if (!implementation_id || parseInt(implementation_id) < 1) {
+    } else if (!implementation_id || implementation_id < 1) {
       return res.json({
         success: false,
         message: "Please select implementation",
       });
-    } else if (!dbms_id || parseInt(dbms_id) < 1) {
+    } else if (!dbms_id || dbms_id < 1) {
       return res.json({
         success: false,
         message: "Please select dbms",
       });
-    } else if (!platform_id || parseInt(platform_id) < 1) {
+    } else if (!platform_id || platform_id < 1) {
       return res.json({
         success: false,
         message: "Please select platform",
@@ -54,14 +65,14 @@ module.exports = {
         message: "Author is required",
       });
     } else {
-      req.body.row_code = row_code.trim();
-      req.body.instructions = instructions.trim();
+      req.body.row_code = row_code;
+      req.body.instructions = instructions;
       next();
     }
   },
 
   codesnippetEditValidation: (req, res, next) => {
-    const {
+    let {
       row_code,
       file_extension,
       language_id,
@@ -72,37 +83,48 @@ module.exports = {
       instructions,
       added_by,
     } = req.body;
-    if (!row_code || row_code.trim().length < 1) {
+
+    row_code = row_code.trim();
+    instructions = instructions.trim();
+    file_extension = file_extension.trim();
+    language_id = parseInt(language_id);
+    framework_id = parseInt(framework_id);
+    implementation_id = parseInt(implementation_id);
+    dbms_id = parseInt(dbms_id);
+    platform_id = parseInt(platform_id);
+    added_by = parseInt(added_by);
+
+    if (!row_code || row_code.length < 20) {
       return res.json({
         success: false,
         message: "Code snippet is required",
       });
-    } else if (!file_extension || parseInt(row_extension) < 1) {
+    } else if (!file_extension || file_extension.length < 1) {
       return res.json({
         success: false,
         message: "File extension required",
       });
-    } else if (!language_id || parseInt(language_id) < 1) {
+    } else if (!language_id || language_id < 1) {
       return res.json({
         success: false,
         message: "Please select language",
       });
-    } else if (!framework_id || parseInt(framework_id) < 1) {
+    } else if (!framework_id || framework_id < 1) {
       return res.json({
         success: false,
         message: "Please select framework",
       });
-    } else if (!implementation_id || parseInt(implementation_id) < 1) {
+    } else if (!implementation_id || implementation_id < 1) {
       return res.json({
         success: false,
         message: "Please select implementation",
       });
-    } else if (!dbms_id || parseInt(dbms_id) < 1) {
+    } else if (!dbms_id || dbms_id < 1) {
       return res.json({
         success: false,
         message: "Please select dbms",
       });
-    } else if (!platform_id || parseInt(platform_id) < 1) {
+    } else if (!platform_id || platform_id < 1) {
       return res.json({
         success: false,
         message: "Please select platform",
@@ -113,8 +135,8 @@ module.exports = {
         message: "Author is required",
       });
     } else {
-      req.body.row_code = row_code.trim();
-      req.body.instructions = instructions.trim();
+      req.body.row_code = row_code;
+      req.body.instructions = instructions;
       next();
     }
   },

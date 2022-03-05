@@ -7,18 +7,13 @@ const {
 
 module.exports = {
   funAddValidation: (req, res, next) => {
-    const { name, added_by } = req.body;
-    // console.log(
-    //   "FUNCTIONALITY BODY INCOMING DATA =>" + JSON.stringify(req.body)
-    // );
-    // console.log("FUNCTION NAME => " + req.body.name);
-    // console.log("Function Icon => " + req.body.icon);
-    // console.log(req.body.name);
-    if (!name || name.trim().length < 3) {
+    let { name, added_by } = req.body;
+    name = name.trim();
+
+    if (!name || name.length < 1) {
       return res.json({
         success: false,
-        message:
-          "Functionality name is required and should be at least three characters",
+        message: "Functionality name is required",
       });
     } else if (!added_by) {
       return res.json({
@@ -37,7 +32,7 @@ module.exports = {
             message: "Functionality name already exists",
           });
         } else {
-          req.body.name = name.trim();
+          req.body.name = name;
           next();
         }
       });
@@ -45,13 +40,13 @@ module.exports = {
   },
 
   funEditValidation: (req, res, next) => {
-    const { name, added_by } = req.body;
+    let { name, added_by } = req.body;
+    name = name.trim();
 
-    if (!name || name.trim().length < 3) {
+    if (!name || name.length < 1) {
       return res.json({
         success: false,
-        message:
-          "Functionality name is required and should be at least three characters",
+        message: "Functionality name is required",
       });
     } else if (!added_by) {
       return res.json({
@@ -70,7 +65,7 @@ module.exports = {
             message: "Functionality name already exists",
           });
         } else {
-          req.body.name = name.trim();
+          req.body.name = name;
           next();
         }
       });

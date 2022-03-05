@@ -7,22 +7,17 @@ const {
 
 module.exports = {
   subfunAddValidation: (req, res, next) => {
-    const { name, func_id, added_by } = req.body;
-    // console.log("Incoming subfun data =>" + JSON.stringify(req.body));
-    // console.log("SUBFUNCTION NAME => " + name);
-    // console.log("FUNCTION ID => " + func_id);
-    // console.log("ADDED BY => " + added_by);
-    if (!name || name.trim().length < 1) {
+    let { name, func_id, added_by } = req.body;
+
+    name = name.trim();
+    func_id = parseInt(func_id);
+
+    if (!name || name.length < 1) {
       return res.json({
         success: false,
         message: "Subfunctionality name is required",
       });
-    } else if (!func_id) {
-      return res.json({
-        success: false,
-        message: "Please select functionality",
-      });
-    } else if (parseInt(func_id) < 1) {
+    } else if (!func_id || func_id < 1) {
       return res.json({
         success: false,
         message: "Please select functionality",
@@ -44,7 +39,7 @@ module.exports = {
             message: "Subfunctionality name already exists",
           });
         } else {
-          req.body.name = name.trim();
+          req.body.name = name;
           next();
         }
       });
@@ -52,20 +47,17 @@ module.exports = {
   },
 
   subfunEditValidation: (req, res, next) => {
-    const { func_id, name, added_by } = req.body;
+    let { func_id, name, added_by } = req.body;
 
-    if (!name || name.trim().length < 3) {
+    name = name.trim();
+    func_id = parseInt(func_id);
+
+    if (!name || name.length < 1) {
       return res.json({
         success: false,
-        message:
-          "Subfunctionality name is required and should be at least three characters",
+        message: "Subfunctionality name is required",
       });
-    } else if (!func_id) {
-      return res.json({
-        success: false,
-        message: "Please select functionality",
-      });
-    } else if (parseInt(func_id) < 1) {
+    } else if (!func_id || func_id < 1) {
       return res.json({
         success: false,
         message: "Please select functionality",
@@ -87,7 +79,7 @@ module.exports = {
             message: "Subfunctionality name already exists",
           });
         } else {
-          req.body.name = name.trim();
+          req.body.name = name;
           next();
         }
       });

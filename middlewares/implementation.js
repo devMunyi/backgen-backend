@@ -2,8 +2,12 @@ const { checkImplementationId } = require("../helpers/implementation");
 
 module.exports = {
   implementationAddValidation: (req, res, next) => {
-    const { func_id, subfunc_id, title, added_by } = req.body;
-    if (!func_id) {
+    let { func_id, subfunc_id, title, added_by } = req.body;
+
+    title = title.trim();
+    func_id = parseInt(func_id);
+
+    if (!func_id || func_id < 1) {
       return res.json({
         success: false,
         message: "Please select function",
@@ -13,7 +17,7 @@ module.exports = {
         success: false,
         message: "Please select sub-function",
       });
-    } else if (!title || title.trim().length < 1) {
+    } else if (!title || title.length < 1) {
       return res.json({
         success: false,
         message: "Implementation title is required",
@@ -24,15 +28,18 @@ module.exports = {
         message: "Author is required",
       });
     } else {
-      req.body.title = title.trim();
+      req.body.title = title;
       next();
     }
   },
 
   implementationEditValidation: (req, res, next) => {
-    const { func_id, subfunc_id, title, added_by } = req.body;
+    let { func_id, subfunc_id, title, added_by } = req.body;
 
-    if (!func_id) {
+    title = title.trim();
+    func_id = parseInt(func_id);
+
+    if (!func_id || func_id < 1) {
       return res.json({
         success: false,
         message: "Please select function",
@@ -42,7 +49,7 @@ module.exports = {
         success: false,
         message: "Please select sub-function",
       });
-    } else if (!title || title.trim().length < 1) {
+    } else if (!title || title.length < 1) {
       return res.json({
         success: false,
         message: "Title is required",
@@ -53,7 +60,7 @@ module.exports = {
         message: "Author is required",
       });
     } else {
-      req.body.title = title.trim();
+      req.body.title = title;
       next();
     }
   },

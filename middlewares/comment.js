@@ -2,13 +2,16 @@ const { checkCommentId } = require("../helpers/comment");
 
 module.exports = {
   commentAddValidation: (req, res, next) => {
-    const { code_snippet_id, text, added_by, replies_to } = req.body;
-    if (!code_snippet_id) {
+    let { code_snippet_id, text, added_by, replies_to } = req.body;
+
+    text = text.trim();
+
+    if (!code_snippet_id < 1) {
       return res.json({
         success: false,
         message: "Code snippet id required",
       });
-    } else if (!text || text.trim().length < 1) {
+    } else if (!text || text.length < 1) {
       return res.json({
         success: false,
         message: "Comment content required",
@@ -24,20 +27,22 @@ module.exports = {
         message: "Comment reply to is required",
       });
     } else {
-      req.body.text = text.trim();
+      req.body.text = text;
       next();
     }
   },
 
   commentEditValidation: (req, res, next) => {
-    const { code_snippet_id, text, added_by, replies_to } = req.body;
+    let { code_snippet_id, text, added_by, replies_to } = req.body;
+
+    text = text.trim();
 
     if (!code_snippet_id) {
       return res.json({
         success: false,
         message: "Code snippet id required",
       });
-    } else if (!text || text.trim().length < 1) {
+    } else if (!text || text.length < 1) {
       return res.json({
         success: false,
         message: "Comment content required",
@@ -53,7 +58,7 @@ module.exports = {
         message: "Comment reply to is required",
       });
     } else {
-      req.body.text = text.trim();
+      req.body.text = text;
       next();
     }
   },

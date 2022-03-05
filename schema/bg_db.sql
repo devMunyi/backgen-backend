@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 03, 2022 at 07:15 PM
+-- Generation Time: Mar 05, 2022 at 09:34 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.0.13
 
@@ -107,7 +107,7 @@ CREATE TABLE `pr_countries` (
   `uid` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `abbrev` char(3) NOT NULL,
-  `flag` varchar(20) DEFAULT NULL,
+  `flag` varchar(200) NOT NULL,
   `added_by` int(1) DEFAULT 0,
   `added_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -383,7 +383,7 @@ CREATE TABLE `pr_dbms` (
   `uid` int(10) NOT NULL,
   `name` varchar(100) NOT NULL,
   `description` text NOT NULL,
-  `icon` varchar(250) NOT NULL,
+  `icon` varchar(200) NOT NULL,
   `added_by` int(1) NOT NULL,
   `added_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -438,7 +438,7 @@ CREATE TABLE `pr_environment_details` (
   `uid` int(5) NOT NULL,
   `name` varchar(50) NOT NULL,
   `description` text NOT NULL,
-  `icon` varchar(50) NOT NULL,
+  `icon` varchar(200) NOT NULL,
   `status` int(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -483,7 +483,7 @@ CREATE TABLE `pr_frameworks` (
   `language_id` int(11) NOT NULL COMMENT 'From pr_languages table',
   `name` varchar(100) NOT NULL,
   `description` text NOT NULL,
-  `icon` varchar(250) NOT NULL,
+  `icon` varchar(200) NOT NULL,
   `added_by` int(5) NOT NULL,
   `added_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -601,7 +601,7 @@ INSERT INTO `pr_frameworks` (`uid`, `language_id`, `name`, `description`, `icon`
 CREATE TABLE `pr_functionalities` (
   `uid` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
-  `icon` varchar(50) NOT NULL,
+  `icon` varchar(200) NOT NULL,
   `added_by` int(11) NOT NULL DEFAULT 1,
   `added_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -613,7 +613,7 @@ CREATE TABLE `pr_functionalities` (
 --
 
 INSERT INTO `pr_functionalities` (`uid`, `name`, `icon`, `added_by`, `added_at`, `updated_at`, `status`) VALUES
-(1, 'Email', '42-email-1646235077472.png', 1, '2021-12-20 11:06:31', '2022-03-03 21:06:15', 1),
+(1, 'Email', '42-email-1646235077472.png', 1, '2021-12-20 11:06:31', '2022-03-05 10:11:53', 0),
 (2, 'Variables', '64-arrow-1646234904190.png', 1, '2022-03-02 18:28:24', '2022-03-02 18:28:24', 1),
 (3, 'Conditions', '500-planning-1646235378758.png', 1, '2022-03-02 18:36:18', '2022-03-02 18:36:18', 1),
 (4, 'Loops', 'looping-arrows-1646236133242.png', 1, '2022-03-02 18:41:10', '2022-03-02 18:48:53', 1),
@@ -653,7 +653,7 @@ CREATE TABLE `pr_languages` (
   `uid` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `description` text NOT NULL,
-  `icon` varchar(250) NOT NULL,
+  `icon` varchar(200) NOT NULL,
   `added_by` int(5) NOT NULL DEFAULT 0,
   `added_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -710,7 +710,7 @@ CREATE TABLE `pr_platforms` (
   `uid` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
   `description` text NOT NULL,
-  `icon` varchar(50) NOT NULL,
+  `icon` varchar(200) NOT NULL,
   `added_by` int(11) NOT NULL,
   `added_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -748,7 +748,7 @@ CREATE TABLE `pr_subfunctions` (
 --
 
 INSERT INTO `pr_subfunctions` (`uid`, `func_id`, `name`, `added_by`, `added_at`, `updated_at`, `status`) VALUES
-(1, 1, 'Send ', 1, '2021-12-26 10:15:07', '2022-03-03 20:52:54', 1);
+(1, 1, 'Send ', 1, '2021-12-26 10:15:07', '2022-03-05 11:16:26', 0);
 
 -- --------------------------------------------------------
 

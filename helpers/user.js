@@ -4,8 +4,8 @@ module.exports = {
   //used when registering/adding new user, to handle username uniqueness
   checkUsersByUsername: (username, callback) => {
     pool.query(
-      `SELECT uid FROM pr_users WHERE username = ? AND status = ?`,
-      [username, 1],
+      `SELECT uid FROM pr_users WHERE username = ?`,
+      [username],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -19,8 +19,8 @@ module.exports = {
   //Used when editing user details, to handle username uniqueness
   checkIfSimilarUsernameExist: (username, id, callback) => {
     pool.query(
-      `SELECT uid FROM pr_users WHERE username = ? AND status = ? AND uid != ?`,
-      [username, 1, id],
+      `SELECT uid FROM pr_users WHERE username = ? AND uid != ?`,
+      [username, id],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -34,8 +34,8 @@ module.exports = {
   //used when registering/adding new user, to handle email uniqueness
   checkUsersByEmail: (email, callback) => {
     pool.query(
-      `SELECT uid FROM pr_users WHERE email = ? AND status = ?`,
-      [email, 1],
+      `SELECT uid FROM pr_users WHERE email = ?`,
+      [email],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -49,8 +49,8 @@ module.exports = {
   //used when editing user details, to handle email uniqueness
   checkIfSimilarEmailExist: (email, id, callback) => {
     pool.query(
-      `SELECT uid FROM pr_users WHERE email = ? AND status = ? AND uid != ?`,
-      [email, 1, id],
+      `SELECT uid FROM pr_users WHERE email = ? AND uid != ?`,
+      [email, id],
       (error, results, fields) => {
         if (error) {
           return callback(error);

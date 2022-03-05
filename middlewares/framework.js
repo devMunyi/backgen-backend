@@ -7,15 +7,17 @@ const {
 
 module.exports = {
   frameworkAddValidation: (req, res, next) => {
-    const { language_id, name, added_by } = req.body;
-    console.log(req.body.name);
+    let { language_id, name, added_by } = req.body;
+    //console.log(req.body.name);
+    language_id = parseInt(language_id);
+    name = name.trim();
 
-    if (!language_id) {
+    if (!language_id || language_id < 1) {
       return res.json({
         success: false,
         message: "Please select language",
       });
-    } else if (!name || name.trim().length < 1) {
+    } else if (!name || name.length < 1) {
       return res.json({
         success: false,
         message: "Framework name is required",
@@ -37,7 +39,7 @@ module.exports = {
             message: "Framework name already exists",
           });
         } else {
-          req.body.name = name.trim();
+          req.body.name = name;
           next();
         }
       });
@@ -45,14 +47,17 @@ module.exports = {
   },
 
   frameworkEditValidation: (req, res, next) => {
-    const { language_id, name, added_by } = req.body;
+    let { language_id, name, added_by } = req.body;
 
-    if (!language_id) {
+    language_id = parseInt(language_id);
+    name = name.trim();
+
+    if (!language_id || language_id < 1) {
       return res.json({
         success: false,
         message: "Please select language",
       });
-    } else if (!name || name.trim().length < 1) {
+    } else if (!name || name.length < 1) {
       return res.json({
         success: false,
         message: "Framework name is required",
@@ -74,7 +79,7 @@ module.exports = {
             message: "Framework name already exists",
           });
         } else {
-          req.body.name = name.trim();
+          req.body.name = name;
           next();
         }
       });

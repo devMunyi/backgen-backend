@@ -42,23 +42,30 @@ module.exports = {
   },
 
   userRegisterValidation: (req, res, next) => {
-    const { username, email, country, password, cpassword } = req.body;
-    if (!username || username.trim().length < 3) {
+    let { username, email, country, password, cpassword } = req.body;
+
+    username = username.trim();
+    email = email.trim();
+    country = parseInt(country);
+    password = password.trim();
+    cpassword = cpassword.trim();
+
+    if (!username || username.length < 3) {
       return res.json({
         success: false,
         message: "Username is required and should be min 3 characters",
       });
-    } else if (!email || email.trim().length < 1) {
+    } else if (!email || email.length < 1) {
       return res.json({
         success: false,
         message: "Email is required",
       });
-    } else if (!country || country.trim().length < 1) {
+    } else if (!country || country < 1) {
       return res.json({
         success: false,
         message: "Country is required",
       });
-    } else if (!password || password.trim().length < 6) {
+    } else if (!password || password.length < 6) {
       return res.json({
         success: false,
         message: "Password is required and should be min 6 characters long",
@@ -95,10 +102,10 @@ module.exports = {
                   message: "Email already taken",
                 });
               } else {
-                req.body.username = username.trim();
-                req.body.email = email.trim();
-                req.body.password = password.trim();
-                req.body.cpassword = cpassword.trim();
+                req.body.username = username;
+                req.body.email = email;
+                req.body.password = password;
+                req.body.cpassword = cpassword;
                 next();
               }
             });
@@ -109,25 +116,32 @@ module.exports = {
   },
 
   userEditValidation: (req, res, next) => {
-    const { username, email, country, password, cpassword } = req.body;
+    let { username, email, country, password, cpassword } = req.body;
+
+    username = username.trim();
+    email = email.trim();
+    country = parseInt(country);
+    password = password.trim();
+    cpassword = cpassword.trim();
+
     const userid = parseInt(req.params.id);
     //console.log(userid);
-    if (!username || username.trim().length < 3) {
+    if (!username || username.length < 3) {
       return res.json({
         success: false,
         message: "Username is required and should be min 3 characters",
       });
-    } else if (!email || email.trim().length < 5) {
+    } else if (!email || email.length < 5) {
       return res.json({
         success: false,
         message: "Email is required",
       });
-    } else if (!country || country.trim().length < 1) {
+    } else if (!country || country < 1) {
       return res.json({
         success: false,
         message: "Country is required",
       });
-    } else if (!password || password.trim().length < 6) {
+    } else if (!password || password.length < 6) {
       return res.json({
         success: false,
         message: "Password is required and should be min 6 characters long",
@@ -163,10 +177,10 @@ module.exports = {
                 message: "Email already taken",
               });
             } else {
-              req.body.username = username.trim();
-              req.body.email = email.trim();
-              req.body.password = password.trim();
-              req.body.cpassword = cpassword.trim();
+              req.body.username = username;
+              req.body.email = email;
+              req.body.password = password;
+              req.body.cpassword = cpassword;
               next();
             }
           });

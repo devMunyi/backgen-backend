@@ -19,8 +19,8 @@ module.exports = {
   //used when adding new codesnippet, to handle name/title uniqueness
   checkCodesnippetsByText: (text, callback) => {
     pool.query(
-      `SELECT uid FROM pr_comments WHERE text = ? AND status = ?`,
-      [text, 1],
+      `SELECT uid FROM pr_comments WHERE text = ?`,
+      [text],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -34,7 +34,7 @@ module.exports = {
   //Used when editing language details, to handle name/title uniqueness
   checkIfSimilarTextExist: (text, id, callback) => {
     pool.query(
-      `SELECT uid FROM pr_comments WHERE text = ? AND status = ? AND uid != ?`,
+      `SELECT uid FROM pr_comments WHERE text = ? AND uid != ?`,
       [text, 1, id],
       (error, results, fields) => {
         if (error) {

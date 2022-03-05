@@ -19,8 +19,8 @@ module.exports = {
   //used when adding new implementation, to handle name/title uniqueness
   checkImplementationsByTitle: (title, callback) => {
     pool.query(
-      `SELECT uid FROM pr_implementations WHERE title = ? AND status = ?`,
-      [title, 1],
+      `SELECT uid FROM pr_implementations WHERE title = ?`,
+      [title],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -34,8 +34,8 @@ module.exports = {
   //Used when editing implementation details, to handle name/title uniqueness
   checkIfSimilarTitleExist: (title, id, callback) => {
     pool.query(
-      `SELECT uid FROM pr_implementations WHERE title = ? AND status = ? AND uid != ?`,
-      [title, 1, id],
+      `SELECT uid FROM pr_implementations WHERE title = ? AND uid != ?`,
+      [title, id],
       (error, results, fields) => {
         if (error) {
           return callback(error);

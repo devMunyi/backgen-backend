@@ -19,8 +19,8 @@ module.exports = {
   //used when adding new language, to handle name/title uniqueness
   checkLanguagesByName: (name, callback) => {
     pool.query(
-      `SELECT uid FROM pr_languages WHERE name = ? AND status = ?`,
-      [name, 1],
+      `SELECT uid FROM pr_languages WHERE name = ?`,
+      [name],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -34,8 +34,8 @@ module.exports = {
   //Used when editing language details, to handle name/title uniqueness
   checkIfSimilarNameExist: (name, id, callback) => {
     pool.query(
-      `SELECT uid FROM pr_languages WHERE name = ? AND status = ? AND uid != ?`,
-      [name, 1, id],
+      `SELECT uid FROM pr_languages WHERE name = ? AND uid != ?`,
+      [name, id],
       (error, results, fields) => {
         if (error) {
           return callback(error);
