@@ -26,8 +26,13 @@ module.exports = {
     });
   },
   getCountryByCountryId: (req, res) => {
-    const { id } = req.params;
-    getCountryByCountryId(parseInt(id), (err, results) => {
+    const { country_id } = req.query;
+
+    if(!country_id){
+      return;
+    }
+
+    getCountryByCountryId(parseInt(country_id), (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -107,8 +112,8 @@ module.exports = {
   updateCountry: (req, res) => {
     const { body } = req;
 
-    const { id } = req.params;
-    updateCountry(parseInt(id), body, (err, results) => {
+    const { country_id } = req.body;
+    updateCountry(parseInt(country_id), body, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -128,8 +133,8 @@ module.exports = {
     });
   },
   deleteCountry: (req, res) => {
-    const { id } = req.params;
-    deleteCountry(parseInt(id), (err, results) => {
+    const { country_id } = req.body;
+    deleteCountry(parseInt(country_id), (err, results) => {
       if (err) {
         console.log(err);
         return;

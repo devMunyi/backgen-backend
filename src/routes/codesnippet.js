@@ -25,19 +25,18 @@ router.post(
 );
 router.get("/codesnippets", getCodeSnippets);
 router.get(
-  "/codesnippet/:id",
-  codesnippetIdValidation,
+  "/codesnippet",
   getCodeSnippetByCodeSnippetId
 );
 router.put(
-  "/edit-codesnippet/:id",
+  "/edit-codesnippet",
   checkToken,
   codesnippetIdValidation,
   codesnippetEditValidation,
   updateCodeSnippet
 );
 router.delete(
-  "/del-codesnippet/:id",
+  "/del-codesnippet",
   checkToken,
   codesnippetIdValidation,
   deleteCodeSnippet

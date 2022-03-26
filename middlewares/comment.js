@@ -6,7 +6,7 @@ module.exports = {
 
     text = text.trim();
 
-    if (!code_snippet_id < 1) {
+    if (code_snippet_id < 1) {
       return res.json({
         success: false,
         message: "Code snippet id required",
@@ -33,7 +33,7 @@ module.exports = {
   },
 
   commentEditValidation: (req, res, next) => {
-    let { code_snippet_id, text, added_by, replies_to } = req.body;
+    let { code_snippet_id, text, added_by, replies_to, comment_id } = req.body;
 
     text = text.trim();
 
@@ -64,8 +64,9 @@ module.exports = {
   },
 
   commentIdValidation: (req, res, next) => {
-    const cmId = parseInt(req.params.id);
-    checkCommentId(cmId, (err, row) => {
+    const comment_id = req.body.comment_id;
+    console.log("COMMENNT ID =>", comment_id);
+    checkCommentId(comment_id, (err, row) => {
       if (err) {
         console.log(err);
       } else if (!row) {

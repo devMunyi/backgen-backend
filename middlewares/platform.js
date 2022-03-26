@@ -41,10 +41,8 @@ module.exports = {
   },
 
   platformEditValidation: (req, res, next) => {
-    let { name, added_by } = req.body;
+    let { name, added_by, platform_id } = req.body;
     name = name.trim();
-
-    const platformId = parseInt(req.params.id);
 
     if (!name || name.length < 1) {
       return res.json({
@@ -57,6 +55,7 @@ module.exports = {
         message: "Author is required",
       });
     } else if (name.length > 0) {
+      const platformId = parseInt(platform_id);
       checkIfSimilarNameExist(name, platformId, (err, result) => {
         if (err) {
           console.log(err);
@@ -75,7 +74,7 @@ module.exports = {
   },
 
   platformIdValidation: (req, res, next) => {
-    const userid = parseInt(req.params.id);
+    const userid = parseInt(req.body.platform_id);
     checkPlatformId(userid, (err, row) => {
       if (err) {
         console.log(err);

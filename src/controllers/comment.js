@@ -25,8 +25,13 @@ module.exports = {
     });
   },
   getCommentByCommentId: (req, res) => {
-    const { id } = req.params;
-    getCommentByCommentId(parseInt(id), (err, results) => {
+    const { comment_id } = req.query;
+
+    if(!comment_id){
+      return;
+    }
+
+    getCommentByCommentId(parseInt(comment_id), (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -63,8 +68,8 @@ module.exports = {
   },
   updateComment: (req, res) => {
     const { body } = req;
-    const { id } = req.params;
-    updateComment(parseInt(id), body, (err, results) => {
+    const { comment_id } = req.body;
+    updateComment(parseInt(comment_id), body, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -84,8 +89,8 @@ module.exports = {
     });
   },
   deleteComment: (req, res) => {
-    const { id } = req.params;
-    deleteComment(parseInt(id), (err, results) => {
+    const { comment_id } = req.body;
+    deleteComment(parseInt(comment_id), (err, results) => {
       if (err) {
         console.log(err);
         return;

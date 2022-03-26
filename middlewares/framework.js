@@ -47,7 +47,7 @@ module.exports = {
   },
 
   frameworkEditValidation: (req, res, next) => {
-    let { language_id, name, added_by } = req.body;
+    let { language_id, name, added_by, framework_id } = req.body;
 
     language_id = parseInt(language_id);
     name = name.trim();
@@ -68,7 +68,7 @@ module.exports = {
         message: "Author is required",
       });
     } else if (name.length > 0) {
-      const framId = parseInt(req.params.id);
+      let framId = parseInt(framework_id);
       checkIfSimilarNameExist(name, framId, (err, result) => {
         if (err) {
           console.log(err);
@@ -87,7 +87,7 @@ module.exports = {
   },
 
   frameworkIdValidation: (req, res, next) => {
-    const framId = parseInt(req.params.id);
+    const framId = parseInt(req.body.framework_id);
     checkFrameworkId(framId, (err, row) => {
       if (err) {
         console.log(err);

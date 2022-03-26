@@ -21,9 +21,9 @@ const {
 ////----Begin routes defination
 router.post("/add-subfunctionality", subfunAddValidation, addSubfunc);
 router.get("/subfunctionalities", getSubfuncs);
-router.get("/subfunctionality/:id", getSubfuncBySubfuncId);
-router.put("/edit-subfunctionality/:id", subfunEditValidation, updateSubfunc);
-router.delete("/del-subfunctionality/:id", deleteSubfunc);
+router.get("/subfunctionality", getSubfuncBySubfuncId);
+router.put("/edit-subfunctionality", subfunEditValidation, updateSubfunc);
+router.delete("/del-subfunctionality", deleteSubfunc);
 router.put("/reactivate-subfunctionality", reactivateSubfunc);
 ////----End routes defination
 

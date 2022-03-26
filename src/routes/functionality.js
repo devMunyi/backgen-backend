@@ -21,14 +21,14 @@ const {
 ////----Begin routes defination
 router.post("/add-functionality", validateImg, funAddValidation, addFunc);
 router.get("/functionalities", getFuncs);
-router.get("/functionality/:id", getFuncByFuncId);
+router.get("/functionality", getFuncByFuncId);
 router.put(
-  "/edit-functionality/:id",
+  "/edit-functionality",
   validateImg,
   funEditValidation,
   updateFunc
 );
-router.delete("/del-functionality/:id", funIdValidation, deleteFunc);
+router.delete("/del-functionality", deleteFunc);
 router.put("/reactivate-functionality", reactivateFunc);
 ////------End routes definations
 

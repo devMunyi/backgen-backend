@@ -30,6 +30,7 @@ module.exports = {
     let obj = {};
 
     let { status, orStatus } = req.query;
+
     if (!status) {
     } else {
       obj.status = parseInt(status);
@@ -40,9 +41,13 @@ module.exports = {
       obj.orStatus = parseInt(orStatus);
     }
 
-    const { id } = req.params;
-    // console.log("REQUEST PARAM ID =>", id);
-    getSubfuncBySubfuncId(parseInt(id), obj, (err, results) => {
+    const { subfun_id } = req.query;
+
+    if(!subfun_id){
+      return;
+    }
+
+    getSubfuncBySubfuncId(parseInt(subfun_id), obj, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -126,8 +131,9 @@ module.exports = {
   updateSubfunc: (req, res) => {
     const { body } = req;
 
-    const { id } = req.params;
-    updateSubfunc(parseInt(id), body, (err, results) => {
+    const { subfun_id } = req.body;
+
+    updateSubfunc(parseInt(subfun_id), body, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -147,8 +153,8 @@ module.exports = {
     });
   },
   deleteSubfunc: (req, res) => {
-    const { id } = req.params;
-    deleteSubfunc(parseInt(id), (err, results) => {
+    const { subfun_id } = req.body;
+    deleteSubfunc(parseInt(subfun_id), (err, results) => {
       if (err) {
         console.log(err);
         return;

@@ -26,9 +26,9 @@ router.post(
   addFramework
 );
 router.get("/frameworks", getFrameworks);
-router.get("/framework/:id", frameworkIdValidation, getFrameworkByFrameworkId);
+router.get("/framework", getFrameworkByFrameworkId);
 router.put(
-  "/edit-framework/:id",
+  "/edit-framework",
   checkToken,
   frameworkIdValidation,
   validateImg,
@@ -36,7 +36,7 @@ router.put(
   updateFramework
 );
 router.delete(
-  "/del-framework/:id",
+  "/del-framework",
   checkToken,
   frameworkIdValidation,
   deleteFramework

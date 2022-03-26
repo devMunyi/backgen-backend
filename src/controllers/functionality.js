@@ -27,9 +27,6 @@ module.exports = {
     });
   },
   getFuncByFuncId: (req, res) => {
-    // console.log("REQUEST QUERY INFO =>", req.query);
-    // console.log("REQUEST PARAMS INFO =>", req.params);
-
     let obj = {};
 
     let { status, orStatus } = req.query;
@@ -43,9 +40,15 @@ module.exports = {
       obj.orStatus = parseInt(orStatus);
     }
 
-    const { id } = req.params;
+    
+    const { func_id } = req.query;
+
+    if(!func_id){
+      return;
+    }
+
     // console.log("FUN REQUEST PARAM ID =>", id);
-    getFuncByFuncId(id, obj, (err, results) => {
+    getFuncByFuncId(func_id, obj, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -135,9 +138,8 @@ module.exports = {
   },
   updateFunc: (req, res) => {
     const { body } = req;
-
-    const { id } = req.params;
-    updateFunc(parseInt(id), body, (err, results) => {
+    const { func_id } = req.body;
+    updateFunc(parseInt(func_id), body, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -157,8 +159,8 @@ module.exports = {
     });
   },
   deleteFunc: (req, res) => {
-    const { id } = req.params;
-    deleteFunc(parseInt(id), (err, results) => {
+    const { func_id } = req.body;
+    deleteFunc(parseInt(func_id), (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -177,8 +179,8 @@ module.exports = {
   },
 
   reactivateFunc: (req, res) => {
-    const { function_id } = req.body;
-    reactivateFunc(parseInt(function_id), (err, results) => {
+    const { func_id } = req.body;
+    reactivateFunc(parseInt(func_id), (err, results) => {
       if (err) {
         console.log(err);
         return;

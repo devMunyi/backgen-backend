@@ -27,8 +27,13 @@ module.exports = {
     });
   },
   getPlatformByPlatformId: (req, res) => {
-    const { id } = req.params;
-    getPlatformByPlatformId(parseInt(id), (err, results) => {
+    const { platform_id } = req.query;
+
+    if(!platform_id){
+      return
+    }
+    
+    getPlatformByPlatformId(parseInt(platform_id), (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -108,8 +113,8 @@ module.exports = {
   updatePlatform: (req, res) => {
     const { body } = req;
 
-    const { id } = req.params;
-    updatePlatform(parseInt(id), body, (err, results) => {
+    const { platform_id } = req.body;
+    updatePlatform(parseInt(platform_id), body, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -129,8 +134,9 @@ module.exports = {
     });
   },
   deletePlatform: (req, res) => {
-    const { id } = req.params;
-    deletePlatform(parseInt(id), (err, results) => {
+    console.log("Platform id to delete =>",req.body.platform_id)
+    const { platform_id } = req.body;
+    deletePlatform(parseInt(platform_id), (err, results) => {
       if (err) {
         console.log(err);
         return;

@@ -2,12 +2,12 @@ const pool = require("../../config/db.config");
 
 module.exports = {
   addComment: (
-    { code_snippet_id, text, replies_to, added_by, upvoters, downvoters },
+    { code_snippet_id, text, replies_to, added_by},
     callback
   ) => {
     pool.query(
-      `INSERT INTO pr_comments(code_snippet_id, text, replies_to, added_by, upvoters, downvoters) VALUES(?, ?, ?, ?, ?, ?)`,
-      [code_snippet_id, text, replies_to, added_by, upvoters, downvoters],
+      `INSERT INTO pr_comments(code_snippet_id, text, replies_to, added_by) VALUES(?, ?, ?, ?)`,
+      [code_snippet_id, text, replies_to, added_by],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -18,7 +18,7 @@ module.exports = {
   },
   getComments: (callback) => {
     pool.query(
-      `SELECT uid, code_snippet_id, text, replies_to, added_by, added_date, updated_date, upvoters, downvoters FROM pr_comments`,
+      `SELECT uid, code_snippet_id, text, replies_to, added_by, added_date, updated_date, upvoters, downvoters, status FROM pr_comments`,
       [],
       (error, results, fields) => {
         if (error) {
@@ -30,7 +30,7 @@ module.exports = {
   },
   getCommentByCommentId: (id, callback) => {
     pool.query(
-      `SELECT uid, code_snippet_id, text, replies_to, added_by, added_date, updated_date, upvoters, downvoters FROM pr_comments WHERE uid = ?`,
+      `SELECT uid, code_snippet_id, text, replies_to, added_by, added_date, updated_date, upvoters, downvoters, status FROM pr_comments WHERE uid = ?`,
       [id],
       (error, results, fields) => {
         if (error) {
@@ -42,12 +42,12 @@ module.exports = {
   },
   updateComment: (
     id,
-    { code_snippet_id, text, replies_to, added_by, upvoters, downvoters },
+    { code_snippet_id, text, replies_to, added_by},
     callback
   ) => {
     pool.query(
-      `UPDATE pr_comments SET code_snippet_id=?, text=?, replies_to=?, added_by=?, upvoters=?, downvoters=? WHERE uid =?`,
-      [code_snippet_id, text, replies_to, added_by, upvoters, downvoters, id],
+      `UPDATE pr_comments SET code_snippet_id=?, text=?, replies_to=?, added_by=? WHERE uid =?`,
+      [code_snippet_id, text, replies_to, added_by, id],
       (error, results, fields) => {
         if (error) {
           return callback(error);

@@ -41,8 +41,7 @@ module.exports = {
   },
 
   languageEditValidation: (req, res, next) => {
-    let { name, added_by } = req.body;
-    const langId = parseInt(req.params.id);
+    let { name, added_by, language_id } = req.body;
     name = name.trim();
 
     if (!name || name.length < 1) {
@@ -56,6 +55,7 @@ module.exports = {
         message: "Author is required",
       });
     } else if (name.length > 0) {
+      const langId = parseInt(language_id);
       checkIfSimilarNameExist(name, langId, (err, result) => {
         if (err) {
           console.log(err);
@@ -74,7 +74,7 @@ module.exports = {
   },
 
   languageIdValidation: (req, res, next) => {
-    const langId = parseInt(req.params.id);
+    const langId = parseInt(req.body.language_id);
     checkLanguageId(langId, (err, row) => {
       if (err) {
         console.log(err);

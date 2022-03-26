@@ -26,9 +26,9 @@ router.post(
   addPlatform
 );
 router.get("/platforms", getPlatforms);
-router.get("/platform/:id", platformIdValidation, getPlatformByPlatformId);
+router.get("/platform", getPlatformByPlatformId);
 router.put(
-  "/edit-platform/:id",
+  "/edit-platform",
   checkToken,
   platformIdValidation,
   validateImg,
@@ -36,7 +36,7 @@ router.put(
   updatePlatform
 );
 router.delete(
-  "/del-platform/:id",
+  "/del-platform",
   checkToken,
   platformIdValidation,
   deletePlatform

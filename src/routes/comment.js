@@ -19,16 +19,16 @@ const {
 ////----Begin routes defination
 router.post("/add-comment", checkToken, commentAddValidation, addComment);
 router.get("/comments", getComments);
-router.get("/comment/:id", commentIdValidation, getCommentByCommentId);
+router.get("/comment", getCommentByCommentId);
 router.put(
-  "/edit-comment/:id",
+  "/edit-comment",
   checkToken,
   commentIdValidation,
   commentEditValidation,
   updateComment
 );
 router.delete(
-  "/del-comment/:id",
+  "/del-comment",
   checkToken,
   commentIdValidation,
   deleteComment

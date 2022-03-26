@@ -34,7 +34,7 @@ module.exports = {
   },
 
   implementationEditValidation: (req, res, next) => {
-    let { func_id, subfunc_id, title, added_by } = req.body;
+    let { func_id, subfunc_id, title, added_by, implementation_id } = req.body;
 
     title = title.trim();
     func_id = parseInt(func_id);
@@ -66,7 +66,7 @@ module.exports = {
   },
 
   implementationIdValidation: (req, res, next) => {
-    const impId = parseInt(req.params.id);
+    const impId = parseInt(req.body.implementation_id);
     checkImplementationId(impId, (err, row) => {
       if (err) {
         console.log(err);

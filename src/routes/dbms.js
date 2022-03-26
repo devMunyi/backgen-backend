@@ -21,16 +21,16 @@ const {
 ////----Begin routes defination
 router.post("/add-dbms", checkToken, validateImg, dbmsAddValidation, addDbms);
 router.get("/dbmses", getDbmses);
-router.get("/dbms/:id", dbmsIdValidation, getDbmsByDbmsId);
+router.get("/dbms", getDbmsByDbmsId);
 router.put(
-  "/edit-dbms/:id",
+  "/edit-dbms",
   checkToken,
   dbmsIdValidation,
   validateImg,
   dbmsEditValidation,
   updateDbms
 );
-router.delete("/del-dbms/:id", checkToken, dbmsIdValidation, deleteDbms);
+router.delete("/del-dbms", checkToken, dbmsIdValidation, deleteDbms);
 ////------End routes definations
 
 module.exports = router; //make the module available for imports

@@ -41,7 +41,7 @@ module.exports = {
   },
 
   dbmsEditValidation: (req, res, next) => {
-    let { name, added_by } = req.body;
+    let { name, added_by, dbms_id } = req.body;
     name = name.trim();
 
     if (!name || name.length < 1) {
@@ -55,8 +55,8 @@ module.exports = {
         message: "Author is required",
       });
     } else if (name.length > 0) {
-      const dbmsId = parseInt(req.params.id);
-      checkIfSimilarNameExist(name, dbmsId, (err, result) => {
+      dbms_id = parseInt(dbms_id);
+      checkIfSimilarNameExist(name, dbms_id, (err, result) => {
         if (err) {
           console.log(err);
           return;
@@ -74,7 +74,7 @@ module.exports = {
   },
 
   dbmsIdValidation: (req, res, next) => {
-    const dbmsId = parseInt(req.params.id);
+    const dbmsId = parseInt(req.body.dbms_id);
     checkDbmsId(dbmsId, (err, row) => {
       if (err) {
         console.log(err);

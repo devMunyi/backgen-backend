@@ -26,8 +26,13 @@ module.exports = {
     });
   },
   getFrameworkByFrameworkId: (req, res) => {
-    const { id } = req.params;
-    getFrameworkByFrameworkId(parseInt(id), (err, results) => {
+    const { framework_id } = req.query;
+
+    if(!framework_id){
+      return;
+    }
+
+    getFrameworkByFrameworkId(parseInt(framework_id), (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -104,8 +109,8 @@ module.exports = {
   updateFramework: (req, res) => {
     const { body } = req;
 
-    const { id } = req.params;
-    updateFramework(parseInt(id), body, (err, results) => {
+    const { framework_id } = req.body;
+    updateFramework(parseInt(framework_id), body, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -125,8 +130,8 @@ module.exports = {
     });
   },
   deleteFramework: (req, res) => {
-    const { id } = req.params;
-    deleteFramework(parseInt(id), (err, results) => {
+    const { framework_id } = req.body;
+    deleteFramework(parseInt(framework_id), (err, results) => {
       if (err) {
         console.log(err);
         return;

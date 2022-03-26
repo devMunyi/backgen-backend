@@ -47,7 +47,7 @@ module.exports = {
   },
 
   subfunEditValidation: (req, res, next) => {
-    let { func_id, name, added_by } = req.body;
+    let { func_id, name, added_by, subfun_id } = req.body;
 
     name = name.trim();
     func_id = parseInt(func_id);
@@ -68,7 +68,7 @@ module.exports = {
         message: "Author is required",
       });
     } else if (name.length > 0) {
-      const subfunId = parseInt(req.params.id);
+      subfunId = parseInt(subfun_id);
       checkIfSimilarNameExist(name, subfunId, (err, result) => {
         if (err) {
           console.log(err);
@@ -87,7 +87,7 @@ module.exports = {
   },
 
   subfunIdValidation: (req, res, next) => {
-    const subfunId = parseInt(req.params.id);
+    const subfunId = parseInt(req.body.subfun_id);
     checkSubfunId(subfunId, (err, row) => {
       if (err) {
         console.log(err);

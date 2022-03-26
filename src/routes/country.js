@@ -26,9 +26,9 @@ router.post(
   addCountry
 );
 router.get("/countries", getCountries);
-router.get("/country/:id", countryIdValidation, getCountryByCountryId);
+router.get("/country", getCountryByCountryId);
 router.put(
-  "/edit-country/:id",
+  "/edit-country",
   checkToken,
   countryIdValidation,
   validateImg,
@@ -36,7 +36,7 @@ router.put(
   updateCountry
 );
 router.delete(
-  "/del-country/:id",
+  "/del-country",
   checkToken,
   countryIdValidation,
   deleteCountry

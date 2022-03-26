@@ -116,7 +116,7 @@ module.exports = {
   },
 
   userEditValidation: (req, res, next) => {
-    let { username, email, country, password, cpassword } = req.body;
+    let { username, email, country, password, cpassword, user_id } = req.body;
 
     username = username.trim();
     email = email.trim();
@@ -124,7 +124,7 @@ module.exports = {
     password = password.trim();
     cpassword = cpassword.trim();
 
-    const userid = parseInt(req.params.id);
+    userid = parseInt(user_id);
     //console.log(userid);
     if (!username || username.length < 3) {
       return res.json({
@@ -190,7 +190,7 @@ module.exports = {
   },
 
   userIdValidation: (req, res, next) => {
-    const userid = parseInt(req.params.id);
+    const userid = parseInt(req.body.user_id);
     checkUserId(userid, (err, row) => {
       if (err) {
         console.log(err);

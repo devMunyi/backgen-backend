@@ -40,7 +40,7 @@ module.exports = {
   },
 
   funEditValidation: (req, res, next) => {
-    let { name, added_by } = req.body;
+    let { name, added_by, func_id } = req.body;
     name = name.trim();
 
     if (!name || name.length < 1) {
@@ -54,8 +54,7 @@ module.exports = {
         message: "Author is required",
       });
     } else if (name.length > 0) {
-      const funId = parseInt(req.params.id);
-      checkIfSimilarNameExist(name, funId, (err, result) => {
+      checkIfSimilarNameExist(name, func_id, (err, result) => {
         if (err) {
           console.log(err);
           return;
@@ -73,7 +72,7 @@ module.exports = {
   },
 
   funIdValidation: (req, res, next) => {
-    const funId = parseInt(req.params.id);
+    const funId = parseInt(req.body.func_id);
     checkFunId(funId, (err, row) => {
       if (err) {
         console.log(err);

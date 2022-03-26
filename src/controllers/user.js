@@ -41,8 +41,13 @@ module.exports = {
     });
   },
   getUserByUserId: (req, res) => {
-    const { id } = req.params;
-    getUserByUserId(parseInt(id), (err, results) => {
+    const { user_id } = req.query;
+
+    if(!user_id){
+      return;
+    }
+
+    getUserByUserId(parseInt(user_id), (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -109,9 +114,9 @@ module.exports = {
     const { body } = req;
     const salt = genSaltSync(10);
     body.password = hashSync(body.password, salt);
-    const { id } = req.params;
+    const { user_id } = req.body;
 
-    updateUser(parseInt(id), body, (err, results) => {
+    updateUser(parseInt(user_id), body, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -131,8 +136,8 @@ module.exports = {
     });
   },
   deleteUser: (req, res) => {
-    const { id } = req.params;
-    deleteUser(parseInt(id), (err, results) => {
+    const { user_id } = req.body;
+    deleteUser(parseInt(user_id), (err, results) => {
       if (err) {
         console.log(err);
         return;

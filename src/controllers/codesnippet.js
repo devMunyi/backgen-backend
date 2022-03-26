@@ -25,8 +25,13 @@ module.exports = {
     });
   },
   getCodeSnippetByCodeSnippetId: (req, res) => {
-    const { id } = req.params;
-    getCodeSnippetByCodeSnippetId(parseInt(id), (err, results) => {
+    const { codesnippet_id } = req.query;
+
+    if(!codesnippet_id){
+      return;
+    }
+
+    getCodeSnippetByCodeSnippetId(parseInt(codesnippet_id), (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -49,7 +54,6 @@ module.exports = {
 
     //destructuring req query for the variables
     let {
-      platform_id,
       language_id,
       framework_id,
       implementation_id,
@@ -58,10 +62,6 @@ module.exports = {
       orderby,
       dir,
     } = req.query;
-
-    if (!platform_id) {
-      platform_id = 0;
-    }
 
     if (!language_id) {
       language_id = 0;
@@ -92,7 +92,6 @@ module.exports = {
     }
 
     //add data to queryObj object
-    queryObj.platform_id = parseInt(platform_id);
     queryObj.language_id = parseInt(language_id);
     queryObj.framework_id = parseInt(framework_id);
     queryObj.implementation_id = parseInt(implementation_id);
@@ -120,8 +119,8 @@ module.exports = {
   },
   updateCodeSnippet: (req, res) => {
     const { body } = req;
-    const { id } = req.params;
-    updateCodeSnippet(id, body, (err, results) => {
+    const { codesnippet_id } = req.body;
+    updateCodeSnippet(codesnippet_id, body, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -141,8 +140,8 @@ module.exports = {
     });
   },
   deleteCodeSnippet: (req, res) => {
-    const { id } = req.params;
-    deleteCodeSnippet(parseInt(parseInt(id)), (err, results) => {
+    const { codesnippet_id } = req.body;
+    deleteCodeSnippet(parseInt(parseInt(codesnippet_id)), (err, results) => {
       if (err) {
         console.log(err);
         return;

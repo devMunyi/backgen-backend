@@ -26,8 +26,13 @@ module.exports = {
     });
   },
   getDbmsByDbmsId: (req, res) => {
-    const { id } = req.params;
-    getDbmsByDbmsId(parseInt(id), (err, results) => {
+    const { dbms_id } = req.query;
+
+    if(!dbms_id){
+      return;
+    }
+
+    getDbmsByDbmsId(parseInt(dbms_id), (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -108,8 +113,8 @@ module.exports = {
   updateDbms: (req, res) => {
     const { body } = req;
 
-    const { id } = req.params;
-    updateDbms(parseInt(id), body, (err, results) => {
+    const { dbms_id } = req.body;
+    updateDbms(parseInt(dbms_id), body, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -131,8 +136,8 @@ module.exports = {
     });
   },
   deleteDbms: (req, res) => {
-    const { id } = req.params;
-    deleteDbms(parseInt(id), (err, results) => {
+    const { dbms_id } = req.body;
+    deleteDbms(parseInt(dbms_id), (err, results) => {
       if (err) {
         console.log(err);
         return;

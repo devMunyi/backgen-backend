@@ -27,8 +27,13 @@ module.exports = {
   },
 
   getLanguageByLanguageId: (req, res) => {
-    const { id } = req.params;
-    getLanguageByLanguageId(parseInt(id), (err, results) => {
+    const { language_id } = req.query;
+
+    if(!language_id){
+      return;
+    }
+    
+    getLanguageByLanguageId(parseInt(language_id), (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -107,8 +112,8 @@ module.exports = {
   updateLanguage: (req, res) => {
     const { body } = req;
 
-    const { id } = req.params;
-    updateLanguage(parseInt(id), body, (err, results) => {
+    const { language_id } = req.body;
+    updateLanguage(parseInt(language_id), body, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -129,8 +134,8 @@ module.exports = {
   },
 
   deleteLanguage: (req, res) => {
-    const { id } = req.params;
-    deleteLanguage(parseInt(id), (err, results) => {
+    const { language_id } = req.body;
+    deleteLanguage(parseInt(language_id), (err, results) => {
       if (err) {
         console.log(err);
         return;

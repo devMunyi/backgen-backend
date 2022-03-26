@@ -52,7 +52,7 @@ module.exports = {
   },
 
   countryEditValidation: (req, res, next) => {
-    let { name, abbrev, added_by } = req.body;
+    let { name, abbrev, added_by, country_id } = req.body;
 
     name = name.trim();
     abbrev = abbrev.trim();
@@ -73,7 +73,7 @@ module.exports = {
         message: "Author is required",
       });
     } else if (name.length > 0) {
-      const countryId = parseInt(req.params.id);
+      countryId = parseInt(country_id);
       checkIfSimilarNameExist(name, countryId, (err, result) => {
         if (err) {
           console.log(err);
@@ -94,7 +94,7 @@ module.exports = {
   },
 
   countryIdValidation: (req, res, next) => {
-    const countryId = parseInt(req.params.id);
+    let countryId = parseInt(req.body.country_id);
     checkCountryId(countryId, (err, row) => {
       if (err) {
         console.log(err);

@@ -25,8 +25,13 @@ module.exports = {
     });
   },
   getImplementationByImplementationId: (req, res) => {
-    const { id } = req.params;
-    getImplementationByImplementationId(parseInt(id), (err, results) => {
+    const {implementation_id } = req.query;
+
+    if(!implementation_id){
+      return;
+    }
+
+    getImplementationByImplementationId(parseInt(implementation_id), (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -104,8 +109,8 @@ module.exports = {
   },
   updateImplementation: (req, res) => {
     const { body } = req;
-    const { id } = req.params;
-    updateImplementation(parseInt(id), body, (err, results) => {
+    const { implementation_id } = req.body;
+    updateImplementation(parseInt(implementation_id), body, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -125,8 +130,8 @@ module.exports = {
     });
   },
   deleteImplementation: (req, res) => {
-    const { id } = req.params;
-    deleteImplementation(parseInt(id), (err, results) => {
+    const { implementation_id } = req.body;
+    deleteImplementation(parseInt(implementation_id), (err, results) => {
       if (err) {
         console.log(err);
         return;

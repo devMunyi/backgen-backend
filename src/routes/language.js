@@ -26,9 +26,9 @@ router.post(
   addLanguage
 );
 router.get("/languages", getLanguages);
-router.get("/language/:id", languageIdValidation, getLanguageByLanguageId);
+router.get("/language", getLanguageByLanguageId);
 router.put(
-  "/edit-language/:id",
+  "/edit-language",
   checkToken,
   languageIdValidation,
   validateImg,
@@ -36,7 +36,7 @@ router.put(
   updateLanguage
 );
 router.delete(
-  "/del-language/:id",
+  "/del-language",
   checkToken,
   languageIdValidation,
   deleteLanguage

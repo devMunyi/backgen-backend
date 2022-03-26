@@ -25,19 +25,18 @@ router.post(
 );
 router.get("/implementations", getImplementations);
 router.get(
-  "/implementation/:id",
-  implementationIdValidation,
+  "/implementation",
   getImplementationByImplementationId
 );
 router.put(
-  "/edit-implementation/:id",
+  "/edit-implementation",
   checkToken,
   implementationIdValidation,
   implementationEditValidation,
   updateImplementation
 );
 router.delete(
-  "/del-implementation/:id",
+  "/del-implementation",
   checkToken,
   implementationIdValidation,
   deleteImplementation

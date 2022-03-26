@@ -2,12 +2,12 @@ const pool = require("../../config/db.config");
 
 module.exports = {
   addImplementation: (
-    { func_id, subfunc_id, title, description, added_by, upvoters, downvoters },
+    { func_id, subfunc_id, title, description, added_by},
     callback
   ) => {
     pool.query(
-      `INSERT INTO pr_implementations(func_id, subfunc_id, title, description, added_by, upvoters, downvoters) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [func_id, subfunc_id, title, description, added_by, upvoters, downvoters],
+      `INSERT INTO pr_implementations(func_id, subfunc_id, title, description, added_by) VALUES (?, ?, ?, ?, ?)`,
+      [func_id, subfunc_id, title, description, added_by],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -55,19 +55,17 @@ module.exports = {
   },
   updateImplementation: (
     id,
-    { func_id, subfunc_id, title, description, added_by, upvoters, downvoters },
+    { func_id, subfunc_id, title, description, added_by},
     callback
   ) => {
     pool.query(
-      `UPDATE pr_implementations SET func_id=?, subfunc_id=?, title=?, description=?, added_by=?, upvoters=?, downvoters=? where uid =?`,
+      `UPDATE pr_implementations SET func_id=?, subfunc_id=?, title=?, description=?, added_by=? where uid =?`,
       [
         func_id,
         subfunc_id,
         title,
         description,
         added_by,
-        upvoters,
-        downvoters,
         id,
       ],
       (error, results, fields) => {

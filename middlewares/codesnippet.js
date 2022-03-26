@@ -9,7 +9,6 @@ module.exports = {
       framework_id,
       implementation_id,
       dbms_id,
-      platform_id,
       instructions,
       added_by,
     } = req.body;
@@ -18,10 +17,9 @@ module.exports = {
     instructions = instructions.trim();
     file_extension = file_extension.trim();
     language_id = parseInt(language_id);
-    framework_id = parseInt(framework_id);
+    /* framework_id = parseInt(framework_id); */
     implementation_id = parseInt(implementation_id);
-    dbms_id = parseInt(dbms_id);
-    platform_id = parseInt(platform_id);
+    /* dbms_id = parseInt(dbms_id); */
     added_by = parseInt(added_by);
 
     if (!row_code || row_code.length < 20) {
@@ -39,7 +37,7 @@ module.exports = {
         success: false,
         message: "Please select language",
       });
-    } else if (!framework_id || framework_id < 1) {
+    } else if (!framework_id) {
       return res.json({
         success: false,
         message: "Please select framework",
@@ -49,15 +47,10 @@ module.exports = {
         success: false,
         message: "Please select implementation",
       });
-    } else if (!dbms_id || dbms_id < 1) {
+    } else if (!dbms_id) {
       return res.json({
         success: false,
         message: "Please select dbms",
-      });
-    } else if (!platform_id || platform_id < 1) {
-      return res.json({
-        success: false,
-        message: "Please select platform",
       });
     } else if (!added_by) {
       return res.json({
@@ -79,19 +72,19 @@ module.exports = {
       framework_id,
       implementation_id,
       dbms_id,
-      platform_id,
       instructions,
       added_by,
+      codesnippet_id
     } = req.body;
 
     row_code = row_code.trim();
     instructions = instructions.trim();
     file_extension = file_extension.trim();
     language_id = parseInt(language_id);
-    framework_id = parseInt(framework_id);
+    /* framework_id = parseInt(framework_id); */
     implementation_id = parseInt(implementation_id);
     dbms_id = parseInt(dbms_id);
-    platform_id = parseInt(platform_id);
+    /* platform_id = parseInt(platform_id); */
     added_by = parseInt(added_by);
 
     if (!row_code || row_code.length < 20) {
@@ -109,7 +102,7 @@ module.exports = {
         success: false,
         message: "Please select language",
       });
-    } else if (!framework_id || framework_id < 1) {
+    } else if (!framework_id) {
       return res.json({
         success: false,
         message: "Please select framework",
@@ -124,11 +117,6 @@ module.exports = {
         success: false,
         message: "Please select dbms",
       });
-    } else if (!platform_id || platform_id < 1) {
-      return res.json({
-        success: false,
-        message: "Please select platform",
-      });
     } else if (!added_by) {
       return res.json({
         success: false,
@@ -142,7 +130,7 @@ module.exports = {
   },
 
   codesnippetIdValidation: (req, res, next) => {
-    const impId = parseInt(req.params.id);
+    const impId = parseInt(req.body.codesnippet_id);
     checkCodesnippetId(impId, (err, row) => {
       if (err) {
         console.log(err);
