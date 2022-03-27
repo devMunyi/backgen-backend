@@ -4,6 +4,7 @@ const {
   getPlatformByPlatformId,
   updatePlatform,
   deletePlatform,
+  reactivatePlatform
 } = require("../controllers/platform");
 const router = require("express").Router();
 
@@ -20,7 +21,6 @@ const {
 //Routes defination
 router.post(
   "/add-platform",
-  checkToken,
   validateImg,
   platformAddValidation,
   addPlatform
@@ -29,17 +29,14 @@ router.get("/platforms", getPlatforms);
 router.get("/platform", getPlatformByPlatformId);
 router.put(
   "/edit-platform",
-  checkToken,
-  platformIdValidation,
   validateImg,
   platformEditValidation,
   updatePlatform
 );
 router.delete(
   "/del-platform",
-  checkToken,
-  platformIdValidation,
   deletePlatform
 );
+router.put("/reactivate-platform", reactivatePlatform);
 
 module.exports = router; //make the module available for imports

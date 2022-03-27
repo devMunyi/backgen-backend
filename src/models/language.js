@@ -13,10 +13,10 @@ module.exports = {
       }
     );
   },
-  getLanguages: ({ status, offset, rpp }, callback) => {
+  getLanguages: ({ where_, andsearch, offset, rpp }, callback) => {
     pool.query(
-      `SELECT uid, name, description, icon, added_by, added_at FROM pr_languages WHERE status = ? ORDER BY uid LIMIT ?,?`,
-      [status, offset, rpp],
+      `SELECT uid, name, description, icon, added_by, added_at, status FROM pr_languages WHERE ${where_} ${andsearch} ORDER BY name LIMIT ?,?`,
+      [offset, rpp],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -25,10 +25,11 @@ module.exports = {
       }
     );
   },
-  getLanguageByLanguageId: (id, callback) => {
+
+  getTotalRecords: ({where_, andsearch}, callback) => {
     pool.query(
-      `SELECT uid, name, description, icon, added_by, added_at FROM pr_languages WHERE uid = ? AND status=1`,
-      [id],
+      `SELECT COUNT(uid) AS all_totals FROM pr_languages WHERE ${where_} ${andsearch}`,
+      [],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -37,6 +38,20 @@ module.exports = {
       }
     );
   },
+
+  getLanguageByLanguageId: ({where_, language_id}, callback) => {
+    pool.query(
+      `SELECT uid, name, description, icon, added_by, added_at, status FROM pr_languages WHERE uid = ? AND ${where_}`,
+      [language_id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results[0]);
+      }
+    );
+  },
+
   updateLanguage: (id, { name, description, icon, added_by }, callback) => {
     pool.query(
       `UPDATE pr_languages SET name=?, description=?, icon=?, added_by=? WHERE uid =?`,
@@ -54,6 +69,19 @@ module.exports = {
     pool.query(
       `UPDATE pr_languages SET status = ? WHERE uid =?`,
       [0, id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
+      }
+    );
+  },
+
+  reactivateLanguage: (id, callback) => {
+    pool.query(
+      `UPDATE pr_languages SET status = ? WHERE uid =?`,
+      [1, id],
       (error, results, fields) => {
         if (error) {
           return callback(error);

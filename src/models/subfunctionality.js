@@ -14,8 +14,18 @@ module.exports = {
       }
     );
   },
-  getSubfuncs: ({ status, orStatus, rpp, offset }, callback) => {
-    if (orStatus === 0) {
+  getSubfuncs: ({ where_, andsearch, rpp, offset }, callback) => {
+    pool.query(
+      `SELECT uid, func_id, name, added_by, added_at, updated_at, status FROM pr_subfunctions WHERE ${where_} ${andsearch} ORDER BY name LIMIT ?,?`,
+      [offset, rpp],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
+      }
+    );
+   /*  if (orStatus === 0) {
       pool.query(
         `SELECT uid, func_id, name, added_by, added_at, updated_at, status FROM pr_subfunctions WHERE status = ? OR status = ? ORDER BY name LIMIT ?,?`,
         [status, orStatus, offset, rpp],
@@ -37,33 +47,35 @@ module.exports = {
           return callback(null, results);
         }
       );
-    }
+    } */
   },
-  getSubfuncBySubfuncId: (id, { orStatus }, callback) => {
-    if (orStatus === 0) {
-      pool.query(
-        "SELECT uid, func_id, name, added_by, added_at, updated_at FROM pr_subfunctions WHERE uid = ? AND (status = 1 OR status = 0) LIMIT 0,1",
-        [id],
-        (error, results, fields) => {
-          if (error) {
-            return callback(error);
-          }
-          return callback(null, results[0]);
+
+  getTotalRecords: ({where_, andsearch}, callback) => {
+    pool.query(
+      `SELECT COUNT(uid) AS all_totals FROM pr_subfunctions WHERE ${where_} ${andsearch}`,
+      [],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
         }
-      );
-    } else {
-      pool.query(
-        `SELECT uid, func_id, name, added_by, added_at, updated_at FROM pr_subfunctions WHERE uid = ? AND status = 1 LIMIT 0,1`,
-        [id],
-        (error, results, fields) => {
-          if (error) {
-            return callback(error);
-          }
-          return callback(null, results[0]);
-        }
-      );
-    }
+        return callback(null, results[0]);
+      }
+    );
   },
+
+  getSubfuncBySubfuncId: ({ where_, subfun_id}, callback) => {
+    pool.query(
+      `SELECT uid, func_id, name, added_by, added_at, updated_at FROM pr_subfunctions WHERE uid = ? AND ${where_} LIMIT 0,1`,
+      [subfun_id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results[0]);
+      }
+    );
+  },
+
   updateSubfunc: (id, { func_id, name, added_by }, callback) => {
     pool.query(
       `UPDATE pr_subfunctions SET func_id=?, name=?, added_by=? WHERE uid =?`,

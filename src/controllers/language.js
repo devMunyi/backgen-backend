@@ -4,7 +4,10 @@ const {
   getLanguages,
   updateLanguage,
   deleteLanguage,
+  getTotalRecords,
+  reactivateLanguage
 } = require("../models/language");
+const { inputAvailable } = require("../../helpers/common");
 
 module.exports = {
   addLanguage: (req, res) => {
@@ -26,45 +29,23 @@ module.exports = {
     });
   },
 
-  getLanguageByLanguageId: (req, res) => {
-    const { language_id } = req.query;
-
-    if(!language_id){
-      return;
-    }
-    
-    getLanguageByLanguageId(parseInt(language_id), (err, results) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: "Record not found",
-        });
-      }
-
-      if (results) {
-        const { icon } = results;
-        results.icon = `images/language/${icon}`;
-
-        return res.json({
-          success: true,
-          data: results,
-        });
-      }
-    });
-  },
-
-  getLanguages: async (req, res) => {
+  getLanguages: (req, res) => {
+    console.log("INCOMING QUERY IS => ", req.query);
     let queryObj = {};
 
-    let { status, orderby, dir, offset, rpp } = req.query;
-
-    if (!status) {
-      status = 1;
+    let { where_, search_, orderby, dir, offset, rpp } = req.query;
+    if (!where_) {
+      where_ = "status = 1";
     }
+    
+    let andsearch;
+    search_ = inputAvailable(search_);
+    if (search_ != undefined) {
+      andsearch = `AND name LIKE '%${search_}%'`;
+    } else {
+      andsearch = "";
+    }
+
     if (!orderby) {
       orderby = "name";
     }
@@ -80,7 +61,8 @@ module.exports = {
     }
 
     //add data to queryObj object
-    queryObj.status = parseInt(status);
+    queryObj.where_ = where_;
+    queryObj.andsearch = andsearch;
     queryObj.orderby = orderby;
     queryObj.dir = dir;
     queryObj.offset = parseInt(offset);
@@ -98,9 +80,61 @@ module.exports = {
       }
       if (results) {
         results.map((result) => {
-          const icon = `images/language/${result.icon}`;
+          const icon = `/images/language/${result.icon}`;
           result.icon = icon;
         });
+
+        //get all total records
+        getTotalRecords(queryObj, (err2, results2) => {
+          if (err2) {
+            console.log(err2);
+            return;
+          }
+
+          if (results2) {
+            console.log("TOTALS RECORDS =>", results2.all_totals);
+            return res.json({
+              success: true,
+              all_totals: results2.all_totals,
+              data: results,
+            });
+          }
+        });
+      }
+    });
+  },
+
+  getLanguageByLanguageId: (req, res) => {
+    let { where_, language_id } = req.query;
+    if (!where_) {
+      where_ = `status = 1`;
+    }
+
+    if (!language_id) {
+      return res.json();
+    }
+
+    let obj = {
+      where_,
+      language_id: parseInt(language_id),
+    };
+
+    getLanguageByLanguageId(obj, (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "Record not found",
+        });
+      }
+
+      if (results) {
+        const { icon } = results;
+        results.icon = `/images/language/${icon}`;
+
         return res.json({
           success: true,
           data: results,
@@ -149,6 +183,26 @@ module.exports = {
       return res.json({
         success: true,
         message: "Langauage deleted successfully!",
+      });
+    });
+  },
+
+  reactivateLanguage: (req, res) => {
+    const { language_id } = req.body;
+    reactivateLanguage(parseInt(language_id), (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "Record Not Found",
+        });
+      }
+      return res.json({
+        success: true,
+        message: "Language activated successfully",
       });
     });
   },

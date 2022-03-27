@@ -13,11 +13,12 @@ module.exports = {
       }
     );
   },
-  getFuncs: ({ status, orStatus, offset, rpp }, callback) => {
-    if (orStatus === 0) {
+
+
+  getFuncs: ({where_, andsearch, offset, rpp }, callback) => {
       pool.query(
-        "SELECT uid, name, icon, added_at, added_by, updated_at, status FROM pr_functionalities WHERE status = ? OR status = ? ORDER BY name ASC LIMIT ?,?",
-        [status, orStatus, offset, rpp],
+        `SELECT uid, name, icon, added_at, added_by, updated_at, status FROM pr_functionalities WHERE ${where_} ${andsearch} ORDER BY name ASC LIMIT ?,?`,
+        [offset, rpp],
         (error, results, fields) => {
           if (error) {
             return callback(error);
@@ -25,18 +26,20 @@ module.exports = {
           return callback(null, results);
         }
       );
-    } else {
-      pool.query(
-        "SELECT uid, name, icon, added_at, added_by, updated_at, status FROM pr_functionalities WHERE status = ? ORDER BY name LIMIT ?,?",
-        [status, offset, rpp],
-        (error, results, fields) => {
-          if (error) {
-            return callback(error);
-          }
-          return callback(null, results);
+  },
+
+
+  getTotalRecords: ({where_, andsearch}, callback) => {
+    pool.query(
+      `SELECT COUNT(uid) AS all_totals FROM pr_functionalities WHERE ${where_} ${andsearch}`,
+      [],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
         }
-      );
-    }
+        return callback(null, results[0]);
+      }
+    );
   },
 
   // getFuncs: ({ status }, callback) => {
@@ -51,11 +54,10 @@ module.exports = {
   //     }
   //   );
   // },
-  getFuncByFuncId: (id, { orStatus }, callback) => {
-    if (orStatus === 0) {
-      pool.query(
-        "SELECT uid, name, icon, added_by, added_at, updated_at, status FROM pr_functionalities WHERE uid = ? AND (status = 1 OR status = 0)",
-        [id],
+  getFuncByFuncId: ({ where_, func_id }, callback) => {
+     pool.query(
+        `SELECT uid, name, icon, added_by, added_at, updated_at, status FROM pr_functionalities WHERE uid = ? AND ${where_}`,
+        [func_id],
         (error, results, fields) => {
           if (error) {
             return callback(error);
@@ -63,18 +65,6 @@ module.exports = {
           return callback(null, results[0]);
         }
       );
-    } else {
-      pool.query(
-        `SELECT uid, name, icon, added_by, added_at, updated_at, status FROM pr_functionalities WHERE uid = ? AND status = 1`,
-        [id],
-        (error, results, fields) => {
-          if (error) {
-            return callback(error);
-          }
-          return callback(null, results[0]);
-        }
-      );
-    }
   },
   updateFunc: (id, { name, icon, added_by }, callback) => {
     pool.query(

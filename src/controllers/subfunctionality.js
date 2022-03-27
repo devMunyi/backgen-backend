@@ -5,7 +5,10 @@ const {
   updateSubfunc,
   deleteSubfunc,
   reactivateSubfunc,
+  getTotalRecords
 } = require("../models/subfunctionality");
+const {inputAvailable} = require("../../helpers/common");
+
 
 module.exports = {
   addSubfunc: (req, res) => {
@@ -26,54 +29,23 @@ module.exports = {
       });
     });
   },
-  getSubfuncBySubfuncId: (req, res) => {
-    let obj = {};
-
-    let { status, orStatus } = req.query;
-
-    if (!status) {
-    } else {
-      obj.status = parseInt(status);
-    }
-
-    if (!orStatus) {
-    } else {
-      obj.orStatus = parseInt(orStatus);
-    }
-
-    const { subfun_id } = req.query;
-
-    if(!subfun_id){
-      return;
-    }
-
-    getSubfuncBySubfuncId(parseInt(subfun_id), obj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: "Record not found",
-        });
-      }
-
-      if (results) {
-        return res.json({
-          success: true,
-          data: results,
-        });
-      }
-    });
-  },
+  
   getSubfuncs: (req, res) => {
     let queryObj = {};
-    let { status, orStatus, orderby, dir, offset, rpp } = req.query;
+    let { where_, search_, orderby, dir, offset, rpp } = req.query;
 
-    if (!status) {
-      status = 1;
+    if (!where_) {
+      where_ = "status = 1";
     }
+
+    let andsearch;
+    search_ = inputAvailable(search_);
+    if (search_ != undefined) {
+      andsearch = `AND name LIKE '%${search_}%'`;
+    } else {
+      andsearch = "";
+    }
+
     if (!orderby) {
       orderby = "name";
     }
@@ -89,11 +61,8 @@ module.exports = {
     }
 
     //add data to queryObj object
-    queryObj.status = parseInt(status);
-    if (!orStatus) {
-    } else {
-      queryObj.orStatus = parseInt(orStatus);
-    }
+    queryObj.where_ = where_;
+    queryObj.andsearch = andsearch;
     queryObj.orderby = orderby;
     queryObj.dir = dir;
     queryObj.offset = parseInt(offset);
@@ -114,12 +83,52 @@ module.exports = {
       }
 
       if (results) {
-        // results.map((result) => {
-        //   const icon = `/images/subfunctionality/${result.icon}`;
-        //   result.icon = icon;
-        //   //console.log(result);
-        // });
+        getTotalRecords(queryObj, (err2, result2) =>{
+          if(err2){
+            console.log(err2)
+            return;
+          }
+          if(result2){
+            return res.json({
+              success: true,
+              all_totals: result2.all_totals,
+              data: results,
+            });
+          }
+        })
+      }
+    });
+  },
 
+
+  getSubfuncBySubfuncId: (req, res) => {
+    let { where_, subfun_id } = req.query;
+    if (!where_) {
+      where_ = `status = 1`
+    } 
+
+    if (!subfun_id) {
+      return res.json();
+    }
+
+    let obj = {
+      where_,
+      subfun_id: parseInt(subfun_id),
+    }
+
+    getSubfuncBySubfuncId(obj, (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "Record not found",
+        });
+      }
+
+      if (results) {
         return res.json({
           success: true,
           data: results,

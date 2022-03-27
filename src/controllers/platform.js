@@ -5,7 +5,10 @@ const {
   getPlatforms,
   updatePlatform,
   deletePlatform,
+  getTotalRecords,
+  reactivatePlatform
 } = require("../models/platform");
+const {inputAvailable} = require("../../helpers/common");
 
 module.exports = {
   addPlatform: (req, res) => {
@@ -26,6 +29,83 @@ module.exports = {
       });
     });
   },
+
+  getPlatforms: (req, res) => {
+    let queryObj = {};
+
+    let { where_, search_, orderby, dir, offset, rpp } = req.query;
+    if (!where_) {
+      where_ = "status = 1";
+    }
+    
+    let andsearch;
+    search_ = inputAvailable(search_);
+    if (search_ != undefined) {
+      andsearch = `AND name LIKE '%${search_}%'`;
+    } else {
+      andsearch = "";
+    }
+
+    if (!orderby) {
+      orderby = "name";
+    }
+    if (!dir) {
+      dir = "ASC";
+    }
+    if (!offset) {
+      offset = 0;
+    }
+
+    if (!rpp) {
+      rpp = 10;
+    }
+
+    //add data to queryObj object
+    queryObj.where_ = where_;
+    queryObj.andsearch = andsearch;
+    queryObj.orderby = orderby;
+    queryObj.dir = dir;
+    queryObj.offset = parseInt(offset);
+    queryObj.rpp = parseInt(rpp);
+
+
+    getPlatforms(queryObj, (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "No record(s) found",
+        });
+      }
+
+      if (results) {
+        results.map((result) => {
+          const icon = `/images/platform/${result.icon}`;
+          result.icon = icon;
+        });
+        
+        //get all total records
+        getTotalRecords(queryObj, (err2, results2) => {
+          if(err2){
+            console.log(err2)
+            return;
+          }
+
+          if (results2) {
+            return res.json({
+              success: true,
+              all_totals:results2.all_totals,
+              data: results,
+            });
+          }
+        });
+      }
+    });
+  },
+
   getPlatformByPlatformId: (req, res) => {
     const { platform_id } = req.query;
 
@@ -47,60 +127,6 @@ module.exports = {
       if (results) {
         const { icon } = results;
         results.icon = `images/platform/${icon}`;
-
-        return res.json({
-          success: true,
-          data: results,
-        });
-      }
-    });
-  },
-  getPlatforms: (req, res) => {
-    let queryObj = {};
-
-    let { status, orderby, dir, offset, rpp } = req.query;
-
-    if (!status) {
-      status = 1;
-    }
-    if (!orderby) {
-      orderby = "name";
-    }
-    if (!dir) {
-      dir = "ASC";
-    }
-    if (!offset) {
-      offset = 0;
-    }
-
-    if (!rpp) {
-      rpp = 10;
-    }
-
-    //add data to queryObj object
-    queryObj.status = parseInt(status);
-    queryObj.orderby = orderby;
-    queryObj.dir = dir;
-    queryObj.offset = parseInt(offset);
-    queryObj.rpp = parseInt(rpp);
-
-    getPlatforms(queryObj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: "No record(s) found",
-        });
-      }
-
-      if (results) {
-        results.map((result) => {
-          const icon = `images/platform/${result.icon}`;
-          result.icon = icon;
-        });
 
         return res.json({
           success: true,
@@ -150,6 +176,26 @@ module.exports = {
       return res.json({
         success: true,
         message: "Platform deleted successfully!",
+      });
+    });
+  },
+
+  reactivatePlatform: (req, res) => {
+    const { platform_id } = req.body;
+    reactivatePlatform(parseInt(platform_id), (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "Record Not Found",
+        });
+      }
+      return res.json({
+        success: true,
+        message: "Platform activated successfully",
       });
     });
   },

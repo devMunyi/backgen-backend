@@ -4,6 +4,7 @@ const {
   getLanguageByLanguageId,
   updateLanguage,
   deleteLanguage,
+  reactivateLanguage
 } = require("../controllers/language");
 const router = require("express").Router();
 
@@ -20,7 +21,6 @@ const {
 ///----Routes definations
 router.post(
   "/add-language",
-  checkToken,
   validateImg,
   languageAddValidation,
   addLanguage
@@ -29,17 +29,13 @@ router.get("/languages", getLanguages);
 router.get("/language", getLanguageByLanguageId);
 router.put(
   "/edit-language",
-  checkToken,
-  languageIdValidation,
   validateImg,
   languageEditValidation,
   updateLanguage
 );
 router.delete(
   "/del-language",
-  checkToken,
-  languageIdValidation,
   deleteLanguage
 );
-
+router.put("/reactivate-language", reactivateLanguage);
 module.exports = router; ////make the module available for imports

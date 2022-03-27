@@ -5,7 +5,10 @@ const {
   updateFunc,
   deleteFunc,
   reactivateFunc,
+  getTotalRecords,
 } = require("../models/functionality");
+
+const {inputAvailable} = require("../../helpers/common");
 
 module.exports = {
   addFunc: (req, res) => {
@@ -26,29 +29,98 @@ module.exports = {
       });
     });
   },
-  getFuncByFuncId: (req, res) => {
-    let obj = {};
 
-    let { status, orStatus } = req.query;
-    if (!status) {
-    } else {
-      obj.status = parseInt(status);
+  getFuncs: (req, res) => {
+    let queryObj = {};
+
+    let { where_, search_, orderby, dir, offset, rpp } = req.query;
+    if (!where_) {
+      where_ = "status = 1";
     }
-
-    if (!orStatus) {
-    } else {
-      obj.orStatus = parseInt(orStatus);
-    }
-
     
-    const { func_id } = req.query;
-
-    if(!func_id){
-      return;
+    let andsearch;
+    search_ = inputAvailable(search_);
+    if (search_ != undefined) {
+      andsearch = `AND name LIKE '%${search_}%'`;
+    } else {
+      andsearch = "";
     }
 
-    // console.log("FUN REQUEST PARAM ID =>", id);
-    getFuncByFuncId(func_id, obj, (err, results) => {
+    if (!orderby) {
+      orderby = "name";
+    }
+    if (!dir) {
+      dir = "ASC";
+    }
+    if (!offset) {
+      offset = 0;
+    }
+
+    if (!rpp) {
+      rpp = 10;
+    }
+
+    //add data to queryObj object
+    queryObj.where_ = where_;
+    queryObj.andsearch = andsearch;
+    queryObj.orderby = orderby;
+    queryObj.dir = dir;
+    queryObj.offset = parseInt(offset);
+    queryObj.rpp = parseInt(rpp);
+    getFuncs(queryObj, (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "No record(s) found",
+        });
+      }
+
+      if (results) {
+        results.map((result) => {
+          const icon = `/images/functionality/${result.icon}`;
+          result.icon = icon;
+        });
+
+        //get all total records
+        getTotalRecords(queryObj, (err2, results2) => {
+          if(err2){
+            console.log(err2)
+            return;
+          }
+
+          if (results2) {
+            return res.json({
+              success: true,
+              all_totals:results2.all_totals,
+              data: results,
+            });
+          }
+        });
+      }
+    });
+  },
+
+
+  getFuncByFuncId: (req, res) => {
+    let { where_, func_id } = req.query;
+    if (!where_) {
+      where_ = `status = 1`
+    } 
+
+    if (!func_id) {
+      return res.json();
+    }
+
+    let obj = {
+      where_,
+      func_id: parseInt(func_id),
+    }
+
+    getFuncByFuncId(obj, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -71,71 +143,7 @@ module.exports = {
       }
     });
   },
-  getFuncs: (req, res) => {
-    let queryObj = {};
 
-    let { status, orStatus, orderby, dir, offset, rpp } = req.query;
-    // console.log("OR STATUS =>", orStatus);
-    if (!status) {
-      status = 1;
-    }
-    if (!orderby) {
-      orderby = "name";
-    }
-    if (!dir) {
-      dir = "ASC";
-    }
-    if (!offset) {
-      offset = 0;
-    }
-
-    if (!rpp) {
-      rpp = 10;
-    }
-
-    //add data to queryObj object
-    queryObj.status = parseInt(status);
-    if (!orStatus) {
-    } else {
-      queryObj.orStatus = parseInt(orStatus);
-    }
-    queryObj.orderby = orderby;
-    queryObj.dir = dir;
-    queryObj.offset = parseInt(offset);
-    queryObj.rpp = parseInt(rpp);
-    getFuncs(queryObj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: "No record(s) found",
-        });
-      }
-
-      if (results) {
-        results.map((result) => {
-          const icon = `/images/functionality/${result.icon}`;
-          result.icon = icon;
-
-          // const fun_icon = `images/functionality/${result.fun_icon}`;
-          // result.fun_icon = fun_icon;
-
-          // const subfun_icon = `images/subfunctionality/${result.subfun_icon}`;
-          // result.subfun_icon = subfun_icon;
-
-          //console.log(result);
-        });
-
-        return res.json({
-          success: true,
-          data: results,
-        });
-      }
-    });
-  },
   updateFunc: (req, res) => {
     const { body } = req;
     const { func_id } = req.body;
