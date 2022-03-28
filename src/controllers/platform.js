@@ -134,7 +134,7 @@ module.exports = {
       }
       if (results) {
         const { icon } = results;
-        results.icon = `images/platform/${icon}`;
+        results.icon = `/images/platform/${icon}`;
 
         return res.json({
           success: true,
@@ -168,7 +168,6 @@ module.exports = {
     });
   },
   deletePlatform: (req, res) => {
-    console.log("Platform id to delete =>",req.body.platform_id)
     const { platform_id } = req.body;
     deletePlatform(parseInt(platform_id), (err, results) => {
       if (err) {
