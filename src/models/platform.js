@@ -43,10 +43,10 @@ module.exports = {
 
 
 
-  getPlatformByPlatformId: (id, callback) => {
+  getPlatformByPlatformId: ({where_, platform_id}, callback) => {
     pool.query(
-      `SELECT uid, name, description, icon, added_by, added_at FROM pr_platforms WHERE uid = ?`,
-      [id],
+      `SELECT uid, name, description, icon, added_by, added_at FROM pr_platforms WHERE uid = ? AND ${where_}`,
+      [platform_id],
       (error, results, fields) => {
         if (error) {
           return callback(error);

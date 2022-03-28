@@ -4,6 +4,7 @@ const {
   getFrameworkByFrameworkId,
   updateFramework,
   deleteFramework,
+  reactivateFramework
 } = require("../controllers/framework");
 const router = require("express").Router();
 
@@ -20,7 +21,6 @@ const {
 ////Routes definations
 router.post(
   "/add-framework",
-  checkToken,
   validateImg,
   frameworkAddValidation,
   addFramework
@@ -29,17 +29,13 @@ router.get("/frameworks", getFrameworks);
 router.get("/framework", getFrameworkByFrameworkId);
 router.put(
   "/edit-framework",
-  checkToken,
-  frameworkIdValidation,
   validateImg,
   frameworkEditValidation,
   updateFramework
 );
 router.delete(
   "/del-framework",
-  checkToken,
-  frameworkIdValidation,
   deleteFramework
 );
-
+router.put("/reactivate-framework", reactivateFramework);
 module.exports = router; //make the module available for imports

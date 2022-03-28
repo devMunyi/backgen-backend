@@ -4,7 +4,10 @@ const {
   getFrameworks,
   updateFramework,
   deleteFramework,
+  getTotalRecords
 } = require("../models/framework");
+const {inputAvailable} = require("../../helpers/common");
+const {fetchLanguageById} = require("../../helpers/language");
 
 module.exports = {
   addFramework: (req, res) => {
@@ -25,44 +28,26 @@ module.exports = {
       });
     });
   },
-  getFrameworkByFrameworkId: (req, res) => {
-    const { framework_id } = req.query;
-
-    if(!framework_id){
-      return;
-    }
-
-    getFrameworkByFrameworkId(parseInt(framework_id), (err, results) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: "Record not found",
-        });
-      }
-      if (results) {
-        const { icon } = results;
-        results.icon = `images/framework/${icon}`;
-        return res.json({
-          success: true,
-          data: results,
-        });
-      }
-    });
-  },
+ 
   getFrameworks: (req, res) => {
+
     let queryObj = {};
 
-    let { language_id, status, orderby, dir, offset, rpp } = req.query;
-
-    if (!status) {
-      status = 1;
+    let {language_id, where_, search_, orderby, dir, offset, rpp } = req.query;
+    if (!where_) {
+      where_ = "f.status = 1";
     }
+    
+    let andsearch;
+    search_ = inputAvailable(search_);
+    if (search_ != undefined) {
+      andsearch = `AND f.name LIKE '%${search_}%'`;
+    } else {
+      andsearch = "";
+    }
+
     if (!orderby) {
-      orderby = "name";
+      orderby = "f.name";
     }
     if (!dir) {
       dir = "ASC";
@@ -75,13 +60,16 @@ module.exports = {
       rpp = 10;
     }
 
-    //add data to fObj object
+    //add data to queryObj object
     queryObj.language_id = parseInt(language_id);
-    queryObj.status = parseInt(status);
+    queryObj.where_ = where_;
+    queryObj.andsearch = andsearch;
     queryObj.orderby = orderby;
     queryObj.dir = dir;
     queryObj.offset = parseInt(offset);
     queryObj.rpp = parseInt(rpp);
+
+    
     getFrameworks(queryObj, (err, results) => {
       if (err) {
         console.log(err);
@@ -95,10 +83,72 @@ module.exports = {
       }
       if (results) {
         results.map((result) => {
-          const icon = `images/framework/${result.icon}`;
+          const icon = `/images/framework/${result.icon}`;
           result.icon = icon;
-          //console.log(result);
+
+         /*  fetchLanguageById(result.language_id, (err1, result1) =>{
+            if(err1){
+              console.log(err1)
+              return;
+            }
+  
+            if (result1) {
+              const language = result1;
+              result.language_id = language;
+              console.log("MANIPULATED RESULT => ", result);
+            }
+          }); */
+          //console.log("LANGUAGE NAME =>", framework_language)
         });
+        
+        //get all total records
+        getTotalRecords(queryObj, (err2, results2) => {
+          if(err2){
+            console.log(err2)
+            return;
+          }
+
+          if (results2) {
+            return res.json({
+              success: true,
+              all_totals:results2.all_totals,
+              data: results,
+            });
+          }
+        });
+
+      }
+    });
+  },
+
+  getFrameworkByFrameworkId: (req, res) => {
+    let { where_, framework_id } = req.query;
+    if (!where_) {
+      where_ = `f.status = 1`
+    } 
+
+    if (!framework_id) {
+      return res.json();
+    }
+
+    let obj = {
+      where_,
+      framework_id: parseInt(framework_id),
+    }
+    getFrameworkByFrameworkId(obj, (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "Record not found",
+        });
+      }
+      if (results) {
+        const { icon } = results;
+        results.icon = `/images/framework/${icon}`;
         return res.json({
           success: true,
           data: results,
@@ -106,6 +156,7 @@ module.exports = {
       }
     });
   },
+
   updateFramework: (req, res) => {
     const { body } = req;
 
@@ -145,6 +196,26 @@ module.exports = {
       return res.json({
         success: true,
         message: "Framework deleted successfully!",
+      });
+    });
+  },
+
+  reactivateFramework: (req, res) => {
+    const { framework_id } = req.body;
+    reactivateFramework(parseInt(framework_id), (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "Record Not Found",
+        });
+      }
+      return res.json({
+        success: true,
+        message: "Framework activated successfully",
       });
     });
   },

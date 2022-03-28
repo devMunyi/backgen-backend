@@ -45,4 +45,20 @@ module.exports = {
       }
     );
   },
+
+
+  fetchLanguageById: (langId, callback) => {
+    pool.query(
+      `SELECT name FROM pr_languages WHERE uid = ? LIMIT 0,1`,
+      [langId],
+      (error, languageName, fields) => {
+        if (error) {
+          return callback(error);
+        } else {
+          language = languageName[0].name;
+          return callback(null, language);
+        }
+      }
+    );
+  },
 };

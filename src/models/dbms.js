@@ -13,10 +13,12 @@ module.exports = {
       }
     );
   },
-  getDbmses: ({ status, offset, rpp }, callback) => {
+
+
+  getDbmses: ({ where_, andsearch, offset, rpp }, callback) => {
     pool.query(
-      `SELECT uid, name, description, icon, added_by, added_at FROM pr_dbms WHERE status = ? ORDER BY name ASC LIMIT ?,?`,
-      [status, offset, rpp],
+      `SELECT uid, name, description, icon, added_by, added_at, status FROM pr_dbms WHERE ${where_} ${andsearch} ORDER BY name ASC LIMIT ?,?`,
+      [offset, rpp],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -25,10 +27,12 @@ module.exports = {
       }
     );
   },
-  getDbmsByDbmsId: (id, callback) => {
+
+
+  getTotalRecords: ({where_, andsearch}, callback) => {
     pool.query(
-      `SELECT uid, name, description, icon, added_by, added_at FROM pr_dbms WHERE uid = ?`,
-      [id],
+      `SELECT COUNT(uid) AS all_totals FROM pr_dbms WHERE ${where_} ${andsearch}`,
+      [],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -37,6 +41,22 @@ module.exports = {
       }
     );
   },
+
+
+  getDbmsByDbmsId: ({ where_, dbms_id }, callback) => {
+    pool.query(
+      `SELECT uid, name, description, icon, added_by, added_at, status FROM pr_dbms WHERE uid = ? AND ${where_}`,
+      [dbms_id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results[0]);
+      }
+    );
+  },
+
+
   updateDbms: (id, { name, description, icon, added_by }, callback) => {
     pool.query(
       `UPDATE pr_dbms SET name=?, description=?, icon=?, added_by=? WHERE uid =?`,
@@ -50,10 +70,24 @@ module.exports = {
     );
   },
 
+
   deleteDbms: (id, callback) => {
     pool.query(
       `UPDATE pr_dbms SET status = ? WHERE uid =?`,
       [0, id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
+      }
+    );
+  },
+
+  reactivateDbms: (id, callback) => {
+    pool.query(
+      `UPDATE pr_dbms SET status = ? WHERE uid =?`,
+      [1, id],
       (error, results, fields) => {
         if (error) {
           return callback(error);

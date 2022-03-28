@@ -107,13 +107,21 @@ module.exports = {
   },
 
   getPlatformByPlatformId: (req, res) => {
-    const { platform_id } = req.query;
-
-    if(!platform_id){
-      return
+    let { where_, platform_id } = req.query;
+    if (!where_) {
+      where_ = `status = 1`;
     }
+
+    if (!platform_id) {
+      return res.json();
+    }
+
+    let obj = {
+      where_,
+      platform_id: parseInt(platform_id),
+    };
     
-    getPlatformByPlatformId(parseInt(platform_id), (err, results) => {
+    getPlatformByPlatformId(obj, (err, results) => {
       if (err) {
         console.log(err);
         return;

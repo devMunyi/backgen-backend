@@ -16,7 +16,7 @@ module.exports = {
   },
   getSubfuncs: ({ where_, andsearch, rpp, offset }, callback) => {
     pool.query(
-      `SELECT uid, func_id, name, added_by, added_at, updated_at, status FROM pr_subfunctions WHERE ${where_} ${andsearch} ORDER BY name LIMIT ?,?`,
+      `SELECT sf.uid AS 'uid', sf.name AS 'name', f.name AS 'function_name', sf.added_by AS 'added_by', sf.added_at AS 'added_at', sf.status AS 'status' FROM pr_subfunctions sf LEFT JOIN pr_functionalities f ON sf.func_id = f.uid WHERE ${where_} ${andsearch} ORDER BY sf.name LIMIT ?,?`,
       [offset, rpp],
       (error, results, fields) => {
         if (error) {
@@ -25,34 +25,11 @@ module.exports = {
         return callback(null, results);
       }
     );
-   /*  if (orStatus === 0) {
-      pool.query(
-        `SELECT uid, func_id, name, added_by, added_at, updated_at, status FROM pr_subfunctions WHERE status = ? OR status = ? ORDER BY name LIMIT ?,?`,
-        [status, orStatus, offset, rpp],
-        (error, results, fields) => {
-          if (error) {
-            return callback(error);
-          }
-          return callback(null, results);
-        }
-      );
-    } else {
-      pool.query(
-        `SELECT uid, func_id, name, added_by, added_at, updated_at FROM pr_subfunctions WHERE status = ? ORDER BY name LIMIT ?,?`,
-        [status, offset, rpp],
-        (error, results, fields) => {
-          if (error) {
-            return callback(error);
-          }
-          return callback(null, results);
-        }
-      );
-    } */
   },
 
   getTotalRecords: ({where_, andsearch}, callback) => {
     pool.query(
-      `SELECT COUNT(uid) AS all_totals FROM pr_subfunctions WHERE ${where_} ${andsearch}`,
+      `SELECT COUNT(sf.uid) AS all_totals FROM pr_subfunctions sf LEFT JOIN pr_functionalities f ON sf.func_id = f.uid WHERE ${where_} ${andsearch}`,
       [],
       (error, results, fields) => {
         if (error) {
@@ -65,7 +42,7 @@ module.exports = {
 
   getSubfuncBySubfuncId: ({ where_, subfun_id}, callback) => {
     pool.query(
-      `SELECT uid, func_id, name, added_by, added_at, updated_at FROM pr_subfunctions WHERE uid = ? AND ${where_} LIMIT 0,1`,
+      `SELECT sf.uid AS 'uid', sf.name AS 'name', f.name AS 'function_name', sf.added_by AS 'added_by', sf.added_at AS 'added_at', sf.status AS 'status' FROM pr_subfunctions sf LEFT JOIN pr_functionalities f ON sf.func_id = f.uid WHERE sf.uid = ? AND ${where_} LIMIT 0,1`,
       [subfun_id],
       (error, results, fields) => {
         if (error) {

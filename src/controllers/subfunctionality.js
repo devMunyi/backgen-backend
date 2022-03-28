@@ -35,19 +35,19 @@ module.exports = {
     let { where_, search_, orderby, dir, offset, rpp } = req.query;
 
     if (!where_) {
-      where_ = "status = 1";
+      where_ = "sf.status = 1";
     }
 
     let andsearch;
     search_ = inputAvailable(search_);
     if (search_ != undefined) {
-      andsearch = `AND name LIKE '%${search_}%'`;
+      andsearch = `AND sf.name LIKE '%${search_}%'`;
     } else {
       andsearch = "";
     }
 
     if (!orderby) {
-      orderby = "name";
+      orderby = "sf.name";
     }
     if (!dir) {
       dir = "ASC";
@@ -104,7 +104,7 @@ module.exports = {
   getSubfuncBySubfuncId: (req, res) => {
     let { where_, subfun_id } = req.query;
     if (!where_) {
-      where_ = `status = 1`
+      where_ = `sf.status = 1`
     } 
 
     if (!subfun_id) {

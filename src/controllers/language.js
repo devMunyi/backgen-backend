@@ -30,7 +30,6 @@ module.exports = {
   },
 
   getLanguages: (req, res) => {
-    console.log("INCOMING QUERY IS => ", req.query);
     let queryObj = {};
 
     let { where_, search_, orderby, dir, offset, rpp } = req.query;
@@ -92,7 +91,6 @@ module.exports = {
           }
 
           if (results2) {
-            console.log("TOTALS RECORDS =>", results2.all_totals);
             return res.json({
               success: true,
               all_totals: results2.all_totals,
