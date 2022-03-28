@@ -12,17 +12,18 @@ module.exports = {
     language_id = parseInt(language_id);
     name = name.trim();
 
-    if (!language_id || language_id < 1) {
-      return res.json({
-        success: false,
-        message: "Please select language",
-      });
-    } else if (!name || name.length < 1) {
+     if (!name || name.length < 1) {
       return res.json({
         success: false,
         message: "Framework name is required",
       });
-    } else if (!added_by) {
+    } else if (!language_id || language_id < 1) {
+      return res.json({
+        success: false,
+        message: "Please select language",
+      });
+    }
+    else if (!added_by) {
       return res.json({
         success: false,
         message: "Author is required",
