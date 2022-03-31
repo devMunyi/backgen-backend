@@ -7,7 +7,12 @@ module.exports = {
     title = title.trim();
     func_id = parseInt(func_id);
 
-    if (!func_id || func_id < 1) {
+    if (!title || title.length < 1) {
+      return res.json({
+        success: false,
+        message: "Implementation title is required",
+      });
+    } else if (!func_id || func_id < 1) {
       return res.json({
         success: false,
         message: "Please select function",
@@ -16,11 +21,6 @@ module.exports = {
       return res.json({
         success: false,
         message: "Please select sub-function",
-      });
-    } else if (!title || title.length < 1) {
-      return res.json({
-        success: false,
-        message: "Implementation title is required",
       });
     } else if (!added_by) {
       return res.json({
