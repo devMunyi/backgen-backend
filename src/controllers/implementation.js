@@ -4,7 +4,12 @@ const {
   getImplementations,
   updateImplementation,
   deleteImplementation,
+  reactivateImplementation,
+  getTotalRecords,
+  getTotalRecords2,
+  getImplementationsByFunAndSubfun,
 } = require("../models/implementation");
+const { inputAvailable } = require("../../helpers/common");
 
 module.exports = {
   addImplementation: (req, res) => {
@@ -24,14 +29,134 @@ module.exports = {
       });
     });
   },
-  getImplementationByImplementationId: (req, res) => {
-    const {implementation_id } = req.query;
 
-    if(!implementation_id){
-      return;
+  getImplementations: (req, res) => {
+    let queryObj = {};
+
+    let { where_, search_, orderby, dir, offset, rpp } = req.query;
+
+    if (!where_) {
+      where_ = "status = 1";
     }
 
-    getImplementationByImplementationId(parseInt(implementation_id), (err, results) => {
+    let andsearch;
+    search_ = inputAvailable(search_);
+    if (search_ != undefined) {
+      andsearch = `AND title LIKE '%${search_}%'`;
+    } else {
+      andsearch = "";
+    }
+
+    if (!orderby) {
+      orderby = "title";
+    }
+    if (!dir) {
+      dir = "ASC";
+    }
+    if (!offset) {
+      offset = 0;
+    }
+
+    if (!rpp) {
+      rpp = 100;
+    }
+
+    //add data to queryObj object
+    queryObj.where_ = where_;
+    queryObj.andsearch = andsearch;
+    queryObj.orderby = orderby;
+    queryObj.dir = dir;
+    queryObj.offset = parseInt(offset);
+    queryObj.rpp = parseInt(rpp);
+
+    getImplementations(queryObj, (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "No record(s) found",
+        });
+      } else {
+        //get all total records
+        getTotalRecords(queryObj, (err2, results2) => {
+          if (err2) {
+            console.log(err2);
+            return;
+          }
+
+          if (results2) {
+            return res.json({
+              success: true,
+              all_totals: results2.all_totals,
+              data: results,
+            });
+          }
+        });
+      }
+    });
+  },
+
+  getImplementationsByFunAndSubfun: (req, res) => {
+    const { sel_func, sel_subfunc } = req.query;
+
+    if (!sel_func || !sel_subfunc) {
+      return res.json();
+    }
+
+    let obj = {
+      sel_func: parseInt(sel_func),
+      sel_subfunc: parseInt(sel_subfunc),
+    };
+
+    getImplementationsByFunAndSubfun(obj, (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "Record Not Found",
+        });
+      } else {
+        getTotalRecords2(obj, (err2, results2) => {
+          if (err2) {
+            console.log(err2);
+            return;
+          }
+
+          if (results2) {
+            return res.json({
+              success: true,
+              all_totals: results2.all_totals,
+              data: results,
+            });
+          }
+        });
+      }
+    });
+  },
+
+  getImplementationByImplementationId: (req, res) => {
+    let { where_, implementation_id } = req.query;
+    if (!where_) {
+      where_ = `status = 1`;
+    }
+
+    if (!implementation_id) {
+      return res.json();
+    }
+
+    let obj = {
+      where_,
+      implementation_id: parseInt(implementation_id),
+    };
+
+    getImplementationByImplementationId(obj, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -48,65 +173,7 @@ module.exports = {
       });
     });
   },
-  getImplementations: (req, res) => {
-    let queryObj = {};
 
-    let { sel_func, sel_subfunc, status, orderby, dir, offset, rpp } =
-      req.query;
-
-    if (!sel_func) {
-      sel_func = 0;
-    }
-
-    if (!sel_func) {
-      sel_subfunc = 0;
-    }
-
-    if (!status) {
-      status = 1;
-    }
-
-    if (!orderby) {
-      orderby = "title";
-    }
-
-    if (!dir) {
-      dir = "ASC";
-    }
-
-    if (!offset) {
-      offset = 0;
-    }
-
-    if (!rpp) {
-      rpp = 10;
-    }
-
-    //add data to fObj object
-    queryObj.sel_func = parseInt(sel_func);
-    queryObj.sel_subfunc = parseInt(sel_subfunc);
-    queryObj.status = parseInt(status);
-    queryObj.orderby = orderby;
-    queryObj.dir = dir;
-    queryObj.offset = parseInt(offset);
-    queryObj.rpp = parseInt(rpp);
-    getImplementations(queryObj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: "No record(s) found",
-        });
-      }
-      return res.json({
-        success: true,
-        data: results,
-      });
-    });
-  },
   updateImplementation: (req, res) => {
     const { body } = req;
     const { implementation_id } = req.body;
@@ -145,6 +212,26 @@ module.exports = {
       return res.json({
         success: true,
         message: "Implementation deleted successfully!",
+      });
+    });
+  },
+
+  reactivateImplementation: (req, res) => {
+    const { implementation_id } = req.body;
+    reactivateImplementation(parseInt(implementation_id), (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "Record Not Found",
+        });
+      }
+      return res.json({
+        success: true,
+        message: "Implementation activated successfully",
       });
     });
   },

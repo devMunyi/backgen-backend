@@ -15,7 +15,19 @@ module.exports = {
     callback
   ) => {
     pool.query(
-      `INSERT INTO pr_code_snippets(row_code, file_extension, language_id, framework_id, implementation_id, dbms_id, instructions, added_by) VALUES(?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO
+        pr_code_snippets(
+          row_code,
+          file_extension,
+          language_id,
+          framework_id,
+          implementation_id,
+          dbms_id,
+          instructions,
+          added_by
+        )
+      VALUES
+      (?, ?, ?, ?, ?, ?, ?, ?) `,
       [
         row_code,
         file_extension,
@@ -35,11 +47,32 @@ module.exports = {
     );
   },
   getCodeSnippets: (
-    { language_id, framework_id, implementation_id, dbms_id},
+    { language_id, framework_id, implementation_id, dbms_id },
     callback
   ) => {
     pool.query(
-      `SELECT uid, row_code, file_extension, language_id, framework_id, implementation_id, dbms_id, instructions, added_by, added_date, updated_date, upvoters, downvoters FROM pr_code_snippets WHERE language_id = ? AND framework_id = ? AND implementation_id = ? AND dbms_id = ? AND status = ?`,
+      `SELECT
+        uid,
+        row_code,
+        file_extension,
+        language_id,
+        framework_id,
+        implementation_id,
+        dbms_id,
+        instructions,
+        added_by,
+        added_date,
+        updated_date,
+        upvoters,
+        downvoters
+      FROM
+        pr_code_snippets
+      WHERE
+        language_id = ?
+        AND framework_id = ?
+        AND implementation_id = ?
+        AND dbms_id = ?
+        AND status = ?`,
       [language_id, framework_id, implementation_id, dbms_id, 1],
       (error, results, fields) => {
         if (error) {
@@ -51,7 +84,24 @@ module.exports = {
   },
   getCodeSnippetByCodeSnippetId: (id, callback) => {
     pool.query(
-      `SELECT  uid, row_code, file_extension, language_id, framework_id, implementation_id, dbms_id, instructions, added_by, added_date, updated_date, upvoters, downvoters FROM pr_code_snippets WHERE uid = ?`,
+      `SELECT
+        uid,
+        row_code,
+        file_extension,
+        language_id,
+        framework_id,
+        implementation_id,
+        dbms_id,
+        instructions,
+        added_by,
+        added_date,
+        updated_date,
+        upvoters,
+        downvoters
+      FROM
+        pr_code_snippets
+      WHERE
+        uid = ?`,
       [id],
       (error, results, fields) => {
         if (error) {
@@ -76,7 +126,19 @@ module.exports = {
     callback
   ) => {
     pool.query(
-      `UPDATE pr_code_snippets SET row_code=?, file_extension=?, language_id=?, framework_id=?, implementation_id=?, dbms_id=?, instructions=?, added_by=? WHERE uid =?`,
+      `UPDATE
+        pr_code_snippets
+      SET
+        row_code = ?,
+        file_extension = ?,
+        language_id = ?,
+        framework_id = ?,
+        implementation_id = ?,
+        dbms_id = ?,
+        instructions = ?,
+        added_by = ?
+      WHERE
+        uid = ?`,
       [
         row_code,
         file_extension,
@@ -99,7 +161,12 @@ module.exports = {
 
   deleteCodeSnippet: (id, callback) => {
     pool.query(
-      `UPDATE pr_code_snippets SET status = ? WHERE uid =?`,
+      `UPDATE
+        pr_code_snippets
+      SET
+        status = ?
+      WHERE
+        uid = ?`,
       [0, id],
       (error, results, fields) => {
         if (error) {

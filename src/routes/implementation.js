@@ -4,6 +4,8 @@ const {
   getImplementationByImplementationId,
   updateImplementation,
   deleteImplementation,
+  reactivateImplementation,
+  getImplementationsByFunAndSubfun,
 } = require("../controllers/implementation");
 const router = require("express").Router();
 
@@ -19,28 +21,19 @@ const {
 ////----Begin routes defination
 router.post(
   "/add-implementation",
-  checkToken,
   implementationAddValidation,
   addImplementation
 );
 router.get("/implementations", getImplementations);
-router.get(
-  "/implementation",
-  getImplementationByImplementationId
-);
+router.get("/implementation", getImplementationByImplementationId);
 router.put(
   "/edit-implementation",
-  checkToken,
-  implementationIdValidation,
   implementationEditValidation,
   updateImplementation
 );
-router.delete(
-  "/del-implementation",
-  checkToken,
-  implementationIdValidation,
-  deleteImplementation
-);
+router.delete("/del-implementation", deleteImplementation);
+router.put("/reactivate-implementation", reactivateImplementation);
+router.get("/fun-subfun-implementations", getImplementationsByFunAndSubfun);
 ////------End routes definations
 
 module.exports = router; ////make the module available for imports

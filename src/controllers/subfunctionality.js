@@ -5,10 +5,9 @@ const {
   updateSubfunc,
   deleteSubfunc,
   reactivateSubfunc,
-  getTotalRecords
+  getTotalRecords,
 } = require("../models/subfunctionality");
-const {inputAvailable} = require("../../helpers/common");
-
+const { inputAvailable } = require("../../helpers/common");
 
 module.exports = {
   addSubfunc: (req, res) => {
@@ -29,7 +28,7 @@ module.exports = {
       });
     });
   },
-  
+
   getSubfuncs: (req, res) => {
     let queryObj = {};
     let { where_, search_, orderby, dir, offset, rpp } = req.query;
@@ -83,29 +82,28 @@ module.exports = {
       }
 
       if (results) {
-        getTotalRecords(queryObj, (err2, result2) =>{
-          if(err2){
-            console.log(err2)
+        getTotalRecords(queryObj, (err2, result2) => {
+          if (err2) {
+            console.log(err2);
             return;
           }
-          if(result2){
+          if (result2) {
             return res.json({
               success: true,
               all_totals: result2.all_totals,
               data: results,
             });
           }
-        })
+        });
       }
     });
   },
 
-
   getSubfuncBySubfuncId: (req, res) => {
     let { where_, subfun_id } = req.query;
     if (!where_) {
-      where_ = `sf.status = 1`
-    } 
+      where_ = `sf.status = 1`;
+    }
 
     if (!subfun_id) {
       return res.json();
@@ -114,7 +112,7 @@ module.exports = {
     let obj = {
       where_,
       subfun_id: parseInt(subfun_id),
-    }
+    };
 
     getSubfuncBySubfuncId(obj, (err, results) => {
       if (err) {
@@ -161,6 +159,7 @@ module.exports = {
       });
     });
   },
+
   deleteSubfunc: (req, res) => {
     const { subfun_id } = req.body;
     deleteSubfunc(parseInt(subfun_id), (err, results) => {

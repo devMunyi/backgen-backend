@@ -4,10 +4,9 @@ const {
   getFrameworks,
   updateFramework,
   deleteFramework,
-  getTotalRecords
+  getTotalRecords,
 } = require("../models/framework");
-const {inputAvailable} = require("../../helpers/common");
-const {fetchLanguageById} = require("../../helpers/language");
+const { inputAvailable } = require("../../helpers/common");
 
 module.exports = {
   addFramework: (req, res) => {
@@ -28,16 +27,15 @@ module.exports = {
       });
     });
   },
- 
-  getFrameworks: (req, res) => {
 
+  getFrameworks: (req, res) => {
     let queryObj = {};
 
-    let {language_id, where_, search_, orderby, dir, offset, rpp } = req.query;
+    let { language_id, where_, search_, orderby, dir, offset, rpp } = req.query;
     if (!where_) {
       where_ = "f.status = 1";
     }
-    
+
     let andsearch;
     search_ = inputAvailable(search_);
     if (search_ != undefined) {
@@ -57,7 +55,7 @@ module.exports = {
     }
 
     if (!rpp) {
-      rpp = 10;
+      rpp = 30;
     }
 
     //add data to queryObj object
@@ -69,7 +67,6 @@ module.exports = {
     queryObj.offset = parseInt(offset);
     queryObj.rpp = parseInt(rpp);
 
-    
     getFrameworks(queryObj, (err, results) => {
       if (err) {
         console.log(err);
@@ -85,38 +82,23 @@ module.exports = {
         results.map((result) => {
           const icon = `/images/framework/${result.icon}`;
           result.icon = icon;
-
-         /*  fetchLanguageById(result.language_id, (err1, result1) =>{
-            if(err1){
-              console.log(err1)
-              return;
-            }
-  
-            if (result1) {
-              const language = result1;
-              result.language_id = language;
-              console.log("MANIPULATED RESULT => ", result);
-            }
-          }); */
-          //console.log("LANGUAGE NAME =>", framework_language)
         });
-        
+
         //get all total records
         getTotalRecords(queryObj, (err2, results2) => {
-          if(err2){
-            console.log(err2)
+          if (err2) {
+            console.log(err2);
             return;
           }
 
           if (results2) {
             return res.json({
               success: true,
-              all_totals:results2.all_totals,
+              all_totals: results2.all_totals,
               data: results,
             });
           }
         });
-
       }
     });
   },
@@ -124,8 +106,8 @@ module.exports = {
   getFrameworkByFrameworkId: (req, res) => {
     let { where_, framework_id } = req.query;
     if (!where_) {
-      where_ = `f.status = 1`
-    } 
+      where_ = `f.status = 1`;
+    }
 
     if (!framework_id) {
       return res.json();
@@ -134,7 +116,8 @@ module.exports = {
     let obj = {
       where_,
       framework_id: parseInt(framework_id),
-    }
+    };
+
     getFrameworkByFrameworkId(obj, (err, results) => {
       if (err) {
         console.log(err);

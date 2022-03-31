@@ -8,7 +8,7 @@ const {
   getTotalRecords,
 } = require("../models/functionality");
 
-const {inputAvailable} = require("../../helpers/common");
+const { inputAvailable } = require("../../helpers/common");
 
 module.exports = {
   addFunc: (req, res) => {
@@ -37,7 +37,7 @@ module.exports = {
     if (!where_) {
       where_ = "status = 1";
     }
-    
+
     let andsearch;
     search_ = inputAvailable(search_);
     if (search_ != undefined) {
@@ -87,15 +87,15 @@ module.exports = {
 
         //get all total records
         getTotalRecords(queryObj, (err2, results2) => {
-          if(err2){
-            console.log(err2)
+          if (err2) {
+            console.log(err2);
             return;
           }
 
           if (results2) {
             return res.json({
               success: true,
-              all_totals:results2.all_totals,
+              all_totals: results2.all_totals,
               data: results,
             });
           }
@@ -104,12 +104,11 @@ module.exports = {
     });
   },
 
-
   getFuncByFuncId: (req, res) => {
     let { where_, func_id } = req.query;
     if (!where_) {
-      where_ = `status = 1`
-    } 
+      where_ = `status = 1`;
+    }
 
     if (!func_id) {
       return res.json();
@@ -118,7 +117,7 @@ module.exports = {
     let obj = {
       where_,
       func_id: parseInt(func_id),
-    }
+    };
 
     getFuncByFuncId(obj, (err, results) => {
       if (err) {
