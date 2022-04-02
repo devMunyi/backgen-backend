@@ -23,6 +23,7 @@ module.exports = {
         sf.uid AS 'uid',
         sf.name AS 'name',
         f.name AS 'function_name',
+        sf.func_id as 'function_id',
         sf.added_by AS 'added_by',
         sf.added_at AS 'added_at',
         sf.status AS 'status'
@@ -72,6 +73,7 @@ module.exports = {
         sf.uid AS 'uid',
         sf.name AS 'name',
         f.name AS 'function_name',
+        sf.func_id as 'function_id',
         sf.added_by AS 'added_by',
         sf.added_at AS 'added_at',
         sf.status AS 'status'
