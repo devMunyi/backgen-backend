@@ -30,6 +30,7 @@ module.exports = {
           f.uid AS 'uid',
           f.name AS 'name',
           l.name AS 'language',
+          f.language_id AS 'language_id',
           f.description AS 'description',
           f.icon AS 'icon',
           f.status AS 'status'
@@ -57,6 +58,7 @@ module.exports = {
           f.uid AS 'uid',
           f.name AS 'name',
           l.name AS 'language',
+          f.language_id AS 'language_id',
           f.description AS 'description',
           f.icon AS 'icon',
           f.status AS 'status'
@@ -105,6 +107,7 @@ module.exports = {
         f.uid AS 'uid',
         f.name AS 'name',
         l.name AS 'language',
+        f.language_id AS 'language_id',
         f.description AS 'description',
         f.icon AS 'icon',
         f.added_by AS 'added_by',
