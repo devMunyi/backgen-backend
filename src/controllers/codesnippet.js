@@ -4,7 +4,9 @@ const {
   getCodeSnippets,
   updateCodeSnippet,
   deleteCodeSnippet,
+  getTotalRecords,
 } = require("../models/codesnippet");
+const { inputAvailable } = require("../../helpers/common");
 
 module.exports = {
   addCodeSnippet: (req, res) => {
@@ -24,99 +26,7 @@ module.exports = {
       });
     });
   },
-  getCodeSnippetByCodeSnippetId: (req, res) => {
-    const { codesnippet_id } = req.query;
 
-    if(!codesnippet_id){
-      return;
-    }
-
-    getCodeSnippetByCodeSnippetId(parseInt(codesnippet_id), (err, results) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: "Record not found",
-        });
-      }
-      return res.json({
-        success: true,
-        data: results,
-      });
-    });
-  },
-  getCodeSnippets: (req, res) => {
-    //initialize an empty object
-    let queryObj = {};
-
-    //destructuring req query for the variables
-    let {
-      language_id,
-      framework_id,
-      implementation_id,
-      dbms_id,
-      status,
-      orderby,
-      dir,
-    } = req.query;
-
-    if (!language_id) {
-      language_id = 0;
-    }
-
-    if (!framework_id) {
-      framework_id = 0;
-    }
-
-    if (!implementation_id) {
-      implementation_id = 0;
-    }
-
-    if (!dbms_id) {
-      dbms_id = 0;
-    }
-
-    if (!status) {
-      status = 1;
-    }
-
-    if (!orderby) {
-      orderby = "uid";
-    }
-
-    if (!dir) {
-      dir = "ASC";
-    }
-
-    //add data to queryObj object
-    queryObj.language_id = parseInt(language_id);
-    queryObj.framework_id = parseInt(framework_id);
-    queryObj.implementation_id = parseInt(implementation_id);
-    queryObj.dbms_id = parseInt(dbms_id);
-    queryObj.status = parseInt(status);
-    queryObj.orderby = orderby;
-    queryObj.dir = dir;
-    getCodeSnippets(queryObj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return;
-      }
-      if (!results) {
-        console.log(queryObj);
-        return res.json({
-          success: false,
-          message: "No record(s) found",
-        });
-      }
-      return res.json({
-        success: true,
-        data: results,
-      });
-    });
-  },
   updateCodeSnippet: (req, res) => {
     const { body } = req;
     const { codesnippet_id } = req.body;
@@ -139,6 +49,141 @@ module.exports = {
       });
     });
   },
+
+  getCodeSnippets: (req, res) => {
+    //initialize an empty object
+    let queryObj = {};
+
+    //destructuring req query for the variables
+    let {
+      where_,
+      search_,
+      func_id,
+      subfunc_id,
+      language_id,
+      framework_id,
+      implementation_id,
+      orderby,
+      dir,
+      rpp,
+      offset,
+    } = req.query;
+
+    let andsearch;
+    search_ = inputAvailable(search_);
+    if (search_ != undefined) {
+      andsearch = `AND c.title LIKE '%${search_}%'`;
+    } else {
+      andsearch = "";
+    }
+
+    if (!func_id) {
+      func_id = 0;
+    }
+
+    if (!subfunc_id) {
+      subfunc_id = 0;
+    }
+
+    if (!language_id) {
+      language_id = 0;
+    }
+
+    if (!framework_id) {
+      framework_id = 0;
+    }
+
+    if (!where_) {
+      where_ = "c.status = 1";
+    }
+
+    if (!orderby) {
+      orderby = "c.title";
+    }
+
+    if (!dir) {
+      dir = "ASC";
+    }
+
+    if (!offset) {
+      offset = 0;
+    }
+
+    console.log("rpp =>", rpp);
+    if (!rpp) {
+      rpp = 1;
+    }
+    //add data to queryObj object
+
+    queryObj.func_id = parseInt(func_id);
+    queryObj.subfunc_id = parseInt(subfunc_id);
+    queryObj.language_id = parseInt(language_id);
+    queryObj.framework_id = parseInt(framework_id);
+    queryObj.implementation_id = parseInt(implementation_id);
+    queryObj.where_ = where_;
+    queryObj.orderby = orderby;
+    queryObj.dir = dir;
+    queryObj.offset = parseInt(offset);
+    queryObj.rpp = parseInt(rpp);
+    queryObj.andsearch = andsearch;
+
+    getCodeSnippets(queryObj, (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        console.log(queryObj);
+        return res.json({
+          success: false,
+          all_totals: 0,
+          message: "No record(s) found",
+        });
+      } else {
+        //get all total records
+        getTotalRecords(queryObj, (err2, results2) => {
+          if (err2) {
+            console.log(err2);
+            return;
+          }
+
+          if (results2) {
+            return res.json({
+              success: true,
+              all_totals: results2.all_totals,
+              data: results,
+            });
+          }
+        });
+      }
+    });
+  },
+
+  getCodeSnippetByCodeSnippetId: (req, res) => {
+    const { codesnippet_id } = req.query;
+
+    if (!codesnippet_id) {
+      return;
+    }
+
+    getCodeSnippetByCodeSnippetId(parseInt(codesnippet_id), (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "Record not found",
+        });
+      }
+      return res.json({
+        success: true,
+        data: results,
+      });
+    });
+  },
+
   deleteCodeSnippet: (req, res) => {
     const { codesnippet_id } = req.body;
     deleteCodeSnippet(parseInt(parseInt(codesnippet_id)), (err, results) => {

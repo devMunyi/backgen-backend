@@ -5,7 +5,7 @@ const {
   updateDbms,
   deleteDbms,
   reactivateDbms,
-  getTotalRecords
+  getTotalRecords,
 } = require("../models/dbms");
 const { inputAvailable } = require("../../helpers/common");
 
@@ -29,7 +29,6 @@ module.exports = {
     });
   },
 
-
   getDbmses: (req, res) => {
     let queryObj = {};
 
@@ -37,7 +36,7 @@ module.exports = {
     if (!where_) {
       where_ = "status = 1";
     }
-    
+
     let andsearch;
     search_ = inputAvailable(search_);
     if (search_ != undefined) {
@@ -84,7 +83,6 @@ module.exports = {
         results.map((result) => {
           const icon = `/images/dbms/${result.icon}`;
           result.icon = icon;
-          console.log(result);
         });
 
         //get all total records
@@ -105,7 +103,6 @@ module.exports = {
       }
     });
   },
-
 
   getDbmsByDbmsId: (req, res) => {
     let { where_, dbms_id } = req.query;
