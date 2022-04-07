@@ -1,13 +1,13 @@
 const pool = require("../../config/db.config");
 
 module.exports = {
-  addUser: ({ username, email, country, password }, callback) => {
+  addUser: ({ username, fullname, email, country, password }, callback) => {
     pool.query(
       `INSERT INTO
-        pr_users(username, email, country, password)
+        pr_users(username, fullname, email, country, password)
       VALUES
-      (?, ?, ?, ?)`,
-      [username, email, country, password],
+      (?, ?, ?, ?, ?)`,
+      [username, fullname, email, country, password],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -16,11 +16,39 @@ module.exports = {
       }
     );
   },
+
+  updateUser: (
+    id,
+    { username, fullname, email, country, password },
+    callback
+  ) => {
+    pool.query(
+      `UPDATE
+        pr_users
+      SET
+        username = ?,
+        fullname =?,
+        email = ?,
+        password = ?,
+        country = ?
+      WHERE
+        uid = ?`,
+      [username, fullname, email, password, country, id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
+      }
+    );
+  },
+
   getUsers: ({ status, offset, rpp }, callback) => {
     pool.query(
       `SELECT
         uid,
         username,
+        fullname,
         email,
         country,
         join_date
@@ -41,11 +69,13 @@ module.exports = {
       }
     );
   },
+
   getUserByUserId: (id, callback) => {
     pool.query(
       `SELECT
         uid,
         username,
+        fullname,
         email,
         country,
         join_date
@@ -60,26 +90,6 @@ module.exports = {
           return callback(error);
         }
         return callback(null, results[0]);
-      }
-    );
-  },
-  updateUser: (id, { username, email, country, password }, callback) => {
-    pool.query(
-      `UPDATE
-        pr_users
-      SET
-        username = ?,
-        email = ?,
-        password = ?,
-        country = ?
-      WHERE
-        uid = ?`,
-      [username, email, password, country, id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
       }
     );
   },

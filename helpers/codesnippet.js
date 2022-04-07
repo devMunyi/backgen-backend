@@ -15,4 +15,32 @@ module.exports = {
       }
     );
   },
+
+  checkCodeAddDuplicate: (row_code, callback) => {
+    pool.query(
+      `SELECT uid FROM pr_code_snippets WHERE row_code = ?`,
+      [row_code],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        } else {
+          return callback(null, results[0]);
+        }
+      }
+    );
+  },
+
+  checkCodeEditDuplicate: (row_code, id, callback) => {
+    pool.query(
+      `SELECT uid FROM pr_code_snippets WHERE row_code = ? AND uid != ?`,
+      [row_code, id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        } else {
+          return callback(null, results[0]);
+        }
+      }
+    );
+  },
 };

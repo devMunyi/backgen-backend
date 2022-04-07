@@ -30,6 +30,11 @@ module.exports = {
   updateCodeSnippet: (req, res) => {
     const { body } = req;
     const { codesnippet_id } = req.body;
+
+    if (!codesnippet_id) {
+      return res.json();
+    }
+
     updateCodeSnippet(codesnippet_id, body, (err, results) => {
       if (err) {
         console.log(err);
@@ -109,7 +114,6 @@ module.exports = {
       offset = 0;
     }
 
-    console.log("rpp =>", rpp);
     if (!rpp) {
       rpp = 1;
     }
@@ -133,7 +137,7 @@ module.exports = {
         return;
       }
       if (!results) {
-        console.log(queryObj);
+        //console.log(queryObj);
         return res.json({
           success: false,
           all_totals: 0,
@@ -143,7 +147,7 @@ module.exports = {
         //get all total records
         getTotalRecords(queryObj, (err2, results2) => {
           if (err2) {
-            console.log(err2);
+            //onsole.log(err2);
             return;
           }
 
@@ -186,6 +190,11 @@ module.exports = {
 
   deleteCodeSnippet: (req, res) => {
     const { codesnippet_id } = req.body;
+
+    if (!codesnippet_id) {
+      return res.json();
+    }
+
     deleteCodeSnippet(parseInt(parseInt(codesnippet_id)), (err, results) => {
       if (err) {
         console.log(err);

@@ -3,12 +3,14 @@ const pool = require("../../config/db.config");
 module.exports = {
   addCodeSnippet: (
     {
-      row_code,
-      file_extension,
+      func_id,
+      subfunc_id,
       language_id,
       framework_id,
       implementation_id,
-      dbms_id,
+      title,
+      row_code,
+      file_extension,
       instructions,
       added_by,
     },
@@ -17,24 +19,28 @@ module.exports = {
     pool.query(
       `INSERT INTO
         pr_code_snippets(
+          title,
           row_code,
           file_extension,
+          func_id,
+          subfunc_id,
           language_id,
           framework_id,
           implementation_id,
-          dbms_id,
           instructions,
           added_by
         )
       VALUES
-      (?, ?, ?, ?, ?, ?, ?, ?) `,
+      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
+        title,
         row_code,
         file_extension,
+        func_id,
+        subfunc_id,
         language_id,
         framework_id,
         implementation_id,
-        dbms_id,
         instructions,
         added_by,
       ],
@@ -50,12 +56,14 @@ module.exports = {
   updateCodeSnippet: (
     id,
     {
-      row_code,
-      file_extension,
+      func_id,
+      subfunc_id,
       language_id,
       framework_id,
       implementation_id,
-      dbms_id,
+      title,
+      row_code,
+      file_extension,
       instructions,
       added_by,
     },
@@ -65,23 +73,27 @@ module.exports = {
       `UPDATE
         pr_code_snippets
       SET
+        title = ?,
         row_code = ?,
         file_extension = ?,
+        func_id = ?,
+        subfunc_id = ?,
         language_id = ?,
         framework_id = ?,
         implementation_id = ?,
-        dbms_id = ?,
         instructions = ?,
         added_by = ?
       WHERE
         uid = ?`,
       [
+        title,
         row_code,
         file_extension,
+        func_id,
+        subfunc_id,
         language_id,
         framework_id,
         implementation_id,
-        dbms_id,
         instructions,
         added_by,
         id,
@@ -156,7 +168,7 @@ module.exports = {
         if (error) {
           return callback(error);
         }
-        console.log(results);
+        //console.log(results);
         return callback(null, results[0]);
       }
     );
@@ -207,7 +219,6 @@ module.exports = {
         language_id,
         framework_id,
         implementation_id,
-        dbms_id,
         instructions,
         added_by,
         added_date,

@@ -164,6 +164,7 @@ module.exports = {
       if (!results) {
         return res.json({
           success: false,
+          all_totals: 0,
           message: "Record not found",
         });
       }

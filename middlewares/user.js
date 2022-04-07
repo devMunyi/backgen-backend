@@ -42,9 +42,10 @@ module.exports = {
   },
 
   userRegisterValidation: (req, res, next) => {
-    let { username, email, country, password, cpassword } = req.body;
+    let { username, fullname, email, country, password, cpassword } = req.body;
 
     username = username.trim();
+    fullname = fullname.trim();
     email = email.trim();
     country = parseInt(country);
     password = password.trim();
@@ -55,10 +56,15 @@ module.exports = {
         success: false,
         message: "Username is required and should be min 3 characters",
       });
-    } else if (!email || email.length < 1) {
+    } else if (!fullname || fullname.length < 5) {
       return res.json({
         success: false,
-        message: "Email is required",
+        message: "Fullname is required",
+      });
+    } else if (!email || email.length < 5) {
+      return res.json({
+        success: false,
+        message: "Valid Email is required",
       });
     } else if (!country || country < 1) {
       return res.json({
@@ -116,9 +122,11 @@ module.exports = {
   },
 
   userEditValidation: (req, res, next) => {
-    let { username, email, country, password, cpassword, user_id } = req.body;
+    let { username, fullname, email, country, password, cpassword, user_id } =
+      req.body;
 
     username = username.trim();
+    fullname = fullname.trim();
     email = email.trim();
     country = parseInt(country);
     password = password.trim();
@@ -131,10 +139,15 @@ module.exports = {
         success: false,
         message: "Username is required and should be min 3 characters",
       });
+    } else if (!fullname || fullname.length < 5) {
+      return res.json({
+        success: false,
+        message: "Fullname is required",
+      });
     } else if (!email || email.length < 5) {
       return res.json({
         success: false,
-        message: "Email is required",
+        message: "Valid Email is required",
       });
     } else if (!country || country < 1) {
       return res.json({

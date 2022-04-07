@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Mar 31, 2022 at 10:33 AM
+-- Generation Time: Apr 07, 2022 at 05:05 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.2
 
@@ -29,13 +29,14 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `pr_code_snippets` (
   `uid` int(11) NOT NULL,
+  `title` varchar(250) DEFAULT NULL,
   `row_code` text NOT NULL,
   `file_extension` varchar(10) NOT NULL,
+  `func_id` int(5) NOT NULL DEFAULT 0,
+  `subfunc_id` int(5) NOT NULL DEFAULT 0,
   `language_id` int(5) NOT NULL COMMENT 'From pr_languages',
   `framework_id` int(5) NOT NULL COMMENT 'from pr_frameworks',
   `implementation_id` int(5) NOT NULL COMMENT 'from pr_implementations',
-  `dbms_id` int(5) NOT NULL COMMENT 'from pr_dbms',
-  `platform_id` int(5) NOT NULL DEFAULT 0,
   `instructions` text NOT NULL,
   `added_by` int(5) NOT NULL DEFAULT 0,
   `added_date` datetime NOT NULL DEFAULT current_timestamp(),
@@ -49,9 +50,12 @@ CREATE TABLE `pr_code_snippets` (
 -- Dumping data for table `pr_code_snippets`
 --
 
-INSERT INTO `pr_code_snippets` (`uid`, `row_code`, `file_extension`, `language_id`, `framework_id`, `implementation_id`, `dbms_id`, `platform_id`, `instructions`, `added_by`, `added_date`, `updated_date`, `upvoters`, `downvoters`, `status`) VALUES
-(1, 'function envList() {\r\n            $.ajax({\r\n            url: \"/api/v1/environments\",\r\n            type: \"GET\",\r\n            dataType: \"json\",\r\n            success: (data) => {\r\n              $(\"#env\").html(\"\");\r\n              for (var i = 0; i < data.response.length; i++) {\r\n                $(\"#env\").append(\r\n                  \'<li class=\"list-group-item\">\' + data.response[name] + \"</li>\";\r\n                );\r\n              }\r\n            },\r\n          });\r\n        }', '.js', 1, 0, 1, 1, 1, 'testing', 1, '0000-00-00 00:00:00', '2022-03-30 16:54:10', 0, 0, 1),
-(2, 'just testing code snippet input which should be atleat 20 characters long', '.php', 2, 0, 1, 1, 0, 'testing', 1, '2022-03-25 17:16:03', '2022-03-25 17:22:17', 0, 0, 0);
+INSERT INTO `pr_code_snippets` (`uid`, `title`, `row_code`, `file_extension`, `func_id`, `subfunc_id`, `language_id`, `framework_id`, `implementation_id`, `instructions`, `added_by`, `added_date`, `updated_date`, `upvoters`, `downvoters`, `status`) VALUES
+(1, 'How to iterate through an object using for in loop', 'const person = {fname:\"John\", lname:\"Doe\", age:25};\r\n\r\nlet text = \"\";\r\nfor (let x in person) {\r\n  text += person[x];\r\n}', '.js', 4, 1, 1, 51, 1, 'You will need nodejs set up environment to run the above this code.', 1, '2022-04-05 14:23:29', '2022-04-05 15:42:01', 0, 0, 1),
+(2, 'How to iterate over an array using <i>for in</i> loop', 'const numbers = [45, 4, 9, 16, 25];\r\n\r\nlet txt = \"\";\r\nfor (let x in numbers) {\r\n  txt += numbers[x];\r\n}', '.js', 4, 1, 1, 51, 1, 'You need to have nodejs environment set up to run this code ', 1, '2022-03-25 17:16:03', '2022-04-05 15:42:01', 0, 0, 1),
+(3, 'How to iterate over an array of elements using forEach', 'const numbers = [45, 4, 9, 16, 25];\r\n\r\nlet txt = \"\";\r\nnumbers.forEach(myFunction);\r\n\r\nfunction myFunction(value) {\r\n  txt += value;\r\n}', '.js', 4, 1, 1, 51, 1, 'You will need nodejs environment set up to run this code', 2, '2022-04-05 14:40:39', '2022-04-06 11:30:28', 0, 0, 1),
+(4, 'How to use while loop in Php', '<?php\n$x = 0;\n\nwhile($x <= 100) {\n  echo \"The number is: $x <br>\";\n  $x+=10;\n}\n?>', '.php', 4, 2, 2, 0, 1, '', 1, '2022-04-07 15:09:39', '2022-04-07 15:31:01', 0, 0, 1),
+(5, 'How to use for loop in PHP', '<?php\nfor ($x = 0; $x <= 100; $x+=10) {\n  echo \"The number is: $x <br>\";\n}\n?>', '.php', 4, 1, 2, 0, 1, '', 1, '2022-04-07 17:01:17', '2022-04-07 17:03:07', 0, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -65,7 +69,7 @@ CREATE TABLE `pr_comments` (
   `text` text NOT NULL,
   `replies_to` int(11) NOT NULL DEFAULT 0,
   `added_by` int(11) DEFAULT NULL,
-  `added_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `added_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_date` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `upvoters` int(11) NOT NULL DEFAULT 0,
   `downvoters` int(11) NOT NULL DEFAULT 0,
@@ -77,9 +81,9 @@ CREATE TABLE `pr_comments` (
 --
 
 INSERT INTO `pr_comments` (`uid`, `code_snippet_id`, `text`, `replies_to`, `added_by`, `added_date`, `updated_date`, `upvoters`, `downvoters`, `status`) VALUES
-(1, 1, 'The is not working in my case. I using mac book', 0, 1, '2022-01-29 13:44:42', '2022-03-25 17:33:50', 0, 0, 1),
-(2, 1, 'comment text sample', 1, 3, '2022-03-25 17:31:59', '2022-03-25 17:33:06', 0, 0, 1),
-(3, 1, 'just a sample commnet testing', 0, 1, '2022-03-25 17:34:17', '2022-03-25 17:42:13', 0, 0, 0);
+(1, 1, 'The is not working in my case. I using mac book', 0, 1, '2022-01-29 10:44:42', '2022-03-25 17:33:50', 0, 0, 1),
+(2, 1, 'comment text sample', 1, 3, '2022-03-25 14:31:59', '2022-03-25 17:33:06', 0, 0, 1),
+(3, 1, 'just a sample commnet testing', 0, 1, '2022-03-25 14:34:17', '2022-03-25 17:42:13', 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -472,11 +476,11 @@ INSERT INTO `pr_environment_details` (`uid`, `name`, `description`, `icon`, `sta
 
 CREATE TABLE `pr_frameworks` (
   `uid` int(11) NOT NULL,
-  `language_id` int(11) NOT NULL COMMENT 'From pr_languages table',
+  `language_id` int(11) NOT NULL DEFAULT 0 COMMENT 'From pr_languages table',
   `name` varchar(100) NOT NULL,
   `description` text NOT NULL,
-  `icon` varchar(200) NOT NULL,
-  `added_by` int(5) NOT NULL,
+  `icon` varchar(200) DEFAULT NULL,
+  `added_by` int(5) NOT NULL DEFAULT 1,
   `added_at` datetime NOT NULL DEFAULT current_timestamp(),
   `updated_at` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `status` int(1) NOT NULL DEFAULT 1
@@ -565,12 +569,12 @@ INSERT INTO `pr_frameworks` (`uid`, `language_id`, `name`, `description`, `icon`
 (77, 5, 'Mono ', 'Mono is a free and open-source .NET Framework-compatible software framework. Originally by Ximian, it was later acquired by Novell, and is now being led by Xamarin, a subsidiary of Microsoft and the .NET Foundation. Mono can be run on many software systems. ', 'mono.png', 1, '2021-12-26 20:27:07', '2022-03-28 13:19:13', 1),
 (78, 5, 'Accord.NET', 'Accord.NET is a framework for scientific computing in .NET. The source code of the project is available under the terms of the Gnu Lesser Public License, version 2.1. The framework comprises a set of libraries that are available in source code as well as via executable installers and NuGet packages.', '', 1, '2021-12-26 20:27:07', '2022-03-28 15:16:01', 1),
 (79, 5, 'Orleans', 'Orleans is a cross-platform software framework for building scalable and robust distributed interactive applications based on the .NET Framework.', 'orl.png', 1, '2021-12-26 20:27:07', '2022-03-28 13:19:13', 1),
-(80, 6, '.NET Framework', 'The .NET Framework is a software framework developed by Microsoft that runs primarily on Microsoft Windows. It includes a large class library called Framework Class Library and provides language interoperability across several programming languages. ', '', 1, '2021-12-26 20:27:07', '2022-03-28 13:19:13', 1),
+(80, 6, '.NET Framework', 'The .NET Framework is a software framework developed by Microsoft that runs primarily on Microsoft Windows. It includes a large class library called Framework Class Library and provides language interoperability across several programming languages. ', '', 1, '2021-12-26 20:27:07', '2022-04-06 20:46:22', 0),
 (81, 6, 'Mono', 'Mono is a free and open-source .NET Framework-compatible software framework. Originally by Ximian, it was later acquired by Novell, and is now being led by Xamarin, a subsidiary of Microsoft and the .NET Foundation. Mono can be run on many software systems.', 'mono.png', 1, '2021-12-26 20:27:07', '2022-03-28 13:19:13', 1),
 (82, 6, 'MuPDF ', 'MuPDF is a free and open-source software framework written in C that implements a PDF, XPS, and EPUB parsing and rendering engine. It is used primarily to render pages into bitmaps, but also provides support for other operations such as searching and listing the table of contents and hyperlinks', 'mupdf.png', 1, '2021-12-26 20:27:07', '2022-03-28 13:19:13', 1),
-(83, 7, '.NET Framework', 'The .NET Framework is a software framework developed by Microsoft that runs primarily on Microsoft Windows. It includes a large class library called Framework Class Library and provides language interoperability across several programming languages.', 'ntf.png', 1, '2021-12-26 20:27:07', '2022-03-28 13:19:13', 1),
+(83, 7, '.NET Framework', 'The .NET Framework is a software framework developed by Microsoft that runs primarily on Microsoft Windows. It includes a large class library called Framework Class Library and provides language interoperability across several programming languages.', 'ntf.png', 1, '2021-12-26 20:27:07', '2022-04-06 20:46:30', 0),
 (84, 7, 'ActiveX', 'ActiveX is a deprecated software framework created by Microsoft that adapts its earlier Component Object Model and Object Linking and Embedding technologies for content downloaded from a network, particularly from the World Wide Web. Microsoft introduced ActiveX in 1996.', 'actx.png', 1, '2021-12-26 20:27:07', '2022-03-28 13:19:13', 1),
-(85, 7, '.NET Core', '.NET is a free and open-source, managed computer software framework for Windows, Linux, and macOS operating systems. It is a cross-platform successor to .NET Framework. The project is primarily developed by Microsoft employees by way of the .NET Foundation, and released under the MIT License.', 'dnc.png', 1, '2021-12-26 20:27:07', '2022-03-28 13:19:13', 1),
+(85, 7, '.NET Core', '.NET is a free and open-source, managed computer software framework for Windows, Linux, and macOS operating systems. It is a cross-platform successor to .NET Framework. The project is primarily developed by Microsoft employees by way of the .NET Foundation, and released under the MIT License.', 'dnc.png', 1, '2021-12-26 20:27:07', '2022-04-06 20:46:16', 0),
 (86, 7, 'Chromium Embedded Framework', 'The Chromium Embedded Framework is an open-source software framework for embedding a Chromium web browser within another application. This enables developers to add web browsing functionality to their application, as well as the ability to use HTML, CSS, and JavaScript to create the application\'s user interface.', 'cef.png', 1, '2021-12-26 20:27:07', '2022-03-28 13:19:13', 1),
 (87, 7, 'KFLib', 'KFRlib is an open-source cross-platform C++ DSP framework written in C++. It is covered by a dual GPL/commercial license.', 'kflb.png', 1, '2021-12-26 20:27:07', '2022-03-28 13:19:13', 1),
 (88, 7, 'ATL Server', 'ATL Server is a technology originally developed by Microsoft for developing web-based applications. It uses a tag replacement engine written in C++ to render web pages.', 'atsr.png', 1, '2021-12-26 20:27:07', '2022-03-28 13:19:13', 1),
@@ -641,8 +645,8 @@ INSERT INTO `pr_functionalities` (`uid`, `name`, `icon`, `platform_id`, `added_b
 
 CREATE TABLE `pr_implementations` (
   `uid` int(11) NOT NULL,
-  `func_id` int(11) NOT NULL COMMENT 'From pr_functionalities table',
-  `subfunc_id` int(11) NOT NULL COMMENT 'From pr_subfunctions table',
+  `func_id` int(11) NOT NULL DEFAULT 0 COMMENT 'From pr_functionalities table',
+  `subfunc_id` int(11) NOT NULL DEFAULT 0 COMMENT 'From pr_subfunctions table',
   `title` varchar(100) NOT NULL,
   `description` text NOT NULL,
   `added_by` int(5) NOT NULL DEFAULT 0 COMMENT 'From pr_users table',
@@ -658,10 +662,9 @@ CREATE TABLE `pr_implementations` (
 --
 
 INSERT INTO `pr_implementations` (`uid`, `func_id`, `subfunc_id`, `title`, `description`, `added_by`, `added_date`, `updated_date`, `upvoters`, `downvoters`, `status`) VALUES
-(1, 1, 0, 'title input test', 'description input test', 1, '2022-03-25 16:41:17', '2022-03-30 18:34:21', 25, 3, 1),
-(2, 1, 1, 'testing', 'testing', 1, '2022-03-25 16:48:19', '2022-03-30 18:29:47', 0, 0, 1),
-(3, 7, 0, 'Read a File', '', 1, '2022-03-30 18:40:30', '2022-03-30 18:40:30', 0, 0, 1),
-(4, 14, 0, 'sdfgh', '', 1, '2022-03-30 18:45:25', '2022-03-30 18:49:29', 0, 0, 0);
+(1, 0, 0, 'Default', '', 0, '2022-04-05 09:29:15', '2022-04-05 18:57:01', 0, 0, 1),
+(2, 0, 0, 'Functional', '', 0, '2022-04-05 09:30:06', '2022-04-06 19:26:14', 0, 0, 1),
+(3, 0, 0, 'Object Oriented', '', 0, '2022-04-05 09:30:06', '2022-04-05 18:57:27', 0, 0, 1);
 
 -- --------------------------------------------------------
 
@@ -739,9 +742,9 @@ CREATE TABLE `pr_platforms` (
 --
 
 INSERT INTO `pr_platforms` (`uid`, `name`, `description`, `icon`, `added_by`, `added_at`, `updated_at`, `status`) VALUES
-(1, 'WEB', 'A web application (or web app) is application software that runs on a web server, unlike computer-based software programs that are run locally on the operating system (OS) of the device. Web applications are accessed by the user through a web browser with an active network connection', 'world-wide-web-1648564457170.png', 1, '2021-12-27 11:38:50', '2022-03-29 14:34:17', 1),
-(2, 'DESKTOP', 'Desktop apps operate as stand-alone software, which means they can be used offline and do not require access to the internet or web browser to work.', 'computer-1648564429146.png', 1, '2021-12-27 11:38:50', '2022-03-29 14:33:49', 1),
-(3, 'MOBILE', 'A mobile application, also referred to as a mobile app or simply an app, is a computer program or software application designed to run on a mobile device such as a phone, tablet, or watch', 'smartphone-1648564445548.png', 1, '2021-12-27 11:38:50', '2022-03-29 14:34:05', 1);
+(1, 'WEB', 'A web application (or web app) is application software that runs on a web server, unlike computer-based software programs that are run locally on the operating system (OS) of the device. Web applications are accessed by the user through a web browser with an active network connection', 'world-wide-web-1648718316860.png', 1, '2021-12-27 11:38:50', '2022-03-31 09:18:36', 1),
+(2, 'DESKTOP', 'Desktop apps operate as stand-alone software, which means they can be used offline and do not require access to the internet or web browser to work.', 'computer-1648717971123.png', 1, '2021-12-27 11:38:50', '2022-03-31 09:12:51', 1),
+(3, 'MOBILE', 'A mobile application, also referred to as a mobile app or simply an app, is a computer program or software application designed to run on a mobile device such as a phone, tablet, or watch', 'smartphone-1648718298532.png', 1, '2021-12-27 11:38:50', '2022-03-31 09:18:18', 1);
 
 -- --------------------------------------------------------
 
@@ -765,8 +768,8 @@ CREATE TABLE `pr_subfunctions` (
 --
 
 INSERT INTO `pr_subfunctions` (`uid`, `func_id`, `name`, `platform_id`, `added_by`, `added_at`, `updated_at`, `status`) VALUES
-(0, 0, 'No Subfunction', 0, 1, '2022-03-30 18:42:51', '2022-03-30 18:43:05', 1),
-(1, 10, 'Send  Request', 0, 1, '2021-12-26 10:15:07', '2022-03-28 20:57:34', 1);
+(1, 4, 'for', 0, 1, '2022-04-05 14:17:23', '2022-04-05 14:30:33', 1),
+(2, 4, 'while', 0, 1, '2022-04-07 15:15:53', '2022-04-07 15:15:53', 1);
 
 -- --------------------------------------------------------
 
@@ -777,6 +780,7 @@ INSERT INTO `pr_subfunctions` (`uid`, `func_id`, `name`, `platform_id`, `added_b
 CREATE TABLE `pr_users` (
   `uid` int(11) NOT NULL,
   `username` varchar(100) NOT NULL,
+  `fullname` varchar(200) NOT NULL,
   `email` varchar(100) NOT NULL,
   `country` int(5) NOT NULL,
   `password` varchar(200) NOT NULL,
@@ -789,13 +793,9 @@ CREATE TABLE `pr_users` (
 -- Dumping data for table `pr_users`
 --
 
-INSERT INTO `pr_users` (`uid`, `username`, `email`, `country`, `password`, `join_date`, `updated_date`, `status`) VALUES
-(1, 'test1', 'test1@gmail.com', 100, '$2b$12$3hLQTk4Ww4iOzC5FIXUO3u9iQ5I2l6Sn0BV99/kv3MFNifLxf5BmC', '2022-01-23 10:00:11', '2022-01-27 11:11:47', 1),
-(2, 'test2 ', 'test2@gmail.com', 150, '$2b$10$d13ELGIoS0S10O0dt4QLXu23VepRRYFYFf9OYR8tj22JsHG1mREiW', '2022-01-25 19:04:57', '2022-01-27 10:26:46', 1),
-(3, 'test3 ', 'test3@gmail.com', 150, '$2b$10$7A5a61SY8pN8e4sl701PvOS7VCwqN5i2McE30064sD0ci.TxTe0sG', '2022-01-25 19:05:11', '2022-01-27 10:27:04', 1),
-(4, 'test4_', 'test4_@gmail.com', 116, '$2b$10$fIQCTRy4vFPVDlAVsbV6.ek5vyY8yzJEwo5hoNoRDXn1AGKIRpfKO', '2022-01-27 10:34:45', '2022-03-25 18:17:46', 1),
-(5, 'test5', 'test5@gmail.com', 140, '$2b$10$h9h8oKVNbftQrKza0Jcm2eFXw6aMZAQOe7uEaGoMMOmPV.HT8GdIa', '2022-01-27 10:40:30', '2022-01-27 10:43:29', 0),
-(6, 'test6', 'test6@gmail.com', 140, '$2b$10$TAmx5OyTiF.d0OJYL82zLOylZ7YOmpQEyj1tGPnU1VmvVHVgn8yse', '2022-03-25 18:16:10', '2022-03-25 18:18:30', 0);
+INSERT INTO `pr_users` (`uid`, `username`, `fullname`, `email`, `country`, `password`, `join_date`, `updated_date`, `status`) VALUES
+(1, 'Sam', 'Samuel Munyi', 'samunyi90@gmail.com', 116, '$2b$10$BN9.J8u7PBBSfbFy5yfGTedH34asT3igAK/rqVyR9CYgEj6dg65XO', '2022-04-07 11:24:43', '2022-04-07 11:24:43', 1),
+(2, 'John', 'John Doe', 'johndoe@gmail.com', 14, '$2b$10$UIfddr96OXDq516o3Ey2deuVvluGJ1k9RxjCeM1So9H0nxVq.VTFS', '2022-04-07 11:27:20', '2022-04-07 11:27:20', 1);
 
 --
 -- Indexes for dumped tables
@@ -888,7 +888,7 @@ ALTER TABLE `pr_users`
 -- AUTO_INCREMENT for table `pr_code_snippets`
 --
 ALTER TABLE `pr_code_snippets`
-  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `pr_comments`
@@ -921,12 +921,6 @@ ALTER TABLE `pr_environment_details`
   MODIFY `uid` int(5) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
--- AUTO_INCREMENT for table `pr_frameworks`
---
-ALTER TABLE `pr_frameworks`
-  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=99;
-
---
 -- AUTO_INCREMENT for table `pr_functionalities`
 --
 ALTER TABLE `pr_functionalities`
@@ -936,7 +930,7 @@ ALTER TABLE `pr_functionalities`
 -- AUTO_INCREMENT for table `pr_implementations`
 --
 ALTER TABLE `pr_implementations`
-  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `pr_languages`
@@ -960,7 +954,7 @@ ALTER TABLE `pr_subfunctions`
 -- AUTO_INCREMENT for table `pr_users`
 --
 ALTER TABLE `pr_users`
-  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `uid` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Constraints for dumped tables

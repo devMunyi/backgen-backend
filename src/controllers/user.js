@@ -35,7 +35,7 @@ module.exports = {
         return res.json({
           success: true,
           data: results,
-          message: "User added Successfully",
+          message: "User added Successfully. You can now login.",
         });
       }
     });
@@ -43,7 +43,7 @@ module.exports = {
   getUserByUserId: (req, res) => {
     const { user_id } = req.query;
 
-    if(!user_id){
+    if (!user_id) {
       return;
     }
 
@@ -135,6 +135,7 @@ module.exports = {
       });
     });
   },
+
   deleteUser: (req, res) => {
     const { user_id } = req.body;
     deleteUser(parseInt(user_id), (err, results) => {
@@ -155,6 +156,7 @@ module.exports = {
       });
     });
   },
+
   loginUser: (req, res) => {
     const { body } = req;
     getUserByUsernameOrByEmail(body.emailOrUsername, (err, results) => {
@@ -165,7 +167,7 @@ module.exports = {
       if (!results) {
         return res.json({
           success: false,
-          data: "Invalid email, username or password",
+          message: "Invalid email, username or password",
         });
       }
       const result = compareSync(body.password, results.password);
@@ -178,14 +180,15 @@ module.exports = {
         });
         return res.json({
           success: true,
-          message: "Logged In Successfully",
+          message:
+            "Logged in successfully. We are redirecting you back to home page",
           token: jsontoken,
           user: rest,
         });
       } else {
         return res.json({
           success: false,
-          data: "Invalid email, username or password",
+          message: "Invalid email, username or password",
         });
       }
     });
