@@ -118,6 +118,7 @@ module.exports = {
       `SELECT
         uid,
         username,
+        fullname,
         country,
         email,
         password,
