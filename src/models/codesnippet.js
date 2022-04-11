@@ -127,16 +127,9 @@ module.exports = {
         c.title,
         c.row_code,
         c.file_extension,
-        c.func_id,
-        c.subfunc_id,
-        c.language_id,
-        c.framework_id,
-        c.implementation_id,
-        i.title AS 'implementation_title',
         c.instructions,
         c.added_by,
         u.fullname,
-        c.added_date,
         c.upvoters,
         c.downvoters,
         c.status
@@ -170,6 +163,42 @@ module.exports = {
         }
         //console.log(results);
         return callback(null, results[0]);
+      }
+    );
+  },
+
+  getImplNames: (
+    {
+      where_,
+      func_id,
+      subfunc_id,
+      language_id,
+      framework_id,
+      implementation_id,
+      andsearch,
+    },
+    callback
+  ) => {
+    pool.query(
+      `SELECT
+        i.title AS 'implementation'
+       FROM
+        pr_code_snippets c
+      LEFT JOIN  pr_implementations i
+      ON c.implementation_id = i.uid
+      WHERE
+        c.func_id = ?
+        AND c.subfunc_id = ?
+        AND c.language_id = ?
+        AND c.framework_id = ?
+        AND c.implementation_id = ?
+        AND ${where_} ${andsearch}`,
+      [func_id, subfunc_id, language_id, framework_id, implementation_id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
       }
     );
   },
@@ -252,7 +281,7 @@ module.exports = {
         if (error) {
           return callback(error);
         }
-        return callback(null, results);
+        return callback(null, results[0]);
       }
     );
   },

@@ -5,6 +5,7 @@ const {
   updateCodeSnippet,
   deleteCodeSnippet,
   getTotalRecords,
+  getImplNames,
 } = require("../models/codesnippet");
 const { inputAvailable } = require("../../helpers/common");
 
@@ -115,6 +116,7 @@ module.exports = {
     }
 
     if (!rpp) {
+      console.log("NO RPP SPECIFIED");
       rpp = 1;
     }
     //add data to queryObj object
@@ -146,16 +148,35 @@ module.exports = {
       } else {
         //get all total records
         getTotalRecords(queryObj, (err2, results2) => {
+          //console.log("TOTAL RECORDS =>", results2);
           if (err2) {
             //onsole.log(err2);
             return;
           }
 
           if (results2) {
-            return res.json({
-              success: true,
-              all_totals: results2.all_totals,
-              data: results,
+            getImplNames(queryObj, (err3, results3) => {
+              //console.log("FUNCTION 3 call result =>", results3);
+              if (err3) {
+                console.log(err3);
+              }
+
+              if (!results3) {
+                return res.json({
+                  success: false,
+                  message: "No record found",
+                  all_totals: 0,
+                });
+              }
+
+              if (results3) {
+                return res.json({
+                  success: true,
+                  all_totals: results2.all_totals,
+                  impl_names: results3,
+                  data: results,
+                });
+              }
             });
           }
         });
