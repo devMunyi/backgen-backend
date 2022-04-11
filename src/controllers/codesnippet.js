@@ -68,7 +68,6 @@ module.exports = {
       subfunc_id,
       language_id,
       framework_id,
-      implementation_id,
       orderby,
       dir,
       rpp,
@@ -125,7 +124,6 @@ module.exports = {
     queryObj.subfunc_id = parseInt(subfunc_id);
     queryObj.language_id = parseInt(language_id);
     queryObj.framework_id = parseInt(framework_id);
-    queryObj.implementation_id = parseInt(implementation_id);
     queryObj.where_ = where_;
     queryObj.orderby = orderby;
     queryObj.dir = dir;

@@ -113,7 +113,6 @@ module.exports = {
       subfunc_id,
       language_id,
       framework_id,
-      implementation_id,
       where_,
       offset,
       rpp,
@@ -142,21 +141,12 @@ module.exports = {
         AND c.subfunc_id = ?
         AND c.language_id = ?
         AND c.framework_id = ?
-        AND c.implementation_id = ?
         AND ${where_} ${andsearch}
       ORDER BY
         c.uid DESC
       LIMIT
         ?, ?`,
-      [
-        func_id,
-        subfunc_id,
-        language_id,
-        framework_id,
-        implementation_id,
-        offset,
-        rpp,
-      ],
+      [func_id, subfunc_id, language_id, framework_id, offset, rpp],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -168,15 +158,7 @@ module.exports = {
   },
 
   getImplNames: (
-    {
-      where_,
-      func_id,
-      subfunc_id,
-      language_id,
-      framework_id,
-      implementation_id,
-      andsearch,
-    },
+    { where_, func_id, subfunc_id, language_id, framework_id, andsearch },
     callback
   ) => {
     pool.query(
@@ -191,9 +173,8 @@ module.exports = {
         AND c.subfunc_id = ?
         AND c.language_id = ?
         AND c.framework_id = ?
-        AND c.implementation_id = ?
         AND ${where_} ${andsearch}`,
-      [func_id, subfunc_id, language_id, framework_id, implementation_id],
+      [func_id, subfunc_id, language_id, framework_id],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -204,15 +185,7 @@ module.exports = {
   },
 
   getTotalRecords: (
-    {
-      where_,
-      func_id,
-      subfunc_id,
-      language_id,
-      framework_id,
-      implementation_id,
-      andsearch,
-    },
+    { where_, func_id, subfunc_id, language_id, framework_id, andsearch },
     callback
   ) => {
     pool.query(
@@ -227,9 +200,8 @@ module.exports = {
         AND c.subfunc_id = ?
         AND c.language_id = ?
         AND c.framework_id = ?
-        AND c.implementation_id = ?
         AND ${where_} ${andsearch}`,
-      [func_id, subfunc_id, language_id, framework_id, implementation_id],
+      [func_id, subfunc_id, language_id, framework_id],
       (error, results, fields) => {
         if (error) {
           return callback(error);
