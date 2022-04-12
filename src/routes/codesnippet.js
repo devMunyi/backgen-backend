@@ -4,6 +4,7 @@ const {
   getCodeSnippets,
   updateCodeSnippet,
   deleteCodeSnippet,
+  searchCodesnippet,
 } = require("../controllers/codesnippet");
 const router = require("express").Router();
 
@@ -21,6 +22,7 @@ router.get("/codesnippets", getCodeSnippets);
 router.get("/codesnippet", getCodeSnippetByCodeSnippetId);
 router.put("/edit-codesnippet", codesnippetEditValidation, updateCodeSnippet);
 router.delete("/del-codesnippet", deleteCodeSnippet);
+router.get("/search-codesnippet", searchCodesnippet);
 ////------End routes definations
 
 module.exports = router; //make the module available for imports

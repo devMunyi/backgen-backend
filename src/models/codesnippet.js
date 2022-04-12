@@ -125,6 +125,10 @@ module.exports = {
         c.uid,
         c.title,
         c.row_code,
+        c.func_id,
+        c.subfunc_id,
+        c.language_id,
+        c.framework_id,
         c.file_extension,
         c.instructions,
         c.added_by,
@@ -153,6 +157,40 @@ module.exports = {
         }
         //console.log(results);
         return callback(null, results[0]);
+      }
+    );
+  },
+
+  searchCodesnippet: ({ where_, offset, rpp, andsearch }, callback) => {
+    pool.query(
+      `SELECT
+        count(c.uid),
+        c.uid,
+        c.title,
+        c.func_id,
+        c.subfunc_id,
+        c.language_id,
+        c.added_by,
+        c.added_date,
+        u.fullname,
+        i.title AS impl_title
+      FROM
+        pr_code_snippets c
+        LEFT JOIN pr_implementations i ON c.implementation_id = i.uid
+        LEFT JOIN pr_users u ON c.added_by = u.uid
+      WHERE
+       ${where_} ${andsearch}
+      ORDER BY
+        c.uid DESC
+      LIMIT
+        ?, ?`,
+      [offset, rpp],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        //console.log(results);
+        return callback(null, results);
       }
     );
   },
@@ -214,22 +252,27 @@ module.exports = {
   getCodeSnippetByCodeSnippetId: (id, callback) => {
     pool.query(
       `SELECT
-        uid,
-        row_code,
-        file_extension,
-        language_id,
-        framework_id,
-        implementation_id,
-        instructions,
-        added_by,
-        added_date,
-        updated_date,
-        upvoters,
-        downvoters
+        c.uid,
+        c.title,
+        c.row_code,
+        c.file_extension,
+        c.func_id,
+        c.subfunc_id,
+        c.language_id,
+        c.framework_id,
+        c.instructions,
+        c.added_by,
+        u.fullname,
+        i.title AS 'impl_title',
+        c.added_date,
+        c.upvoters,
+        c.downvoters
       FROM
-        pr_code_snippets
+        pr_code_snippets c
+        LEFT JOIN pr_implementations i ON c.implementation_id = i.uid
+        LEFT JOIN pr_users u ON c.added_by = u.uid
       WHERE
-        uid = ?`,
+        c.uid = ?`,
       [id],
       (error, results, fields) => {
         if (error) {

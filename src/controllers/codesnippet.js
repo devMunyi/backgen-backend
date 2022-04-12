@@ -6,6 +6,7 @@ const {
   deleteCodeSnippet,
   getTotalRecords,
   getImplNames,
+  searchCodesnippet,
 } = require("../models/codesnippet");
 const { inputAvailable } = require("../../helpers/common");
 
@@ -56,6 +57,62 @@ module.exports = {
     });
   },
 
+  searchCodesnippet: (req, res) => {
+    //initialize an empty object
+    let queryObj = {};
+
+    //destructuring req query for the variables
+    let { where_, search_, rpp, offset } = req.query;
+
+    let andsearch;
+    search_ = inputAvailable(search_);
+    if (search_ != undefined) {
+      andsearch = `AND c.title LIKE '%${search_}%'`;
+    } else {
+      andsearch = "";
+    }
+
+    if (!where_) {
+      where_ = "c.status = 1";
+    }
+
+    if (!offset) {
+      offset = 0;
+    }
+
+    if (!rpp) {
+      console.log("no rpp value");
+      rpp = 25;
+    }
+
+    //add data to queryObj object
+    queryObj.where_ = where_;
+    queryObj.offset = parseInt(offset);
+    queryObj.rpp = parseInt(rpp);
+    queryObj.andsearch = andsearch;
+
+    searchCodesnippet(queryObj, (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        //console.log(queryObj);
+        return res.json({
+          success: false,
+          all_totals: 0,
+          message: "No record(s) found",
+        });
+      } else {
+        //get all total records
+        return res.json({
+          success: true,
+          data: results,
+        });
+      }
+    });
+  },
+
   getCodeSnippets: (req, res) => {
     //initialize an empty object
     let queryObj = {};
@@ -83,19 +140,19 @@ module.exports = {
     }
 
     if (!func_id) {
-      func_id = 0;
+      func_id = "";
     }
 
     if (!subfunc_id) {
-      subfunc_id = 0;
+      subfunc_id = "";
     }
 
     if (!language_id) {
-      language_id = 0;
+      language_id = "";
     }
 
     if (!framework_id) {
-      framework_id = 0;
+      framework_id = "";
     }
 
     if (!where_) {
@@ -115,15 +172,14 @@ module.exports = {
     }
 
     if (!rpp) {
-      console.log("NO RPP SPECIFIED");
       rpp = 1;
     }
-    //add data to queryObj object
 
-    queryObj.func_id = parseInt(func_id);
-    queryObj.subfunc_id = parseInt(subfunc_id);
-    queryObj.language_id = parseInt(language_id);
-    queryObj.framework_id = parseInt(framework_id);
+    //add data to queryObj object
+    queryObj.func_id = func_id;
+    queryObj.subfunc_id = subfunc_id;
+    queryObj.language_id = language_id;
+    queryObj.framework_id = framework_id;
     queryObj.where_ = where_;
     queryObj.orderby = orderby;
     queryObj.dir = dir;
@@ -168,6 +224,7 @@ module.exports = {
               }
 
               if (results3) {
+                results.impl_version = offset;
                 return res.json({
                   success: true,
                   all_totals: results2.all_totals,
