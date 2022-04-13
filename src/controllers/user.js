@@ -197,7 +197,7 @@ module.exports = {
   currentUser: (req, res) => {
     const { result } = req.user;
     const { country, ...rest } = result;
-    console.log(rest);
+    //console.log(rest);
 
     getCurrentUser(rest, (err, results) => {
       if (err) {

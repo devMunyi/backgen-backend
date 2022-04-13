@@ -142,7 +142,7 @@ module.exports = {
     );
   },
 
-  getCurrentUser: ({ uid, username, email, status }, callback) => {
+  getCurrentUser: ({ uid }, callback) => {
     pool.query(
       `SELECT
         uid,
@@ -152,10 +152,8 @@ module.exports = {
         pr_users
       WHERE
         uid = ?
-        AND username = ?
-        AND email = ?
         AND status = ?`,
-      [parseInt(uid), username, email, parseInt(status)],
+      [parseInt(uid), 1],
       (error, results, fields) => {
         if (error) {
           return callback(error);
