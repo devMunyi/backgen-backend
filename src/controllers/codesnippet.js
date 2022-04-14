@@ -7,6 +7,7 @@ const {
   getTotalRecords,
   getImplNames,
   searchCodesnippet,
+  searchTotals,
 } = require("../models/codesnippet");
 const { inputAvailable } = require("../../helpers/common");
 
@@ -69,7 +70,7 @@ module.exports = {
     if (search_ != undefined) {
       andsearch = `AND c.title LIKE '%${search_}%'`;
     } else {
-      andsearch = "";
+      andsearch = `AND c.title LIKE ''`;
     }
 
     if (!where_) {
@@ -82,7 +83,7 @@ module.exports = {
 
     if (!rpp) {
       console.log("no rpp value");
-      rpp = 25;
+      rpp = 7;
     }
 
     //add data to queryObj object
@@ -104,10 +105,24 @@ module.exports = {
           message: "No record(s) found",
         });
       } else {
-        //get all total records
-        return res.json({
-          success: true,
-          data: results,
+        searchTotals(queryObj, (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          if (!result) {
+            return res.json({
+              success: false,
+              search_totals: 0,
+              message: "No record(s) found",
+            });
+          } else {
+            //get all total records
+            return res.json({
+              success: true,
+              search_totals: result.search_totals,
+              data: results,
+            });
+          }
         });
       }
     });
@@ -254,11 +269,13 @@ module.exports = {
       if (!results) {
         return res.json({
           success: false,
+          all_totals: 0,
           message: "Record not found",
         });
       }
       return res.json({
         success: true,
+        all_totals: 1,
         data: results,
       });
     });

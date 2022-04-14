@@ -161,15 +161,36 @@ module.exports = {
     );
   },
 
+  searchTotals: ({ where_, andsearch }, callback) => {
+    pool.query(
+      `SELECT
+        count(c.uid) AS "search_totals"
+      FROM
+        pr_code_snippets c
+      WHERE
+       ${where_} ${andsearch}
+      ORDER BY
+        c.uid DESC`,
+      [],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        //console.log(results);
+        return callback(null, results[0]);
+      }
+    );
+  },
+
   searchCodesnippet: ({ where_, offset, rpp, andsearch }, callback) => {
     pool.query(
       `SELECT
-        count(c.uid),
         c.uid,
         c.title,
         c.func_id,
         c.subfunc_id,
         c.language_id,
+        c.framework_id,
         c.added_by,
         c.added_date,
         u.fullname,
@@ -263,7 +284,7 @@ module.exports = {
         c.instructions,
         c.added_by,
         u.fullname,
-        i.title AS 'impl_title',
+        i.title AS 'impl_name',
         c.added_date,
         c.upvoters,
         c.downvoters
@@ -272,7 +293,7 @@ module.exports = {
         LEFT JOIN pr_implementations i ON c.implementation_id = i.uid
         LEFT JOIN pr_users u ON c.added_by = u.uid
       WHERE
-        c.uid = ?`,
+        c.uid = ? AND c.status = 1`,
       [id],
       (error, results, fields) => {
         if (error) {
