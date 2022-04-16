@@ -116,9 +116,18 @@ module.exports = {
         c.func_id,
         c.subfunc_id,
         c.language_id,
-        c.framework_id
+        c.framework_id,
+        i.title AS 'implementation',
+        f.name AS 'framework',
+        l.name AS 'language'
       FROM
         pr_code_snippets c
+      LEFT JOIN  pr_implementations i
+      ON c.implementation_id = i.uid
+      LEFT JOIN  pr_frameworks f
+      ON c.framework_id = f.uid
+      LEFT JOIN  pr_languages l
+      ON c.language_id = l.uid
       WHERE
         ${where_}
       ORDER BY
@@ -136,37 +145,41 @@ module.exports = {
     );
   },
 
-  getImplNames: ({ where_, offset, rpp }, callback) => {
-    pool.query(
-      `SELECT
-        i.title AS 'implementation'
-       FROM
-        pr_code_snippets c
-      LEFT JOIN  pr_implementations i
-      ON c.implementation_id = i.uid
-      WHERE
-       ${where_}
-      ORDER BY
-        c.uid DESC
-      LIMIT
-        ?, ?`,
-      [offset, rpp],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        //console.log("IMPL NAMES RESULTS =>", results);
-        return callback(null, results);
-      }
-    );
-  },
+  // getImplNames: ({ where_, offset, rpp }, callback) => {
+  //   pool.query(
+  //     `SELECT
+  //       i.title AS 'implementation'
+  //      FROM
+  //       pr_code_snippets c
+  //     LEFT JOIN  pr_implementations i
+  //     ON c.implementation_id = i.uid
+  //     WHERE
+  //      ${where_}
+  //     ORDER BY
+  //       c.uid DESC
+  //     LIMIT
+  //       ?, ?`,
+  //     [offset, rpp],
+  //     (error, results, fields) => {
+  //       if (error) {
+  //         return callback(error);
+  //       }
+  //       //console.log("IMPL NAMES RESULTS =>", results);
+  //       return callback(null, results);
+  //     }
+  //   );
+  // },
 
   getTotalRecords: ({ where_, offset, rpp }, callback) => {
     pool.query(
       `SELECT
         COUNT(c.uid) AS all_totals
-       FROM
+      FROM
         pr_code_snippets c
+      LEFT JOIN  pr_implementations i
+      ON c.implementation_id = i.uid
+      LEFT JOIN  pr_frameworks f
+      ON c.framework_id = f.uid
       WHERE
         ${where_} 
       ORDER BY

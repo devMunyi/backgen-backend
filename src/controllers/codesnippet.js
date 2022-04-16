@@ -5,7 +5,6 @@ const {
   updateCodeSnippet,
   deleteCodeSnippet,
   getTotalRecords,
-  getImplNames,
   searchCodesnippet,
   searchTotals,
 } = require("../models/codesnippet");
@@ -146,7 +145,7 @@ module.exports = {
       offset,
     } = req.query;
 
-    console.log("QUERY =>", req.query);
+    //console.log("QUERY =>", req.query);
 
     if (!where_) {
       where_ = "c.status = 1";
@@ -231,31 +230,10 @@ module.exports = {
           }
 
           if (results2) {
-            getImplNames(queryObj, (err3, results3) => {
-              if (err3) {
-                console.log(err3);
-              }
-
-              if (!results3) {
-                return res.json({
-                  success: false,
-                  message: "No record found",
-                  all_totals: 0,
-                });
-              }
-
-              if (results3) {
-                // console.log("CODE RESULTS =>", results);
-                // console.log("IMPL TOTALS =>", results2);
-                // console.log("IMPL NAMES =>", results3);
-                results.impl_version = offset;
-                return res.json({
-                  success: true,
-                  all_totals: results2.all_totals,
-                  impl_names: results3,
-                  data: results,
-                });
-              }
+            return res.json({
+              success: true,
+              all_totals: results2.all_totals,
+              data: results,
             });
           }
         });
