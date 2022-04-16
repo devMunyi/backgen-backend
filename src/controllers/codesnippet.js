@@ -146,32 +146,39 @@ module.exports = {
       offset,
     } = req.query;
 
-    let andsearch;
-    search_ = inputAvailable(search_);
-    if (search_ != undefined) {
-      andsearch = `AND c.title LIKE '%${search_}%'`;
-    } else {
-      andsearch = "";
-    }
-
-    if (!func_id) {
-      func_id = "";
-    }
-
-    if (!subfunc_id) {
-      subfunc_id = "";
-    }
-
-    if (!language_id) {
-      language_id = "";
-    }
-
-    if (!framework_id) {
-      framework_id = "";
-    }
+    console.log("QUERY =>", req.query);
 
     if (!where_) {
       where_ = "c.status = 1";
+    }
+
+    let andsearch;
+    search_ = inputAvailable(search_);
+    if (search_ != undefined) {
+      andsearch = ` AND c.title LIKE '%${search_}%'`;
+      where_ += andsearch;
+    }
+
+    if (func_id) {
+      func_id = parseInt(func_id);
+      func_ = ` AND c.func_id = ${func_id}`;
+      where_ += func_;
+    }
+
+    if (subfunc_id) {
+      subfunc_id = parseInt(subfunc_id);
+      subfunc_ = ` AND c.subfunc_id = ${subfunc_id}`;
+      where_ += subfunc_;
+    }
+    if (language_id) {
+      language_id = parseInt(language_id);
+      language_ = ` AND c.language_id = ${language_id}`;
+      where_ += language_;
+    }
+    if (framework_id) {
+      framework_id = parseInt(framework_id);
+      framework_ = ` AND c.framework_id = ${framework_id}`;
+      where_ += framework_;
     }
 
     if (!orderby) {
@@ -187,20 +194,20 @@ module.exports = {
     }
 
     if (!rpp) {
-      rpp = 1;
+      rpp = 10;
     }
 
     //add data to queryObj object
-    queryObj.func_id = func_id;
-    queryObj.subfunc_id = subfunc_id;
-    queryObj.language_id = language_id;
-    queryObj.framework_id = framework_id;
+    // queryObj.func_id = func_id;
+    // queryObj.subfunc_id = subfunc_id;
+    // queryObj.language_id = language_id;
+    // queryObj.framework_id = framework_id;
+    //queryObj.andsearch = andsearch;
     queryObj.where_ = where_;
     queryObj.orderby = orderby;
     queryObj.dir = dir;
     queryObj.offset = parseInt(offset);
     queryObj.rpp = parseInt(rpp);
-    queryObj.andsearch = andsearch;
 
     getCodeSnippets(queryObj, (err, results) => {
       if (err) {
@@ -219,13 +226,12 @@ module.exports = {
         getTotalRecords(queryObj, (err2, results2) => {
           //console.log("TOTAL RECORDS =>", results2);
           if (err2) {
-            //onsole.log(err2);
+            console.log(err2);
             return;
           }
 
           if (results2) {
             getImplNames(queryObj, (err3, results3) => {
-              //console.log("FUNCTION 3 call result =>", results3);
               if (err3) {
                 console.log(err3);
               }
@@ -239,6 +245,9 @@ module.exports = {
               }
 
               if (results3) {
+                // console.log("CODE RESULTS =>", results);
+                // console.log("IMPL TOTALS =>", results2);
+                // console.log("IMPL NAMES =>", results3);
                 results.impl_version = offset;
                 return res.json({
                   success: true,

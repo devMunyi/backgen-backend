@@ -107,19 +107,7 @@ module.exports = {
     );
   },
 
-  getCodeSnippets: (
-    {
-      func_id,
-      subfunc_id,
-      language_id,
-      framework_id,
-      where_,
-      offset,
-      rpp,
-      andsearch,
-    },
-    callback
-  ) => {
+  getCodeSnippets: ({ where_, offset, rpp }, callback) => {
     pool.query(
       `SELECT
         c.uid,
@@ -128,34 +116,69 @@ module.exports = {
         c.func_id,
         c.subfunc_id,
         c.language_id,
-        c.framework_id,
-        c.file_extension,
-        c.instructions,
-        c.added_by,
-        u.fullname,
-        c.upvoters,
-        c.downvoters,
-        c.status
+        c.framework_id
       FROM
         pr_code_snippets c
-        LEFT JOIN pr_implementations i ON c.implementation_id = i.uid
-        LEFT JOIN pr_users u ON c.added_by = u.uid
       WHERE
-        c.func_id = ?
-        AND c.subfunc_id = ?
-        AND c.language_id = ?
-        AND c.framework_id = ?
-        AND ${where_} ${andsearch}
+        ${where_}
       ORDER BY
         c.uid DESC
       LIMIT
         ?, ?`,
-      [func_id, subfunc_id, language_id, framework_id, offset, rpp],
+      [offset, rpp],
       (error, results, fields) => {
         if (error) {
           return callback(error);
         }
-        //console.log(results);
+        //console.log("CODE RESULTS =>", results);
+        return callback(null, results);
+      }
+    );
+  },
+
+  getImplNames: ({ where_, offset, rpp }, callback) => {
+    pool.query(
+      `SELECT
+        i.title AS 'implementation'
+       FROM
+        pr_code_snippets c
+      LEFT JOIN  pr_implementations i
+      ON c.implementation_id = i.uid
+      WHERE
+       ${where_}
+      ORDER BY
+        c.uid DESC
+      LIMIT
+        ?, ?`,
+      [offset, rpp],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        //console.log("IMPL NAMES RESULTS =>", results);
+        return callback(null, results);
+      }
+    );
+  },
+
+  getTotalRecords: ({ where_, offset, rpp }, callback) => {
+    pool.query(
+      `SELECT
+        COUNT(c.uid) AS all_totals
+       FROM
+        pr_code_snippets c
+      WHERE
+        ${where_} 
+      ORDER BY
+        c.uid DESC
+      LIMIT
+        ?, ?`,
+      [offset, rpp],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        //console.log("RESULTS TOTAL =>", results);
         return callback(null, results[0]);
       }
     );
@@ -170,7 +193,7 @@ module.exports = {
       WHERE
        ${where_} ${andsearch}
       ORDER BY
-        c.uid DESC`,
+        c.uid DESC `,
       [],
       (error, results, fields) => {
         if (error) {
@@ -212,60 +235,6 @@ module.exports = {
         }
         //console.log(results);
         return callback(null, results);
-      }
-    );
-  },
-
-  getImplNames: (
-    { where_, func_id, subfunc_id, language_id, framework_id, andsearch },
-    callback
-  ) => {
-    pool.query(
-      `SELECT
-        i.title AS 'implementation'
-       FROM
-        pr_code_snippets c
-      LEFT JOIN  pr_implementations i
-      ON c.implementation_id = i.uid
-      WHERE
-        c.func_id = ?
-        AND c.subfunc_id = ?
-        AND c.language_id = ?
-        AND c.framework_id = ?
-        AND ${where_} ${andsearch}`,
-      [func_id, subfunc_id, language_id, framework_id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
-  },
-
-  getTotalRecords: (
-    { where_, func_id, subfunc_id, language_id, framework_id, andsearch },
-    callback
-  ) => {
-    pool.query(
-      `SELECT
-        COUNT(c.uid) AS all_totals
-       FROM
-        pr_code_snippets c
-      LEFT JOIN  pr_implementations i
-      ON c.implementation_id = i.uid
-      WHERE
-        c.func_id = ?
-        AND c.subfunc_id = ?
-        AND c.language_id = ?
-        AND c.framework_id = ?
-        AND ${where_} ${andsearch}`,
-      [func_id, subfunc_id, language_id, framework_id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results[0]);
       }
     );
   },
