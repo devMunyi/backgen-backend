@@ -119,7 +119,9 @@ module.exports = {
         c.framework_id,
         i.title AS 'implementation',
         f.name AS 'framework',
-        l.name AS 'language'
+        l.name AS 'language',
+        c.added_by,
+        u.fullname
       FROM
         pr_code_snippets c
       LEFT JOIN  pr_implementations i
@@ -128,6 +130,7 @@ module.exports = {
       ON c.framework_id = f.uid
       LEFT JOIN  pr_languages l
       ON c.language_id = l.uid
+      LEFT JOIN pr_users u ON c.added_by = u.uid
       WHERE
         ${where_}
       ORDER BY
@@ -180,6 +183,9 @@ module.exports = {
       ON c.implementation_id = i.uid
       LEFT JOIN  pr_frameworks f
       ON c.framework_id = f.uid
+      LEFT JOIN  pr_languages l
+      ON c.language_id = l.uid
+      LEFT JOIN pr_users u ON c.added_by = u.uid
       WHERE
         ${where_} 
       ORDER BY

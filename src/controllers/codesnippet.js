@@ -196,12 +196,6 @@ module.exports = {
       rpp = 10;
     }
 
-    //add data to queryObj object
-    // queryObj.func_id = func_id;
-    // queryObj.subfunc_id = subfunc_id;
-    // queryObj.language_id = language_id;
-    // queryObj.framework_id = framework_id;
-    //queryObj.andsearch = andsearch;
     queryObj.where_ = where_;
     queryObj.orderby = orderby;
     queryObj.dir = dir;
