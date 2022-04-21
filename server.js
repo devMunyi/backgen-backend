@@ -5,6 +5,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const fileUpload = require("express-fileupload");
 const { readdirSync } = require("fs");
+const compression = require("compression");
 //const path = require("path");
 
 const app = express();
@@ -12,6 +13,7 @@ const port = process.env.PORT || 5000;
 const hostname = "localhost";
 
 //configuring key middlewares
+app.use(compression());
 app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());

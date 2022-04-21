@@ -7,6 +7,7 @@ const {
   loginUser,
   currentUser,
   gitOauth,
+  googleAuth,
 } = require("../controllers/user");
 const router = require("express").Router();
 
@@ -29,4 +30,5 @@ router.get("/current-user", checkToken, currentUser); //to be used when navigati
 //pages or routes where uid, username, and email coming from the req (encoded on the jwt token) are...
 //expected to match the ones stored in the db
 router.get("/oauth/redirect", gitOauth); //login by git oauth
+router.post("/google/signin", googleAuth); //login by google oauth
 module.exports = router; //make the module available for imports

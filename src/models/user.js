@@ -17,6 +17,25 @@ module.exports = {
     );
   },
 
+  addUserByGoogle: (
+    { fullname, email, social_login_provider, photo },
+    callback
+  ) => {
+    pool.query(
+      `INSERT INTO
+        pr_users(fullname, email, social_login_provider, photo)
+      VALUES
+      (?, ?, ?, ?)`,
+      [fullname, email, social_login_provider, photo],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
+      }
+    );
+  },
+
   updateUser: (
     id,
     { username, fullname, email, country, password },
@@ -142,18 +161,31 @@ module.exports = {
     );
   },
 
-  getCurrentUser: ({ uid }, callback) => {
+  getCurrentUser: ({ email }, callback) => {
     pool.query(
       `SELECT
         uid,
-        username,
         email
       FROM
         pr_users
       WHERE
-        uid = ?
-        AND status = ?`,
-      [parseInt(uid), 1],
+        email = ?
+      AND status = ?`,
+      [email, 1],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        } else {
+          return callback(null, results[0]);
+        }
+      }
+    );
+  },
+
+  checkUserByEmail: (email, social_login_provider, callback) => {
+    pool.query(
+      `SELECT uid FROM pr_users WHERE email = ? AND social_login_provider = ?`,
+      [email, social_login_provider],
       (error, results, fields) => {
         if (error) {
           return callback(error);

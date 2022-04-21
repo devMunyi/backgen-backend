@@ -34,8 +34,23 @@ module.exports = {
   //used when registering/adding new user, to handle email uniqueness
   checkUsersByEmail: (email, callback) => {
     pool.query(
-      `SELECT uid FROM pr_users WHERE email = ?`,
+      `SELECT uid FROM pr_users WHERE email = ? AND `,
       [email],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        } else {
+          return callback(null, results[0]);
+        }
+      }
+    );
+  },
+
+  //used when registering/adding new user, to handle email uniqueness
+  checkUserByEmail: (email, social_login_provider = "", callback) => {
+    pool.query(
+      `SELECT uid FROM pr_users WHERE email = ? AND social_login_provider = ?'`,
+      [email, social_login_provider],
       (error, results, fields) => {
         if (error) {
           return callback(error);

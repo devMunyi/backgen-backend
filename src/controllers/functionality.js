@@ -7,6 +7,7 @@ const {
   reactivateFunc,
   getTotalRecords,
 } = require("../models/functionality");
+const async = require("async");
 
 const { inputAvailable } = require("../../helpers/common");
 

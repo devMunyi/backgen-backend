@@ -8,38 +8,20 @@ const {
   deleteUser,
   getUserByUsernameOrByEmail,
   getCurrentUser,
+  checkUserByEmail,
+  addUserByGoogle,
 } = require("../models/user");
 const { genSaltSync, hashSync, compareSync } = require("bcrypt");
 const { sign } = require("jsonwebtoken");
 
+//Google Auth
+const { OAuth2Client } = require("google-auth-library");
+const CLIENT_ID =
+  "545549745917-bt32oena9mo7ankcbcqpg2thpc6kigdm.apps.googleusercontent.com";
+const client = new OAuth2Client(CLIENT_ID);
+//const { nanoid } = require("nanoid"); //use it to generate random username
+
 module.exports = {
-  addUser: (req, res) => {
-    //After input validation using userRegisterValidation middleware try to save the user data
-    const { body } = req;
-    const salt = genSaltSync(10);
-    body.password = hashSync(body.password, salt);
-    addUser(body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          success: false,
-          message: "Error occured in adding a new user",
-        });
-      }
-      if (!results) {
-        return res.status(500).json({
-          success: false,
-          message: "Error occured in adding a new user",
-        });
-      } else {
-        return res.json({
-          success: true,
-          data: results,
-          message: "User added Successfully. You can now login.",
-        });
-      }
-    });
-  },
   getUserByUserId: (req, res) => {
     const { user_id } = req.query;
 
@@ -194,12 +176,91 @@ module.exports = {
     });
   },
 
+  googleAuth: (req, res) => {
+    let { token } = req.body;
+    //console.log("RECEIVED TOKEN =>", token);
+
+    let user = {}; //initialize empty object that will store fetched user info
+    async function verify() {
+      const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: CLIENT_ID, // Specify the CLIENT_ID of the app that accesses the backend
+        // Or, if multiple clients access the backend:
+        //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+      });
+      const payload = ticket.getPayload();
+      //const userid = payload["sub"];
+      user.fullname = payload.name;
+      user.email = payload.email;
+      user.photo = payload.picture;
+      user.social_login_provider = "Google";
+      user.photo = payload.picture;
+
+      //check if the user details had been previously saved
+      checkUserByEmail(user.email, "Google", (err, result) => {
+        if (err) {
+          console.log(err);
+        }
+
+        if (result) {
+          //console.log("USER GOOGLE SIGNED SEARCHED ID =>", result);
+          user.uid = result.uid;
+          // console.log("USER ID =>", result.uid);
+          // console.log("USER WITH ID =>", user);
+        }
+
+        if (!result) {
+          //save user info to db
+          addUserByGoogle(user, (err, results) => {
+            if (err) {
+              console.log(err);
+              return res.status(500).json({
+                success: false,
+                message: "Error occured during sign in. Please try again",
+              });
+            }
+            if (!results) {
+              return res.status(500).json({
+                success: false,
+                message: "Error occured during sign in. Please try again",
+              });
+            } else {
+              user.uid = results.insertId;
+            }
+          });
+        }
+      });
+    }
+
+    verify()
+      .then(() => {
+        console.log("USER DETAILS =>", user);
+        const jsontoken = sign({ result: user }, process.env.JWT_SECRET, {
+          expiresIn: "8h",
+        });
+
+        //console.log("USER DETAILS =>", user);
+
+        return res.json({
+          success: true,
+          message:
+            "Logged in successfully. We are redirecting you back to home page",
+          token: jsontoken,
+          user,
+        });
+
+        //res.cookie("session-token", token);
+        //res.send("success");
+      })
+      .catch(console.error);
+  },
+
   currentUser: (req, res) => {
     const { result } = req.user;
-    const { country, ...rest } = result;
+    //const { country, ...rest } = result;
     //console.log(rest);
 
-    getCurrentUser(rest, (err, results) => {
+    getCurrentUser(result, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -230,6 +291,34 @@ module.exports = {
       res.redirect(
         `http://localhost?access_token=${response.data.access_token}`
       );
+    });
+  },
+
+  addUser: (req, res) => {
+    //After input validation using userRegisterValidation middleware try to save the user data
+    const { body } = req;
+    const salt = genSaltSync(10);
+    body.password = hashSync(body.password, salt);
+    addUser(body, (err, results) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({
+          success: false,
+          message: "Error occured in adding a new user",
+        });
+      }
+      if (!results) {
+        return res.status(500).json({
+          success: false,
+          message: "Error occured in adding a new user",
+        });
+      } else {
+        return res.json({
+          success: true,
+          data: results,
+          message: "User added Successfully. You can now login.",
+        });
+      }
     });
   },
 };
