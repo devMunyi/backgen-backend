@@ -14,6 +14,8 @@ const {
 const { genSaltSync, hashSync, compareSync } = require("bcrypt");
 const { sign } = require("jsonwebtoken");
 
+const async = require("async");
+
 //Google Auth
 const { OAuth2Client } = require("google-auth-library");
 const CLIENT_ID =
@@ -195,59 +197,123 @@ module.exports = {
       user.photo = payload.picture;
       user.social_login_provider = "Google";
       user.photo = payload.picture;
-
-      //check if the user details had been previously saved
-      checkUserByEmail(user.email, "Google", (err, result) => {
-        if (err) {
-          console.log(err);
-        }
-
-        if (result) {
-          //console.log("USER GOOGLE SIGNED SEARCHED ID =>", result);
-          user.uid = result.uid;
-          // console.log("USER ID =>", result.uid);
-          // console.log("USER WITH ID =>", user);
-        }
-
-        if (!result) {
-          //save user info to db
-          addUserByGoogle(user, (err, results) => {
-            if (err) {
-              console.log(err);
-              return res.status(500).json({
-                success: false,
-                message: "Error occured during sign in. Please try again",
-              });
-            }
-            if (!results) {
-              return res.status(500).json({
-                success: false,
-                message: "Error occured during sign in. Please try again",
-              });
-            } else {
-              user.uid = results.insertId;
-            }
-          });
-        }
-      });
     }
-
     verify()
       .then(() => {
-        console.log("USER DETAILS =>", user);
-        const jsontoken = sign({ result: user }, process.env.JWT_SECRET, {
-          expiresIn: "8h",
-        });
+        async.parallel(
+          {
+            task1: function (callback) {
+              setTimeout(function () {
+                checkUserByEmail(user.email, "Google", (err, result) => {
+                  if (err) {
+                    console.log(err);
+                  }
 
-        //console.log("USER DETAILS =>", user);
+                  if (result) {
+                    user.uid = result.uid;
+                  }
 
-        return res.json({
-          success: true,
-          message:
-            "Logged in successfully. We are redirecting you back to home page",
-          token: jsontoken,
-          user,
-        });
+                  if (!result) {
+                    //save user info to db
+                    addUserByGoogle(user, (err, results) => {
+                      if (err) {
+                        console.log(err);
+                        return res.status(500).json({
+                          success: false,
+                          message:
+                            "Error occured during sign in. Please try again",
+                        });
+                      }
+                      if (!results) {
+                        return res.status(500).json({
+                          success: false,
+                          message:
+                            "Error occured during sign in. Please try again",
+                        });
+                      } else {
+                        user.uid = results.insertId;
+                      }
+                    });
+                  }
+                });
+                callback(null, user);
+              }, 50);
+            },
+            task2: function (callback) {
+              setTimeout(function () {
+                console.log("Task Two");
+                callback(null, 2);
+              }, 100);
+            },
+          },
+          function (err, results) {
+            //console.log("FINAL USER DETAILS =>", results.task1);
+            const jsontoken = sign(
+              { result: results.task1 },
+              process.env.JWT_SECRET,
+              {
+                expiresIn: "8h",
+              }
+            );
+
+            return res.json({
+              success: true,
+              message:
+                "Logged in successfully. We are redirecting you back to home page",
+              token: jsontoken,
+              user,
+            });
+          }
+        );
+
+        // //check if the user details had been previously saved
+        // checkUserByEmail(user.email, "Google", (err, result) => {
+        //   console.log("USER EMAIl =>", user.email);
+        //   if (err) {
+        //     console.log(err);
+        //   }
+
+        //   if (result) {
+        //     //console.log("USER GOOGLE SIGNED SEARCHED ID =>", result);
+        //     user.uid = result.uid;
+        //     // console.log("USER ID =>", result.uid);
+        //     // console.log("USER WITH ID =>", user);
+        //   }
+
+        //   if (!result) {
+        //     //save user info to db
+        //     addUserByGoogle(user, (err, results) => {
+        //       if (err) {
+        //         console.log(err);
+        //         return res.status(500).json({
+        //           success: false,
+        //           message: "Error occured during sign in. Please try again",
+        //         });
+        //       }
+        //       if (!results) {
+        //         return res.status(500).json({
+        //           success: false,
+        //           message: "Error occured during sign in. Please try again",
+        //         });
+        //       } else {
+        //         user.uid = results.insertId;
+        //       }
+        //     });
+        //   }
+        // });
+
+        // console.log("USER DETAILS =>", user);
+        // const jsontoken = sign({ result: user }, process.env.JWT_SECRET, {
+        //   expiresIn: "8h",
+        // });
+
+        // return res.json({
+        //   success: true,
+        //   message:
+        //     "Logged in successfully. We are redirecting you back to home page",
+        //   token: jsontoken,
+        //   user,
+        // });
 
         //res.cookie("session-token", token);
         //res.send("success");

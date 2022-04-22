@@ -161,17 +161,16 @@ module.exports = {
     );
   },
 
-  getCurrentUser: ({ email }, callback) => {
+  getCurrentUser: ({ uid }, callback) => {
     pool.query(
       `SELECT
-        uid,
-        email
+        uid
       FROM
         pr_users
       WHERE
-        email = ?
+        uid = ?
       AND status = ?`,
-      [email, 1],
+      [uid, 1],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -182,7 +181,7 @@ module.exports = {
     );
   },
 
-  checkUserByEmail: (email, social_login_provider, callback) => {
+  checkUserByEmail: async (email, social_login_provider, callback) => {
     pool.query(
       `SELECT uid FROM pr_users WHERE email = ? AND social_login_provider = ?`,
       [email, social_login_provider],

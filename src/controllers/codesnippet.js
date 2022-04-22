@@ -81,7 +81,7 @@ module.exports = {
     }
 
     if (!rpp) {
-      console.log("no rpp value");
+      //console.log("no rpp value");
       rpp = 7;
     }
 
