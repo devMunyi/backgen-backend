@@ -17,16 +17,13 @@ module.exports = {
     );
   },
 
-  addUserByGoogle: (
-    { fullname, email, social_login_provider, photo },
-    callback
-  ) => {
+  addUserByGoogle: ({ fullname, email, provider, photo }, callback) => {
     pool.query(
       `INSERT INTO
-        pr_users(fullname, email, social_login_provider, photo)
+        pr_users(fullname, email, auth_provider, photo)
       VALUES
       (?, ?, ?, ?)`,
-      [fullname, email, social_login_provider, photo],
+      [fullname, email, provider, photo],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -181,10 +178,10 @@ module.exports = {
     );
   },
 
-  checkUserByEmail: async (email, social_login_provider, callback) => {
+  checkUserByEmail: async (email, callback) => {
     pool.query(
-      `SELECT uid FROM pr_users WHERE email = ? AND social_login_provider = ?`,
-      [email, social_login_provider],
+      `SELECT uid FROM pr_users WHERE email = ?`,
+      [email],
       (error, results, fields) => {
         if (error) {
           return callback(error);

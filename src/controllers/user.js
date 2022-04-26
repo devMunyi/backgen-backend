@@ -1,5 +1,4 @@
 require("dotenv").config();
-const axios = require("axios");
 const {
   addUser,
   getUserByUserId,
@@ -343,20 +342,6 @@ module.exports = {
           sameUser: results,
         });
       }
-    });
-  },
-
-  gitOauth: (req, res) => {
-    axios({
-      method: "POST",
-      url: `${process.env.GTHB_URL}?client_id=${process.env.GTHB_SECRET_ID}&client_secret=${process.env.GTHB_CLIENT_SECRETS}&code=${req.query.code}`,
-      headers: {
-        Accept: "application/json",
-      },
-    }).then((response) => {
-      res.redirect(
-        `http://localhost?access_token=${response.data.access_token}`
-      );
     });
   },
 
