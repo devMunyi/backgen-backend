@@ -6,6 +6,7 @@ const {
 
 module.exports = {
   codesnippetAddValidation: (req, res, next) => {
+    console.log("REQ BODY => ", req.body);
     let {
       func_id,
       subfunc_id,

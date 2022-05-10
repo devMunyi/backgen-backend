@@ -1,7 +1,7 @@
 const pool = require("../config/db.config");
 
 module.exports = {
-  //used when registering/adding new user, to handle username uniqueness
+  //Get user by username from database by username
   checkUsersByUsername: (username, callback) => {
     pool.query(
       `SELECT uid FROM pr_users WHERE username = ?`,
@@ -16,7 +16,7 @@ module.exports = {
     );
   },
 
-  //Used when editing user details, to handle username uniqueness
+  //Get user from database by username and id when updating
   checkIfSimilarUsernameExist: (username, id, callback) => {
     pool.query(
       `SELECT uid FROM pr_users WHERE username = ? AND uid != ?`,
@@ -31,10 +31,10 @@ module.exports = {
     );
   },
 
-  //used when registering/adding new user, to handle email uniqueness
+  //retrieve user from database by email
   checkUsersByEmail: (email, callback) => {
     pool.query(
-      `SELECT uid FROM pr_users WHERE email = ? AND `,
+      `SELECT uid FROM pr_users WHERE email = ? AND status = 1`,
       [email],
       (error, results, fields) => {
         if (error) {
@@ -46,22 +46,7 @@ module.exports = {
     );
   },
 
-  //used when registering/adding new user, to handle email uniqueness
-  checkUserByEmail: (email, social_login_provider = "", callback) => {
-    pool.query(
-      `SELECT uid FROM pr_users WHERE email = ? AND social_login_provider = ?'`,
-      [email, social_login_provider],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        } else {
-          return callback(null, results[0]);
-        }
-      }
-    );
-  },
-
-  //used when editing user details, to handle email uniqueness
+  //retrieve user by email and id
   checkIfSimilarEmailExist: (email, id, callback) => {
     pool.query(
       `SELECT uid FROM pr_users WHERE email = ? AND uid != ?`,
@@ -76,11 +61,28 @@ module.exports = {
     );
   },
 
-  //used to ensure invalid user id (uid which doesn't exist in the table) is not parsed as param on making request
-  checkUserId: (id, callback) => {
+  //used when logging, to allow user to either login by username or by email
+  getUserByUsernameOrByEmail: (emailOrUsername, callback) => {
     pool.query(
-      `SELECT uid FROM pr_users WHERE uid = ? AND status = ?`,
-      [id, 1],
+      `SELECT
+        uid,
+        username,
+        fullname,
+        email,
+        photo,
+        country,
+        password,
+        auth_provider AS 'provider',
+        status
+      FROM
+        pr_users
+      WHERE
+        (
+          email = ?
+          OR username = ?
+        )
+        AND status = ?`,
+      [emailOrUsername, emailOrUsername, 1],
       (error, results, fields) => {
         if (error) {
           return callback(error);

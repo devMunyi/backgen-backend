@@ -8,19 +8,15 @@ const {
   getUserByUsernameOrByEmail,
   getCurrentUser,
   checkUserByEmail,
-  addUserByGoogle,
+  checkUserById,
+  userByEmailAndId,
+  updatePassword,
 } = require("../models/user");
 const { genSaltSync, hashSync, compareSync } = require("bcrypt");
-const { sign } = require("jsonwebtoken");
+const { sign, verify } = require("jsonwebtoken");
 
 const async = require("async");
-
-//Google Auth
-const { OAuth2Client } = require("google-auth-library");
-const CLIENT_ID =
-  "545549745917-bt32oena9mo7ankcbcqpg2thpc6kigdm.apps.googleusercontent.com";
-const client = new OAuth2Client(CLIENT_ID);
-//const { nanoid } = require("nanoid"); //use it to generate random username
+const nodemailer = require("nodemailer");
 
 module.exports = {
   getUserByUserId: (req, res) => {
@@ -165,7 +161,7 @@ module.exports = {
           success: true,
           message:
             "Logged in successfully. We are redirecting you back to home page",
-          token: jsontoken,
+          token: "Bearer " + jsontoken,
           user: rest,
         });
       } else {
@@ -175,149 +171,6 @@ module.exports = {
         });
       }
     });
-  },
-
-  googleAuth: (req, res) => {
-    let { token } = req.body;
-    //console.log("RECEIVED TOKEN =>", token);
-
-    let user = {}; //initialize empty object that will store fetched user info
-    async function verify() {
-      const ticket = await client.verifyIdToken({
-        idToken: token,
-        audience: CLIENT_ID, // Specify the CLIENT_ID of the app that accesses the backend
-        // Or, if multiple clients access the backend:
-        //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-      });
-      const payload = ticket.getPayload();
-      //const userid = payload["sub"];
-      user.fullname = payload.name;
-      user.email = payload.email;
-      user.photo = payload.picture;
-      user.social_login_provider = "Google";
-      user.photo = payload.picture;
-    }
-    verify()
-      .then(() => {
-        async.parallel(
-          {
-            task1: function (callback) {
-              setTimeout(function () {
-                checkUserByEmail(user.email, "Google", (err, result) => {
-                  if (err) {
-                    console.log(err);
-                  }
-
-                  if (result) {
-                    user.uid = result.uid;
-                  }
-
-                  if (!result) {
-                    //save user info to db
-                    addUserByGoogle(user, (err, results) => {
-                      if (err) {
-                        console.log(err);
-                        return res.status(500).json({
-                          success: false,
-                          message:
-                            "Error occured during sign in. Please try again",
-                        });
-                      }
-                      if (!results) {
-                        return res.status(500).json({
-                          success: false,
-                          message:
-                            "Error occured during sign in. Please try again",
-                        });
-                      } else {
-                        user.uid = results.insertId;
-                      }
-                    });
-                  }
-                });
-                callback(null, user);
-              }, 50);
-            },
-            task2: function (callback) {
-              setTimeout(function () {
-                console.log("Task Two");
-                callback(null, 2);
-              }, 100);
-            },
-          },
-          function (err, results) {
-            //console.log("FINAL USER DETAILS =>", results.task1);
-            const jsontoken = sign(
-              { result: results.task1 },
-              process.env.JWT_SECRET,
-              {
-                expiresIn: "8h",
-              }
-            );
-
-            return res.json({
-              success: true,
-              message:
-                "Logged in successfully. We are redirecting you back to home page",
-              token: jsontoken,
-              user,
-            });
-          }
-        );
-
-        // //check if the user details had been previously saved
-        // checkUserByEmail(user.email, "Google", (err, result) => {
-        //   console.log("USER EMAIl =>", user.email);
-        //   if (err) {
-        //     console.log(err);
-        //   }
-
-        //   if (result) {
-        //     //console.log("USER GOOGLE SIGNED SEARCHED ID =>", result);
-        //     user.uid = result.uid;
-        //     // console.log("USER ID =>", result.uid);
-        //     // console.log("USER WITH ID =>", user);
-        //   }
-
-        //   if (!result) {
-        //     //save user info to db
-        //     addUserByGoogle(user, (err, results) => {
-        //       if (err) {
-        //         console.log(err);
-        //         return res.status(500).json({
-        //           success: false,
-        //           message: "Error occured during sign in. Please try again",
-        //         });
-        //       }
-        //       if (!results) {
-        //         return res.status(500).json({
-        //           success: false,
-        //           message: "Error occured during sign in. Please try again",
-        //         });
-        //       } else {
-        //         user.uid = results.insertId;
-        //       }
-        //     });
-        //   }
-        // });
-
-        // console.log("USER DETAILS =>", user);
-        // const jsontoken = sign({ result: user }, process.env.JWT_SECRET, {
-        //   expiresIn: "8h",
-        // });
-
-        // return res.json({
-        //   success: true,
-        //   message:
-        //     "Logged in successfully. We are redirecting you back to home page",
-        //   token: jsontoken,
-        //   user,
-        // });
-
-        //res.cookie("session-token", token);
-        //res.send("success");
-      })
-      .catch(console.error);
   },
 
   currentUser: (req, res) => {
@@ -368,6 +221,176 @@ module.exports = {
           success: true,
           data: results,
           message: "User added Successfully. You can now login.",
+        });
+      }
+    });
+  },
+
+  forgotPassword: (req, res) => {
+    const { email } = req.body;
+    if (!email || email.length < 1) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    //make sure that user exists in the db
+    checkUserByEmail(email, (err, user) => {
+      if (err) {
+        return console.log(err);
+      }
+
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: "Email not found",
+        });
+      }
+
+      //user exists now create a one time link valid for 15min
+      const secret = process.env.JWT_SECRET + user.password;
+      const payload = {
+        uid: user.uid,
+        email: user.email,
+        fullname: user.fullname,
+      };
+
+      const token = sign(payload, secret, { expiresIn: "1h" });
+      const link = `${process.env.PASSWORD_RESET_URL}?uid=${user.uid}&token=${token}`;
+      //console.log(link);
+
+      //send password reset link as mail
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.APP_EMAIL,
+          pass: process.env.APP_EMAIL_PASS,
+        },
+      });
+
+      const mailOptions = {
+        from: process.env.APP_EMAIL,
+        to: payload.email,
+        subject: "Password Reset Link",
+        html: `<p><b>Dear ${payload.fullname},</b></p>
+        <p>To reset your password, please click <a href='${link}'>here</a> and follow the instructions provided.</p>
+        <p>If you have trouble clicking on the link provided, you may copy and paste the following URL into your browser:</p>
+        <p>${link}</p>
+        <p>This link will expire in 1 hour. If you receive a message stating that the link has expired, please click <a href='${process.env.FORGOT_PASSWORD_URL}'>here</a> to request a new 'password reset' link.</p>
+        <p>You may also copy and paste the following URL into your browser to request a new 'password reset' link:</p>
+        <p>${process.env.FORGOT_PASSWORD_URL}</p>
+        <p>Thank you for using Zidiapp,</p>
+        <p>The Zidiapp Team</p>
+        `,
+      };
+
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          return console.log(error);
+        } else {
+          //console.log("Email sent: " + info.accepted);
+          return res.status(200).send({
+            success: true,
+            message: "Password reset link has been sent to your email...",
+          });
+        }
+      });
+    });
+  },
+
+  resetPassword: (req, res) => {
+    let { uid, token, password, cpassword } = req.body;
+
+    if (!uid || !token) {
+      return res.json({
+        success: false,
+        message: "Invalid password reset token",
+      });
+    }
+
+    uid = parseInt(uid);
+
+    //make sure that user exists in the db
+    checkUserById(uid, (err, user) => {
+      if (err) {
+        return console.log(err);
+      }
+
+      if (!user) {
+        return res.json({
+          success: false,
+          message: "Email not found",
+        });
+      }
+
+      //we have a valid user with that id
+      const secret = process.env.JWT_SECRET + user.password;
+      try {
+        const payload = verify(token, secret);
+        const pUid = payload.uid;
+        const pEmail = payload.email;
+        //validate password and password2 matches
+        if (!password || password.length < 6) {
+          return res.json({
+            success: false,
+            message: "Password is required and should be min 6 characters long",
+          });
+        } else if (!cpassword) {
+          return res.json({
+            success: false,
+            message: "Confirm password is required",
+          });
+        } else if (password !== cpassword) {
+          return res.json({
+            success: false,
+            message: "Passwords do not match.",
+          });
+        } else {
+          //find that user with payload id and email exist and update the password
+          userByEmailAndId({ uid: pUid, email: pEmail }, (err, resp) => {
+            if (err) {
+              return console.log(err);
+            }
+
+            if (!resp) {
+              return res.json({
+                success: false,
+                message: "Invalid user id",
+              });
+            }
+
+            if (resp) {
+              //hash the password
+              const salt = genSaltSync(10);
+              user.password = hashSync(password, salt);
+
+              //save the updated passoword
+              updatePassword(user, (err, resp2) => {
+                if (err) {
+                  return console.log(err);
+                }
+
+                if (!resp2) {
+                  return res.json({
+                    success: false,
+                    message: "Password update Failed. Please Try Again",
+                  });
+                } else {
+                  return res.status(200).json({
+                    success: true,
+                    message:
+                      "Successful. You can now use your new password to login",
+                  });
+                }
+              });
+            }
+          });
+        }
+      } catch (error) {
+        res.send({
+          success: false,
+          message: error.message,
         });
       }
     });

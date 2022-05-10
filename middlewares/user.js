@@ -1,13 +1,14 @@
 require("dotenv").config();
 const { verify } = require("jsonwebtoken");
 const expressJWT = require("express-jwt");
+const { compareSync } = require("bcrypt");
 const secret = process.env.JWT_SECRET;
 const {
   checkIfSimilarUsernameExist,
   checkIfSimilarEmailExist,
   checkUsersByEmail,
-  checkUserId,
   checkUsersByUsername,
+  getUserByUsernameOrByEmail,
 } = require("../helpers/user");
 
 module.exports = {
@@ -17,6 +18,7 @@ module.exports = {
     algorithms: ["HS256"],
   }),
 
+  //validate token
   checkToken: (req, res, next) => {
     let token = req.get("authorization");
     if (token) {
@@ -41,6 +43,34 @@ module.exports = {
     }
   },
 
+  //email validation middleware
+  emailValidation: (req, res, next) => {
+    let { email } = req.body;
+    email = email.trim();
+
+    if (!email || email.length < 1) {
+      return res.send({
+        success: false,
+        message: "Email is required",
+      });
+    }
+
+    //check if the email exist in the database
+    checkUsersByEmail(email, (err, result) => {
+      if (err) {
+        return console.log(err);
+      } else if (!result) {
+        return res.json({
+          success: false,
+          message: "User email not registered",
+        });
+      } else {
+        req.body.email = email;
+        next();
+      }
+    });
+  },
+
   userRegisterValidation: (req, res, next) => {
     let { username, fullname, email, country, password, cpassword } = req.body;
 
@@ -51,15 +81,15 @@ module.exports = {
     password = password.trim();
     cpassword = cpassword.trim();
 
-    if (!username || username.length < 3) {
+    if (!username || username.length < 1) {
       return res.json({
         success: false,
-        message: "Username is required and should be min 3 characters",
+        message: "Username is required",
       });
     } else if (!fullname || fullname.length < 5) {
       return res.json({
         success: false,
-        message: "Fullname is required",
+        message: "Fullname is required and should be min 5 characters",
       });
     } else if (!email || email.length < 5) {
       return res.json({
@@ -134,17 +164,17 @@ module.exports = {
 
     userid = parseInt(user_id);
     //console.log(userid);
-    if (!username || username.length < 3) {
+    if (!username || username.length < 1) {
       return res.json({
         success: false,
-        message: "Username is required and should be min 3 characters",
+        message: "Username is required",
       });
     } else if (!fullname || fullname.length < 5) {
       return res.json({
         success: false,
-        message: "Fullname is required",
+        message: "Fullname is required and should be min 5 characters",
       });
-    } else if (!email || email.length < 5) {
+    } else if (!email || email.length < 3) {
       return res.json({
         success: false,
         message: "Valid Email is required",
@@ -202,19 +232,43 @@ module.exports = {
     }
   },
 
-  userIdValidation: (req, res, next) => {
-    const userid = parseInt(req.body.user_id);
-    checkUserId(userid, (err, row) => {
-      if (err) {
-        console.log(err);
-      } else if (!row) {
-        return res.json({
-          success: false,
-          message: "Invalid User id",
-        });
-      } else {
-        next();
-      }
-    });
+  validateUserLogin: (req, res, next) => {
+    let { username, password } = req.body;
+    //console.log("REQUEST BODY => ", req.body);
+    if (username.length < 1) {
+      return res.send({
+        success: false,
+        message: "Username is required",
+      });
+    } else if (password.length < 1) {
+      return res.send({
+        success: false,
+        message: "Password is required",
+      });
+    } else {
+      getUserByUsernameOrByEmail(username, (err, user) => {
+        if (err) {
+          return console.log(err); //when some errors occur
+        }
+        if (!user) {
+          return res.json({
+            success: false,
+            message: "Invalid username",
+          });
+        }
+        //invalid password
+        if (!compareSync(password, user.password)) {
+          return res.json({
+            success: false,
+            message: "Incorrect password",
+          });
+        } else {
+          let { password, ...rest } = user;
+          user = rest;
+          req.user = user;
+          next();
+        }
+      });
+    }
   },
 };

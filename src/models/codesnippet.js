@@ -121,7 +121,9 @@ module.exports = {
         f.name AS 'framework',
         l.name AS 'language',
         c.added_by,
-        u.fullname
+        u.fullname,
+        u.username,
+        u.auth_provider AS 'provider'
       FROM
         pr_code_snippets c
       LEFT JOIN  pr_implementations i

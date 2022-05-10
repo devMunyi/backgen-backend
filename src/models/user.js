@@ -17,13 +17,35 @@ module.exports = {
     );
   },
 
-  addUserByGoogle: ({ fullname, email, provider, photo }, callback) => {
+  addUserByGoogle: (
+    { fullname, username, email, provider, photo },
+    callback
+  ) => {
     pool.query(
       `INSERT INTO
-        pr_users(fullname, email, auth_provider, photo)
+        pr_users(fullname, username, email, auth_provider, photo)
       VALUES
-      (?, ?, ?, ?)`,
-      [fullname, email, provider, photo],
+      (?, ?, ?, ?, ?)`,
+      [fullname, username, email, provider, photo],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
+      }
+    );
+  },
+
+  addUserByGthOrFbOrTwt: (
+    { fullname, username, email, provider, photo },
+    callback
+  ) => {
+    pool.query(
+      `INSERT INTO
+        pr_users(fullname, username, email, auth_provider, photo)
+      VALUES
+      (?, ?, ?, ?, ?)`,
+      [fullname, username, email, provider, photo],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -67,6 +89,7 @@ module.exports = {
         fullname,
         email,
         country,
+        auth_provider AS 'provider',
         join_date
       FROM
         pr_users
@@ -94,6 +117,7 @@ module.exports = {
         fullname,
         email,
         country,
+        auth_provider AS 'provider',
         join_date
       FROM
         pr_users
@@ -135,9 +159,11 @@ module.exports = {
         uid,
         username,
         fullname,
-        country,
         email,
+        photo,
+        country,
         password,
+        auth_provider AS 'provider',
         status
       FROM
         pr_users
@@ -156,6 +182,48 @@ module.exports = {
         }
       }
     );
+  },
+
+  getUserByUsernameOrByEmail2: ({ email, username }, callback) => {
+    if (email) {
+      pool.query(
+        `SELECT
+          uid
+        FROM
+          pr_users
+        WHERE
+          email = ?
+        AND status = ?`,
+        [email, 1],
+        (error, results, fields) => {
+          if (error) {
+            return callback(error);
+          } else {
+            return callback(null, results[0]);
+          }
+        }
+      );
+    } else {
+      if (username) {
+        pool.query(
+          `SELECT
+            uid
+          FROM
+            pr_users
+          WHERE
+            username = ?
+          AND status = ?`,
+          [username, 1],
+          (error, results, fields) => {
+            if (error) {
+              return callback(error);
+            } else {
+              return callback(null, results[0]);
+            }
+          }
+        );
+      }
+    }
   },
 
   getCurrentUser: ({ uid }, callback) => {
@@ -178,15 +246,58 @@ module.exports = {
     );
   },
 
-  checkUserByEmail: async (email, callback) => {
+  checkUserByEmail: (email, callback) => {
     pool.query(
-      `SELECT uid FROM pr_users WHERE email = ?`,
+      `SELECT uid, email, fullname, password FROM pr_users WHERE email = ?`,
       [email],
       (error, results, fields) => {
         if (error) {
           return callback(error);
         } else {
           return callback(null, results[0]);
+        }
+      }
+    );
+  },
+
+  checkUserById: (uid, callback) => {
+    pool.query(
+      `SELECT uid, email, password FROM pr_users WHERE uid = ?`,
+      [uid],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        } else {
+          return callback(null, results[0]);
+        }
+      }
+    );
+  },
+
+  userByEmailAndId: ({ email, uid }, callback) => {
+    pool.query(
+      `SELECT uid, email, password FROM pr_users WHERE uid = ? AND email = ?`,
+      [uid, email],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        } else {
+          return callback(null, results[0]);
+        }
+      }
+    );
+  },
+
+  //update password
+  updatePassword: ({ password, uid, email }, callback) => {
+    pool.query(
+      `UPDATE pr_users SET password = ? WHERE uid = ? AND email = ?`,
+      [password, uid, email],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        } else {
+          return callback(null, results);
         }
       }
     );
