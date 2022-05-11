@@ -42,34 +42,34 @@ app.use("/back", express.static("public")); //defines where file requests should
 //   })
 // );
 
-//express-session setup
-const options = {
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
+//express-session configurations
+const storeOptions = {
+  host: process.env.DBHOST,
+  port: process.env.DBPORT,
+  user: process.env.DBUSER,
+  password: process.env.DBPASS,
+  database: process.env.DBNAME,
   clearExpired: true,
+}; //db store
+
+const sessionStore = new MySQLStore(storeOptions);
+const sessionOptions = {
+  key: process.env.SESSION_KEY,
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: sessionStore,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 12, //12hours
+  },
 };
 
-const sessionStore = new MySQLStore(options);
-
-if (process.env.NODE_ENV === "production") {
-  app.set("trust proxy", 1);
+if (app.get("env") === "production") {
+  app.set("trust proxy", 1); // trust first proxy
+  sessionOptions.cookie.secure = true; // serve secure cookies
 }
 
-app.use(
-  session({
-    key: "bg-ses",
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: sessionStore,
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 12, //12hours
-    },
-  })
-);
+app.use(session(sessionOptions));
 
 app.use(passport.initialize()); //initialize passport
 app.use(passport.session()); //initialize session with passport

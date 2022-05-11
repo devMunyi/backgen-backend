@@ -74,8 +74,9 @@ router.get(
 );
 
 router.get("/logged-in", (req, res) => {
-  //console.log("SESSION =>", req.session);
+  console.log("SESSION =>", req.session);
   if (req.user) {
+    console.log("LOGGED IN USER DATA => ", req.user);
     return res.json({
       success: true,
       message: "Found a logged in user",
@@ -84,6 +85,7 @@ router.get("/logged-in", (req, res) => {
       //jwt: req.jwt
     });
   } else {
+    console.log("NO LOGGED IN USER DATA");
     return res.json({
       success: false,
       message: "No user found",
