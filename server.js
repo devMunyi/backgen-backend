@@ -17,13 +17,6 @@ const port = process.env.PORT || 5000;
 const hostname = "localhost";
 
 //configuring key middlewares
-app.use(
-  cors({
-    origin: ["http://localhost", "https://backgen.net", "https://zidiapp.com"],
-    methods: "GET,POST,PUT,DELETE",
-    credentials: true,
-  })
-); //handles cross-domain requests
 
 app.use(compression()); //compresses static files
 app.use(morgan("dev")); //keep tracks of incoming requests
@@ -31,6 +24,32 @@ app.use(express.json()); //enable express to receive form data in json format
 app.use(express.urlencoded({ extended: false })); //enable express to receive form data
 app.use(fileUpload()); //handles file uploads
 app.use("/back", express.static("public")); //defines where file requests should be retrieved
+app.use(
+  cors({
+    origin: ["https://zidiapp.com", "https://backgen.net", "http://localhost"],
+    methods: "GET,POST,PUT,DELETE",
+    credentials: true,
+  })
+); //handles cross-domain requests
+
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Credentials", true);
+  let allowedOrigins = [
+    "https://zidiapp.com",
+    "https://backgen.net",
+    "http://localhost",
+  ];
+  let origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+  }
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-HTTP-Method-Override, Set-Cookie, Cookie"
+  );
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  next();
+}); // --------------- SECOND CHANGE -------------------
 
 //Cookie session setup
 // app.set("trust proxy", 1); // trust first proxy
@@ -63,6 +82,7 @@ const sessionOptions = {
   },
 };
 
+app.disable("X-Powered-By");
 if (app.get("env") === "production") {
   app.set("trust proxy", 1); // trust first proxy
   sessionOptions.cookie.secure = true; // serve secure cookies
