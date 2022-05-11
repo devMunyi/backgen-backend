@@ -63,7 +63,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/back/google/callback",
+      callbackURL: process.env.GOOGLE_CALLBACK_URL,
     },
     function (accessToken, refreshToken, profile, cb) {
       let fullname = profile.displayName;
@@ -114,7 +114,7 @@ passport.use(
     {
       clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: "/back/github/callback",
+      callbackURL: process.env.GITHUB_CALLBACK_URL,
     },
     function (accessToken, refreshToken, profile, cb) {
       let fullname = profile.displayName;
@@ -163,7 +163,7 @@ passport.use(
     {
       clientID: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: "/back/facebook/callback",
+      callbackURL: process.env.FACEBOOK_CALLBACK_URL,
     },
     function (accessToken, refreshToken, profile, cb) {
       console.log("FACEBOOK PROFILE => ", profile);
@@ -216,7 +216,7 @@ passport.use(
     {
       consumerKey: process.env.TWITTER_API_KEY,
       consumerSecret: process.env.TWITTER_API_SECRET,
-      callbackURL: "/back/twitter/callback",
+      callbackURL: process.env.TWITTER_CALLBACK_URL,
     },
     function (token, tokenSecret, profile, cb) {
       //console.log("TWITTER PROFILE => ", profile);

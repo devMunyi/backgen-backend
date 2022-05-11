@@ -1,7 +1,7 @@
 //const cookieSession = require("cookie-session");
 const passport = require("passport");
 require("dotenv").config();
-require("./config/db.config");
+const pool = require("./config/db.config");
 require("./src/passport");
 const express = require("express");
 const cors = require("cors");
@@ -45,7 +45,6 @@ app.use("/back", express.static("public")); //defines where file requests should
 //express-session configurations
 const storeOptions = {
   host: process.env.DBHOST,
-  port: process.env.DBPORT,
   user: process.env.DBUSER,
   password: process.env.DBPASS,
   database: process.env.DBNAME,
