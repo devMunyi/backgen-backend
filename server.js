@@ -11,7 +11,6 @@ const { readdirSync } = require("fs");
 const compression = require("compression");
 const session = require("express-session");
 const MySQLStore = require("express-mysql-session")(session);
-const flash = require("express-flash");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -55,11 +54,13 @@ const options = {
 
 const sessionStore = new MySQLStore(options);
 
-app.set("trust proxy", 1); // trust first proxy
-app.use(flash()); //messages
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
 app.use(
   session({
-    key: "session",
+    key: "bg-ses",
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
