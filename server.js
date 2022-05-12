@@ -84,9 +84,12 @@ const sessionOptions = {
 
 app.disable("X-Powered-By");
 if (app.get("env") === "production") {
+  console.log("APP ON LIVE SERVER");
   app.set("trust proxy", 1); // trust first proxy
   sessionOptions.cookie.sameSite = "none";
   sessionOptions.cookie.secure = true; // serve secure cookies
+} else {
+  console.log("APP ON DEVELOPMENT ENVIRONEMNT");
 }
 
 app.use(session(sessionOptions));
