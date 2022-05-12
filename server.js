@@ -27,39 +27,29 @@ app.use("/back", express.static("public")); //defines where file requests should
 app.use(
   cors({
     origin: ["https://zidiapp.com", "https://backgen.net", "http://localhost"],
-    methods: "GET,POST,PUT,DELETE",
+    methods: "GET, POST, PUT, DELETE, OPTIONS",
     credentials: true,
   })
 ); //handles cross-domain requests
 
-app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Credentials", true);
-  let allowedOrigins = [
-    "https://zidiapp.com",
-    "https://backgen.net",
-    "http://localhost",
-  ];
-  let origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
-  }
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-HTTP-Method-Override, Set-Cookie, Cookie"
-  );
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-  next();
-}); // --------------- SECOND CHANGE -------------------
-
-//Cookie session setup
-// app.set("trust proxy", 1); // trust first proxy
-// app.use(
-//   cookieSession({
-//     name: "session",
-//     keys: [process.env.SESSION_SECRET],
-//     maxAge: 24 * 60 * 60 * 1000,
-//   })
-// );
+// app.use(function (req, res, next) {
+//   res.header("Access-Control-Allow-Credentials", true);
+//   let allowedOrigins = [
+//     "https://zidiapp.com",
+//     "https://backgen.net",
+//     "http://localhost",
+//   ];
+//   let origin = req.headers.origin;
+//   if (allowedOrigins.includes(origin)) {
+//     res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
+//   }
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-HTTP-Method-Override, Set-Cookie, Cookie"
+//   );
+//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+//   next();
+// }); // --------------- SECOND CHANGE -------------------
 
 //express-session configurations
 const storeOptions = {
@@ -72,25 +62,18 @@ const storeOptions = {
 
 const sessionStore = new MySQLStore(storeOptions);
 const sessionOptions = {
-  key: process.env.SESSION_KEY,
+  name: process.env.SESSION_KEY,
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: sessionStore,
   cookie: {
+    sameSite: "lax",
+    secure: false,
+    httpOnly: false,
     maxAge: 1000 * 60 * 60 * 12, //12hours
   },
 };
-
-app.disable("X-Powered-By");
-if (app.get("env") === "production") {
-  console.log("APP ON LIVE SERVER");
-  app.set("trust proxy", 1); // trust first proxy
-  sessionOptions.cookie.sameSite = "none";
-  sessionOptions.cookie.secure = true; // serve secure cookies
-} else {
-  console.log("APP ON DEVELOPMENT ENVIRONEMNT");
-}
 
 app.use(session(sessionOptions));
 
