@@ -63,10 +63,10 @@ app.use(function (req, res, next) {
 
 //express-session configurations
 const storeOptions = {
-  host: process.env.DBHOST,
-  user: process.env.DBUSER,
-  password: process.env.DBPASS,
-  database: process.env.DBNAME,
+  host: process.env.DATABASE_HOST,
+  user: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASS,
+  database: process.env.DATABASE_NAME,
   clearExpired: true,
 }; //db store
 
