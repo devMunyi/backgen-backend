@@ -85,6 +85,7 @@ const sessionOptions = {
 app.disable("X-Powered-By");
 if (app.get("env") === "production") {
   app.set("trust proxy", 1); // trust first proxy
+  sessionOptions.cookie.sameSite = "none";
   sessionOptions.cookie.secure = true; // serve secure cookies
 }
 

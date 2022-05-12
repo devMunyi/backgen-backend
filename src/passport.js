@@ -22,6 +22,7 @@ passport.use(
     password,
     done
   ) {
+    console.log("REQUEST HEADERS => ", req.headers);
     if (!req.user) {
       return done(err); //when some errors occur
     } else {
