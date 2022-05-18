@@ -160,7 +160,7 @@ module.exports = {
         });
         return res.json({
           success: true,
-          message: "Logged in success",
+          message: "Log in success",
           token: "Bearer " + jsontoken,
           user: rest,
         });
