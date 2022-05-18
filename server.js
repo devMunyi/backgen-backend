@@ -60,6 +60,13 @@ const storeOptions = {
   clearExpired: true,
 }; //db store
 
+if (process.env.NODE_ENV !== "Development") {
+  storeOptions.host = process.env.HOST;
+  storeOptions.user = process.env.USER;
+  storeOptions.password = process.env.PASS;
+  storeOptions.database = process.env.DATABASE;
+}
+
 const sessionStore = new MySQLStore(storeOptions);
 const sessionOptions = {
   name: process.env.SESSION_KEY,
@@ -68,12 +75,16 @@ const sessionOptions = {
   saveUninitialized: false,
   store: sessionStore,
   cookie: {
-    sameSite: "lax",
+    sameSite: "lax", //"strict" or "none"
     secure: false,
-    httpOnly: false,
     maxAge: 1000 * 60 * 60 * 12, //12hours
   },
 };
+
+if (process.env.NODE_ENV !== "Development") {
+  sessionOptions.cookie.sameSite = "none";
+  sessionOptions.cookie.secure = true;
+}
 
 app.use(session(sessionOptions));
 

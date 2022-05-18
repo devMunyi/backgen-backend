@@ -102,7 +102,7 @@ router.post(
     failureFlash: true,
   }),
   function (req, res) {
-    console.log("FLASH INFO => ", req.flash);
+    //console.log("FLASH INFO => ", req.flash);
     res.send({
       success: req.authInfo.success,
       message: req.authInfo.message,

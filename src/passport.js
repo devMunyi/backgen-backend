@@ -13,6 +13,7 @@ const GitHubStrategy = require("passport-github2").Strategy;
 const FacebookStrategy = require("passport-facebook").Strategy;
 const TwitterStrategy = require("passport-twitter").Strategy;
 const LocalStrategy = require("passport-local").Strategy;
+const flash = require("express-flash");
 
 //passport-local
 passport.use(
@@ -22,7 +23,7 @@ passport.use(
     password,
     done
   ) {
-    console.log("REQUEST HEADERS => ", req.headers);
+    //console.log("REQUEST HEADERS => ", req.headers);
     if (!req.user) {
       return done(err); //when some errors occur
     } else {
@@ -72,6 +73,8 @@ passport.use(
       let username = "";
       let photo = profile.photos[0].value;
       let provider = "Google";
+
+      console.log("GOOGLE PROFILE => ", profile);
 
       user = {
         fullname,
@@ -167,10 +170,10 @@ passport.use(
       callbackURL: process.env.FACEBOOK_CALLBACK_URL,
     },
     function (accessToken, refreshToken, profile, cb) {
-      console.log("FACEBOOK PROFILE => ", profile);
+      //console.log("FACEBOOK PROFILE => ", profile);
       let fullname = profile.displayName;
       let email = profile._json.email;
-      console.log("EMAIL => ", email);
+      //console.log("EMAIL => ", email);
       let username = profile.username;
       let photo = profile.photos[0].value;
       let provider = "Facebook";

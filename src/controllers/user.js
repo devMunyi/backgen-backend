@@ -137,8 +137,9 @@ module.exports = {
   },
 
   loginUser: (req, res) => {
-    const { body } = req;
-    getUserByUsernameOrByEmail(body.emailOrUsername, (err, results) => {
+    const { username, password } = req.body;
+    //console.log("USERNAME => ", username);
+    getUserByUsernameOrByEmail(username, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -146,10 +147,10 @@ module.exports = {
       if (!results) {
         return res.json({
           success: false,
-          message: "Invalid email, username or password",
+          message: "Invalid username",
         });
       }
-      const result = compareSync(body.password, results.password);
+      const result = compareSync(password, results.password);
       if (result) {
         //console.log(results);
         const { password, ...rest } = results;
@@ -159,15 +160,14 @@ module.exports = {
         });
         return res.json({
           success: true,
-          message:
-            "Logged in successfully. We are redirecting you back to home page",
+          message: "Logged in success",
           token: "Bearer " + jsontoken,
           user: rest,
         });
       } else {
         return res.json({
           success: false,
-          message: "Invalid email, username or password",
+          message: "Incorrect password",
         });
       }
     });

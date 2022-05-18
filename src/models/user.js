@@ -153,7 +153,7 @@ module.exports = {
   },
 
   //used when logging, to allow user to either login by username or by email
-  getUserByUsernameOrByEmail: (emailOrUsername, callback) => {
+  getUserByUsernameOrByEmail: (username, callback) => {
     pool.query(
       `SELECT
         uid,
@@ -173,7 +173,7 @@ module.exports = {
           OR username = ?
         )
         AND status = ?`,
-      [emailOrUsername, emailOrUsername, 1],
+      [username, username, 1],
       (error, results, fields) => {
         if (error) {
           return callback(error);
