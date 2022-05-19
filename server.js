@@ -26,7 +26,13 @@ app.use(fileUpload()); //handles file uploads
 app.use("/back", express.static("public")); //defines where file requests should be retrieved
 app.use(
   cors({
-    origin: ["https://zidiapp.com", "https://backgen.net", "http://localhost"],
+    origin: [
+      "https://zidiapp.com",
+      "https://www.zidiapp.com",
+      "https://backgen.net",
+      "https://www.backgen.net",
+      "http://localhost",
+    ],
     methods: "GET, POST, PUT, DELETE, OPTIONS",
     credentials: true,
   })
