@@ -527,7 +527,9 @@ module.exports = {
             "?success=" +
             false +
             "&message=" +
-            "Google Account Already Exists. Sign in with Google Instead"
+            "Google Account Already Exists. Sign in with Google Instead" +
+            "&provider=" +
+            provider
         );
       }
 
@@ -543,7 +545,9 @@ module.exports = {
                 "?success=" +
                 true +
                 "&message=" +
-                "Sign up success"
+                "Sign up success" +
+                "&provider=" +
+                provider
             );
           }
         });
@@ -703,7 +707,9 @@ module.exports = {
             "?success=" +
             false +
             "&message=" +
-            "Github Account Already Exists. Sign in with Github Instead"
+            "Github Account Already Exists. Sign in with Github Instead" +
+            "&provider=" +
+            provider
         );
       }
 
@@ -719,7 +725,9 @@ module.exports = {
                 "?success=" +
                 true +
                 "&message=" +
-                "Sign up success"
+                "Sign up success" +
+                "&provider=" +
+                provider
             );
           }
         });
