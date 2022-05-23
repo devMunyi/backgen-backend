@@ -6,7 +6,7 @@ const {
 
 module.exports = {
   codesnippetAddValidation: (req, res, next) => {
-    console.log("REQ BODY => ", req.body);
+    //console.log("REQ BODY => ", req.body);
     let {
       func_id,
       subfunc_id,
@@ -21,9 +21,7 @@ module.exports = {
     } = req.body;
 
     func_id = parseInt(func_id);
-    subfunc_id = parseInt(subfunc_id);
     language_id = parseInt(language_id);
-    framework_id = framework_id;
     implementation_id = parseInt(implementation_id);
     title = title.trim();
     row_code = row_code.trim();
@@ -36,7 +34,7 @@ module.exports = {
         success: false,
         message: "Please select a function",
       });
-    } else if (!subfunc_id || subfunc_id < 1) {
+    } else if (!subfunc_id) {
       return res.json({
         success: false,
         message: "Please select a subfunction",
@@ -129,9 +127,7 @@ module.exports = {
     }
 
     func_id = parseInt(func_id);
-    subfunc_id = parseInt(subfunc_id);
     language_id = parseInt(language_id);
-    framework_id = framework_id;
     implementation_id = parseInt(implementation_id);
     title = title.trim();
     row_code = row_code.trim();
@@ -147,7 +143,7 @@ module.exports = {
         success: false,
         message: "Please select a function",
       });
-    } else if (!subfunc_id || subfunc_id < 1) {
+    } else if (!subfunc_id) {
       return res.json({
         success: false,
         message: "Please select a subfunction",

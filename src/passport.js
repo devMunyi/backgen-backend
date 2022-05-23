@@ -116,9 +116,9 @@ passport.use(
 passport.use(
   new GitHubStrategy(
     {
-      clientID: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      callbackURL: process.env.GITHUB_CALLBACK_URL,
+      clientID: process.env.SIGNIN_GITHUB_CLIENT_ID,
+      clientSecret: process.env.SIGNIN_GITHUB_CLIENT_SECRET,
+      callbackURL: process.env.SIGNIN_GITHUB_CALLBACK_URL,
     },
     function (accessToken, refreshToken, profile, cb) {
       let fullname = profile.displayName;
@@ -165,8 +165,8 @@ passport.use(
 passport.use(
   new FacebookStrategy(
     {
-      clientID: process.env.GITHUB_CLIENT_ID,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      clientID: process.env.FACEBOOK_APP_ID,
+      clientSecret: process.env.FACEBOOK_APP_SECRET,
       callbackURL: process.env.FACEBOOK_CALLBACK_URL,
     },
     function (accessToken, refreshToken, profile, cb) {

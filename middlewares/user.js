@@ -31,6 +31,7 @@ module.exports = {
             message: "Invalid token, please login.",
           });
         } else {
+          console.log("DECODED USER => ", decoded);
           req.user = decoded;
           next();
         }

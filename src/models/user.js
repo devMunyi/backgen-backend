@@ -226,7 +226,7 @@ module.exports = {
     }
   },
 
-  getCurrentUser: ({ uid }, callback) => {
+  getCurrentUser: (uid, callback) => {
     pool.query(
       `SELECT
         uid
