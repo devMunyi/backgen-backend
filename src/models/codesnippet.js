@@ -7,7 +7,8 @@ module.exports = {
       subfunc_id,
       language_id,
       framework_id,
-      implementation_id,
+      lang_impl_type_id,
+      user_impl_type_id,
       title,
       row_code,
       file_extension,
@@ -26,12 +27,13 @@ module.exports = {
           subfunc_id,
           language_id,
           framework_id,
-          implementation_id,
+          lang_impl_type_id,
+          user_impl_type_id,
           instructions,
           added_by
         )
       VALUES
-      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         title,
         row_code,
@@ -40,7 +42,8 @@ module.exports = {
         subfunc_id,
         language_id,
         framework_id,
-        implementation_id,
+        lang_impl_type_id,
+        user_impl_type_id,
         instructions,
         added_by,
       ],
@@ -60,7 +63,8 @@ module.exports = {
       subfunc_id,
       language_id,
       framework_id,
-      implementation_id,
+      lang_impl_type_id,
+      user_impl_type_id,
       title,
       row_code,
       file_extension,
@@ -80,7 +84,8 @@ module.exports = {
         subfunc_id = ?,
         language_id = ?,
         framework_id = ?,
-        implementation_id = ?,
+        lang_impl_type_id = ?,
+        user_impl_type_id = ?,
         instructions = ?,
         added_by = ?
       WHERE
@@ -93,7 +98,8 @@ module.exports = {
         subfunc_id,
         language_id,
         framework_id,
-        implementation_id,
+        lang_impl_type_id,
+        user_impl_type_id,
         instructions,
         added_by,
         id,
@@ -117,7 +123,8 @@ module.exports = {
         c.subfunc_id,
         c.language_id,
         c.framework_id,
-        i.title AS 'implementation',
+        lit.title AS 'language_implementation_type',
+        uit.title AS 'user_implementation_type',
         f.name AS 'framework',
         l.name AS 'language',
         c.added_by,
@@ -126,8 +133,10 @@ module.exports = {
         u.auth_provider AS 'provider'
       FROM
         pr_code_snippets c
-      LEFT JOIN  pr_implementations i
-      ON c.implementation_id = i.uid
+      LEFT JOIN  pr_language_implementation_type lit
+      ON c.lang_impl_type_id = lit.uid
+      LEFT JOIN  pr_user_implementation_type uit
+      ON c.user_impl_type_id = uit.uid
       LEFT JOIN  pr_frameworks f
       ON c.framework_id = f.uid
       LEFT JOIN  pr_languages l
@@ -181,13 +190,6 @@ module.exports = {
         COUNT(c.uid) AS all_totals
       FROM
         pr_code_snippets c
-      LEFT JOIN  pr_implementations i
-      ON c.implementation_id = i.uid
-      LEFT JOIN  pr_frameworks f
-      ON c.framework_id = f.uid
-      LEFT JOIN  pr_languages l
-      ON c.language_id = l.uid
-      LEFT JOIN pr_users u ON c.added_by = u.uid
       WHERE
         ${where_} 
       ORDER BY
@@ -238,10 +240,14 @@ module.exports = {
         c.added_by,
         c.added_date,
         u.fullname,
-        i.title AS impl_title
+        lit.title AS 'language_implementation_type',
+        uit.title AS 'user_implementation_type'
       FROM
         pr_code_snippets c
-        LEFT JOIN pr_implementations i ON c.implementation_id = i.uid
+        LEFT JOIN  pr_language_implementation_type lit
+      ON c.lang_impl_type_id = lit.uid
+        LEFT JOIN  pr_user_implementation_type uit
+      ON c.user_impl_type_id = uit.uid
         LEFT JOIN pr_users u ON c.added_by = u.uid
       WHERE
        ${where_} ${andsearch}
@@ -274,13 +280,17 @@ module.exports = {
         c.instructions,
         c.added_by,
         u.fullname,
-        i.title AS 'impl_name',
+        lit.title AS 'language_implementation_type',
+        uit.title AS 'user_implementation_type',
         c.added_date,
         c.upvoters,
         c.downvoters
       FROM
         pr_code_snippets c
-        LEFT JOIN pr_implementations i ON c.implementation_id = i.uid
+        LEFT JOIN  pr_language_implementation_type lit
+      ON c.lang_impl_type_id = lit.uid
+        LEFT JOIN  pr_user_implementation_type uit
+      ON c.user_impl_type_id = uit.uid
         LEFT JOIN pr_users u ON c.added_by = u.uid
       WHERE
         c.uid = ? AND c.status = 1`,

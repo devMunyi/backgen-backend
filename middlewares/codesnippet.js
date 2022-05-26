@@ -12,7 +12,8 @@ module.exports = {
       subfunc_id,
       language_id,
       framework_id,
-      implementation_id,
+      lang_impl_type_id,
+      user_impl_type_id,
       title,
       row_code,
       file_extension,
@@ -22,7 +23,8 @@ module.exports = {
 
     func_id = parseInt(func_id);
     language_id = parseInt(language_id);
-    implementation_id = parseInt(implementation_id);
+    lang_impl_type_id = parseInt(lang_impl_type_id);
+    user_impl_type_id = parseInt(user_impl_type_id);
     title = title.trim();
     row_code = row_code.trim();
     file_extension = file_extension.trim();
@@ -49,10 +51,15 @@ module.exports = {
         success: false,
         message: "Please select framework",
       });
-    } else if (!implementation_id || implementation_id < 1) {
+    } else if (!lang_impl_type_id || lang_impl_type_id < 1) {
       return res.json({
         success: false,
-        message: "Please select an implementation",
+        message: "Please select language implementation type",
+      });
+    } else if (!user_impl_type_id || user_impl_type_id < 1) {
+      return res.json({
+        success: false,
+        message: "Please select your implementation type",
       });
     } else if (!title || title.length < 1) {
       return res.json({
@@ -91,7 +98,8 @@ module.exports = {
           req.body.subfunc_id = subfunc_id;
           req.body.language_id = language_id;
           req.body.framework_id = parseInt(framework_id);
-          req.body.implementation_id = implementation_id;
+          req.body.lang_impl_type_id = lang_impl_type_id;
+          req.body.user_impl_type_id = user_impl_type_id;
           req.body.title = title;
           req.body.row_code = row_code;
           req.body.file_extension = file_extension;
@@ -109,7 +117,8 @@ module.exports = {
       subfunc_id,
       language_id,
       framework_id,
-      implementation_id,
+      lang_impl_type_id,
+      user_impl_type_id,
       title,
       row_code,
       file_extension,
@@ -128,15 +137,14 @@ module.exports = {
 
     func_id = parseInt(func_id);
     language_id = parseInt(language_id);
-    implementation_id = parseInt(implementation_id);
+    lang_impl_type_id = parseInt(lang_impl_type_id);
+    user_impl_type_id = parseInt(user_impl_type_id);
     title = title.trim();
     row_code = row_code.trim();
     file_extension = file_extension.trim();
     instructions = instructions.trim();
     added_by = parseInt(added_by);
     codesnippet_id = parseInt(codesnippet_id);
-
-    console.log("ROW CODE => ", row_code);
 
     if (!func_id || func_id < 1) {
       return res.json({
@@ -158,10 +166,15 @@ module.exports = {
         success: false,
         message: "Please select framework",
       });
-    } else if (!implementation_id || implementation_id < 1) {
+    } else if (!lang_impl_type_id || lang_impl_type_id < 1) {
       return res.json({
         success: false,
-        message: "Please select an implementation",
+        message: "Please select langauge implementation type",
+      });
+    } else if (!user_impl_type_id || user_impl_type_id < 1) {
+      return res.json({
+        success: false,
+        message: "Please select your implementation type",
       });
     } else if (!title || title.length < 1) {
       return res.json({
@@ -199,7 +212,8 @@ module.exports = {
           req.body.subfunc_id = subfunc_id;
           req.body.language_id = language_id;
           req.body.framework_id = parseInt(framework_id);
-          req.body.implementation_id = implementation_id;
+          req.body.lang_impl_type_id = lang_impl_type_id;
+          req.body.user_impl_type_id = user_impl_type_id;
           req.body.title = title;
           req.body.row_code = row_code;
           req.body.file_extension = file_extension;

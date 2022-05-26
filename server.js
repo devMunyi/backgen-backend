@@ -17,7 +17,6 @@ const port = process.env.PORT || 5000;
 const hostname = "localhost";
 
 //configuring key middlewares
-
 app.use(compression()); //compresses static files
 app.use(morgan("dev")); //keep tracks of incoming requests
 app.use(express.json()); //enable express to receive form data in json format
