@@ -139,13 +139,14 @@ module.exports = {
       subfunc_id,
       language_id,
       framework_id,
+      user_impl_type_id,
       orderby,
       dir,
       rpp,
       offset,
     } = req.query;
 
-    //console.log("QUERY =>", req.query);
+    //console.log("USER IMPLEMENTATION =>", user_impl_type_id);
 
     if (!where_) {
       where_ = "c.status = 1";
@@ -178,6 +179,12 @@ module.exports = {
       framework_id = parseInt(framework_id);
       framework_ = ` AND c.framework_id = ${framework_id}`;
       where_ += framework_;
+    }
+
+    if (user_impl_type_id) {
+      user_impl_type_id = parseInt(user_impl_type_id);
+      implementation_ = ` AND c.user_impl_type_id = ${user_impl_type_id}`;
+      where_ += implementation_;
     }
 
     if (!orderby) {
