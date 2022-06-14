@@ -27,6 +27,7 @@
     "googleapis": "^100.0.0",
     "image-thumbnail": "^1.0.14",
     "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.3",
     "morgan": "^1.10.0",
     "mysql": "^2.18.1",
     "nodemailer": "^6.7.5",
@@ -36,7 +37,9 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "passport-twitter": "^0.1.5",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "query-string": "^7.1.1",
+    "util": "^0.12.4"
   },
   "devDependencies": {
     "nodemon": "^2.0.16"

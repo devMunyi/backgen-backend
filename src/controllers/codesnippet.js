@@ -7,8 +7,9 @@ const {
   getTotalRecords,
   searchCodesnippet,
   searchTotals,
-} = require("../models/codesnippet");
-const { inputAvailable } = require("../../helpers/common");
+} = require("../models/codesnippet"); //require codesnippet models to avail its featured methods
+const { inputAvailable } = require("../../helpers/common"); //require common helper functions
+const async = require("async");
 
 module.exports = {
   addCodeSnippet: (req, res) => {
@@ -127,7 +128,7 @@ module.exports = {
     });
   },
 
-  getCodeSnippets: (req, res) => {
+  getCodeSnippets: async (req, res) => {
     //initialize an empty object
     let queryObj = {};
 
@@ -224,13 +225,12 @@ module.exports = {
       } else {
         //get all total records
         getTotalRecords(queryObj, (err2, results2) => {
-          //console.log("TOTAL RECORDS =>", results2);
           if (err2) {
             console.log(err2);
             return;
           }
 
-          if (results2) {
+          if (results) {
             return res.json({
               success: true,
               all_totals: results2.all_totals,

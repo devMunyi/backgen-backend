@@ -1,4 +1,4 @@
-const pool = require("../../config/db.config");
+const pool = require("../../config/db.config"); //require database configurations for CRUD operations
 
 module.exports = {
   addUser: ({ username, fullname, email, country, password }, callback) => {
@@ -17,35 +17,35 @@ module.exports = {
     );
   },
 
-  addUserByGoogle: (
-    { fullname, username, email, provider, photo },
-    callback
-  ) => {
-    pool.query(
-      `INSERT INTO
-        pr_users(fullname, username, email, auth_provider, photo)
-      VALUES
-      (?, ?, ?, ?, ?)`,
-      [fullname, username, email, provider, photo],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
-  },
+  // addUserByGoogle: (
+  //   { fullname, username, email, provider, photo },
+  //   callback
+  // ) => {
+  //   pool.query(
+  //     `INSERT INTO
+  //       pr_users(fullname, username, email, auth_provider, photo)
+  //     VALUES
+  //     (?, ?, ?, ?, ?)`,
+  //     [fullname, username, email, provider, photo],
+  //     (error, results, fields) => {
+  //       if (error) {
+  //         return callback(error);
+  //       }
+  //       return callback(null, results);
+  //     }
+  //   );
+  // },
 
-  addUserByGthOrFbOrTwt: (
-    { fullname, username, email, provider, photo },
+  addUserByOauth: (
+    { fullname, username, email, provider, providerUserId, photo },
     callback
   ) => {
     pool.query(
       `INSERT INTO
-        pr_users(fullname, username, email, auth_provider, photo)
+        pr_users(fullname, username, email, auth_provider, provider_user_id, photo)
       VALUES
-      (?, ?, ?, ?, ?)`,
-      [fullname, username, email, provider, photo],
+      (?, ?, ?, ?, ?, ?)`,
+      [fullname, username, email, provider, providerUserId, photo],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -298,6 +298,20 @@ module.exports = {
           return callback(error);
         } else {
           return callback(null, results);
+        }
+      }
+    );
+  },
+
+  getUserByAuthProviderId: (providerUserId, callback) => {
+    pool.query(
+      `SELECT uid, email, password FROM pr_users WHERE provider_user_id = ?`,
+      [providerUserId],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        } else {
+          return callback(null, results[0]);
         }
       }
     );

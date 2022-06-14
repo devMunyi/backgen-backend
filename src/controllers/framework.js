@@ -5,8 +5,8 @@ const {
   updateFramework,
   deleteFramework,
   getTotalRecords,
-} = require("../models/framework");
-const { inputAvailable } = require("../../helpers/common");
+} = require("../models/framework"); //require framework models to avail its featured methods
+const { inputAvailable } = require("../../helpers/common"); //require common helper functions
 
 module.exports = {
   addFramework: (req, res) => {

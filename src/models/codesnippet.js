@@ -1,4 +1,4 @@
-const pool = require("../../config/db.config");
+const pool = require("../../config/db.config"); //require database configurations for CRUD operations
 
 module.exports = {
   addCodeSnippet: (
@@ -130,7 +130,9 @@ module.exports = {
         c.added_by,
         u.fullname,
         u.username,
-        u.auth_provider AS 'provider'
+        u.auth_provider AS 'provider',
+        c.instructions,
+        c.total_comments
       FROM
         pr_code_snippets c
       LEFT JOIN  pr_language_implementation_type lit
@@ -153,8 +155,43 @@ module.exports = {
         if (error) {
           return callback(error);
         }
-        //console.log("CODE RESULTS =>", results);
         return callback(null, results);
+      }
+    );
+  },
+
+  getCodeSnippetByCodeSnippetId: (id, callback) => {
+    pool.query(
+      `SELECT
+        c.uid,
+        c.title,
+        c.row_code,
+        c.file_extension,
+        c.func_id,
+        c.subfunc_id,
+        c.language_id,
+        c.framework_id,
+        c.instructions,
+        c.added_by,
+        u.fullname,
+        lit.title AS 'language_implementation_type',
+        uit.title AS 'user_implementation_type',
+        c.added_date
+      FROM
+        pr_code_snippets c
+        LEFT JOIN  pr_language_implementation_type lit
+      ON c.lang_impl_type_id = lit.uid
+        LEFT JOIN  pr_user_implementation_type uit
+      ON c.user_impl_type_id = uit.uid
+        LEFT JOIN pr_users u ON c.added_by = u.uid
+      WHERE
+        c.uid = ? AND c.status = 1`,
+      [id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results[0]);
       }
     );
   },
@@ -266,44 +303,6 @@ module.exports = {
     );
   },
 
-  getCodeSnippetByCodeSnippetId: (id, callback) => {
-    pool.query(
-      `SELECT
-        c.uid,
-        c.title,
-        c.row_code,
-        c.file_extension,
-        c.func_id,
-        c.subfunc_id,
-        c.language_id,
-        c.framework_id,
-        c.instructions,
-        c.added_by,
-        u.fullname,
-        lit.title AS 'language_implementation_type',
-        uit.title AS 'user_implementation_type',
-        c.added_date,
-        c.upvoters,
-        c.downvoters
-      FROM
-        pr_code_snippets c
-        LEFT JOIN  pr_language_implementation_type lit
-      ON c.lang_impl_type_id = lit.uid
-        LEFT JOIN  pr_user_implementation_type uit
-      ON c.user_impl_type_id = uit.uid
-        LEFT JOIN pr_users u ON c.added_by = u.uid
-      WHERE
-        c.uid = ? AND c.status = 1`,
-      [id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results[0]);
-      }
-    );
-  },
-
   deleteCodeSnippet: (id, callback) => {
     pool.query(
       `UPDATE
@@ -318,6 +317,24 @@ module.exports = {
           return callback(error);
         }
         return callback(null, results[0]);
+      }
+    );
+  },
+
+  incrementCommentsTotal: (code_snippet_id, callback) => {
+    pool.query(
+      `UPDATE
+        pr_code_snippets
+      SET
+      total_comments = total_comments + 1
+      WHERE
+        uid = ?`,
+      [code_snippet_id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
       }
     );
   },

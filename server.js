@@ -1,16 +1,15 @@
 //const cookieSession = require("cookie-session");
-const passport = require("passport");
+//const passport = require("passport");
 require("dotenv").config();
-const pool = require("./config/db.config");
-require("./src/passport");
+//require("./src/passport");
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const fileUpload = require("express-fileupload");
 const { readdirSync } = require("fs");
 const compression = require("compression");
-const session = require("express-session");
-const MySQLStore = require("express-mysql-session")(session);
+//const session = require("express-session");
+//const MySQLStore = require("express-mysql-session")(session);
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -22,7 +21,7 @@ app.use(morgan("dev")); //keep tracks of incoming requests
 app.use(express.json()); //enable express to receive form data in json format
 app.use(express.urlencoded({ extended: false })); //enable express to receive form data
 app.use(fileUpload()); //handles file uploads
-app.use("/back", express.static("public")); //defines where file requests should be retrieved
+app.use("/back", express.static("public")); //defines where static file requests should be retrieved
 app.use(
   cors({
     origin: [
@@ -72,30 +71,30 @@ if (process.env.NODE_ENV !== "Development") {
   storeOptions.database = process.env.DATABASE;
 }
 
-const sessionStore = new MySQLStore(storeOptions);
-const sessionOptions = {
-  name: process.env.SESSION_KEY,
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  store: sessionStore,
-  cookie: {
-    sameSite: "lax", //"strict" or "none"
-    secure: false,
-    maxAge: 1000 * 60 * 60 * 12, //12hours
-  },
-};
+// const sessionStore = new MySQLStore(storeOptions);
+// const sessionOptions = {
+//   name: process.env.SESSION_KEY,
+//   secret: process.env.SESSION_SECRET,
+//   resave: false,
+//   saveUninitialized: false,
+//   store: sessionStore,
+//   cookie: {
+//     sameSite: "lax", //"strict" or "none"
+//     secure: false,
+//     maxAge: 1000 * 60 * 60 * 12, //12hours
+//   },
+// };
 
-if (process.env.NODE_ENV !== "Development") {
-  sessionOptions.cookie.sameSite = "none";
-  sessionOptions.cookie.secure = true;
-  sessionOptions.cookie.httpOnly = false;
-}
+// if (process.env.NODE_ENV !== "Development") {
+//   sessionOptions.cookie.sameSite = "none";
+//   sessionOptions.cookie.secure = true;
+//   sessionOptions.cookie.httpOnly = false;
+// }
 
-app.use(session(sessionOptions));
+//app.use(session(sessionOptions));
 
-app.use(passport.initialize()); //initialize passport
-app.use(passport.session()); //initialize session with passport
+//app.use(passport.initialize()); //initialize passport
+//app.use(passport.session()); //initialize session with passport
 
 //Autoload routes
 readdirSync("./src/routes").map((r) =>

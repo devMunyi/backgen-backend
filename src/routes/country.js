@@ -4,20 +4,19 @@ const {
   getCountryByCountryId,
   updateCountry,
   deleteCountry,
-} = require("../controllers/country");
-const router = require("express").Router();
+} = require("../controllers/country"); //require country controller to avail its featured methods
+const router = require("express").Router(); //require router to define expected client request
 
-//////----begin imported custom middlewares
-const { checkToken } = require("../../middlewares/user");
+//////-------------------------begin imported custom middlewares
+const { checkToken } = require("../../middlewares/user"); //avail user checkToken middleware
 const {
-  countryIdValidation,
   countryAddValidation,
   countryEditValidation,
   validateImg,
-} = require("../../middlewares/country");
-//////-----End imported custom middlewares
+} = require("../../middlewares/country"); //avail country add/edit validation middlewares
+//////--------------------------End imported custom middlewares
 
-////----Begin routes defination
+////-------------------------------Begin routes defination
 router.post(
   "/add-country",
   checkToken,
@@ -30,17 +29,11 @@ router.get("/country", getCountryByCountryId);
 router.put(
   "/edit-country",
   checkToken,
-  countryIdValidation,
   validateImg,
   countryEditValidation,
   updateCountry
 );
-router.delete(
-  "/del-country",
-  checkToken,
-  countryIdValidation,
-  deleteCountry
-);
-////------End routes definations
+router.delete("/del-country", checkToken, deleteCountry);
+////---------------------------End routes definations
 
 module.exports = router; ////make the module available for imports

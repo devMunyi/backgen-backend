@@ -4,35 +4,25 @@ const {
   getCommentByCommentId,
   updateComment,
   deleteComment,
-} = require("../controllers/comment");
-const router = require("express").Router();
+  getCommentsByCodesnippetId,
+} = require("../controllers/comment"); //require comment controller to avail its featured methods
+const router = require("express").Router(); //require router to define expected client request
 
 //////----begin imported custom middlewares
-const { checkToken } = require("../../middlewares/user");
+const { checkToken } = require("../../middlewares/user"); //avail user checkToken middleware
 const {
   commentAddValidation,
   commentEditValidation,
-  commentIdValidation,
-} = require("../../middlewares/comment");
+} = require("../../middlewares/comment"); //avail comment add/edit validation middlewares
 //////-----End imported custom middlewares
 
 ////----Begin routes defination
 router.post("/add-comment", checkToken, commentAddValidation, addComment);
 router.get("/comments", getComments);
 router.get("/comment", getCommentByCommentId);
-router.put(
-  "/edit-comment",
-  checkToken,
-  commentIdValidation,
-  commentEditValidation,
-  updateComment
-);
-router.delete(
-  "/del-comment",
-  checkToken,
-  commentIdValidation,
-  deleteComment
-);
+router.put("/edit-comment", checkToken, commentEditValidation, updateComment);
+router.delete("/del-comment", checkToken, deleteComment);
+router.get("/comments-by-codeid", getCommentsByCodesnippetId);
 ////------End routes definations
 
 module.exports = router; ////make the module available for imports

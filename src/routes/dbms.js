@@ -5,32 +5,26 @@ const {
   updateDbms,
   deleteDbms,
   reactivateDbms,
-} = require("../controllers/dbms");
-const router = require("express").Router();
+} = require("../controllers/dbms"); //require dbms controller to avail its featured methods
+const router = require("express").Router(); //require router to define expected client request
 
-//////----begin imported custom middlewares
-const { checkToken } = require("../../middlewares/user");
+//////--------------------------------begin imported custom middlewares
+const { checkToken } = require("../../middlewares/user"); //avail user checkToken middleware
 const {
-  dbmsIdValidation,
   dbmsAddValidation,
   dbmsEditValidation,
   validateImg,
-} = require("../../middlewares/dbms");
+} = require("../../middlewares/dbms"); //avail dbms add/edit validation middlewares
 
-//////-----End imported custom middlewares
+//////---------------------------------End imported custom middlewares
 
-////----Begin routes defination
+////---------------------------------Begin routes defination
 router.post("/add-dbms", validateImg, dbmsAddValidation, addDbms);
 router.get("/dbmses", getDbmses);
 router.get("/dbms", getDbmsByDbmsId);
-router.put(
-  "/edit-dbms",
-  validateImg,
-  dbmsEditValidation,
-  updateDbms
-);
+router.put("/edit-dbms", validateImg, dbmsEditValidation, updateDbms);
 router.delete("/del-dbms", deleteDbms);
 router.put("/reactivate-dbms", reactivateDbms);
-////------End routes definations
+////----------------------------End routes definations
 
 module.exports = router; //make the module available for imports

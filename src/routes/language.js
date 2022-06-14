@@ -4,27 +4,21 @@ const {
   getLanguageByLanguageId,
   updateLanguage,
   deleteLanguage,
-  reactivateLanguage
-} = require("../controllers/language");
-const router = require("express").Router();
+  reactivateLanguage,
+} = require("../controllers/language"); //require language controller to avail its featured methods
+const router = require("express").Router(); //require router to define expected client request
 
-/////----begin imported custom middlewares
-const { checkToken } = require("../../middlewares/user");
+/////-------------------------begin imported custom middlewares
+const { checkToken } = require("../../middlewares/user"); //avail user checkToken middleware
 const {
   languageAddValidation,
-  languageIdValidation,
   languageEditValidation,
   validateImg,
-} = require("../../middlewares/language");
-/////----End imported custom middlewares
+} = require("../../middlewares/language"); //avail langauage add/edit validation middlewares
+/////--------------------------End imported custom middlewares
 
-///----Routes definations
-router.post(
-  "/add-language",
-  validateImg,
-  languageAddValidation,
-  addLanguage
-);
+///---------------------------Routes defination
+router.post("/add-language", validateImg, languageAddValidation, addLanguage);
 router.get("/languages", getLanguages);
 router.get("/language", getLanguageByLanguageId);
 router.put(
@@ -33,9 +27,8 @@ router.put(
   languageEditValidation,
   updateLanguage
 );
-router.delete(
-  "/del-language",
-  deleteLanguage
-);
+router.delete("/del-language", deleteLanguage);
 router.put("/reactivate-language", reactivateLanguage);
+/////--------------------------End Routes defination
+
 module.exports = router; ////make the module available for imports

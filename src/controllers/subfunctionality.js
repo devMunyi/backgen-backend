@@ -6,8 +6,8 @@ const {
   deleteSubfunc,
   reactivateSubfunc,
   getTotalRecords,
-} = require("../models/subfunctionality");
-const { inputAvailable } = require("../../helpers/common");
+} = require("../models/subfunctionality"); //require subfunctionality models to avail its featured methods
+const { inputAvailable } = require("../../helpers/common"); //require helper functions
 
 module.exports = {
   addSubfunc: (req, res) => {

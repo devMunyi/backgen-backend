@@ -4,21 +4,20 @@ const {
   getFrameworkByFrameworkId,
   updateFramework,
   deleteFramework,
-  reactivateFramework
-} = require("../controllers/framework");
-const router = require("express").Router();
+  reactivateFramework,
+} = require("../controllers/framework"); //require framework controller to avail its featured methods
+const router = require("express").Router(); //require router to define expected client request
 
-/////-----Begin of imported custom middlewares
-const { checkToken } = require("../../middlewares/user");
+/////----------------------------Begin of imported custom middlewares
+const { checkToken } = require("../../middlewares/user"); //avail user checkToken middleware
 const {
   frameworkAddValidation,
-  frameworkIdValidation,
   frameworkEditValidation,
   validateImg,
-} = require("../../middlewares/framework");
-/////-----End of imported custom middlewares
+} = require("../../middlewares/framework"); //avail framework add/edit validation middlewares
+/////-------------------------End of imported custom middlewares
 
-////Routes definations
+/////--------------------------Routes definations
 router.post(
   "/add-framework",
   validateImg,
@@ -33,9 +32,8 @@ router.put(
   frameworkEditValidation,
   updateFramework
 );
-router.delete(
-  "/del-framework",
-  deleteFramework
-);
+router.delete("/del-framework", deleteFramework);
 router.put("/reactivate-framework", reactivateFramework);
+///-----------------------End routes definations
+
 module.exports = router; //make the module available for imports

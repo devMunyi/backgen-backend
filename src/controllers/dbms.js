@@ -6,8 +6,8 @@ const {
   deleteDbms,
   reactivateDbms,
   getTotalRecords,
-} = require("../models/dbms");
-const { inputAvailable } = require("../../helpers/common");
+} = require("../models/dbms"); //require dbms models to avail its featured methods
+const { inputAvailable } = require("../../helpers/common"); //require common helper functions
 
 module.exports = {
   addDbms: (req, res) => {

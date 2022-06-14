@@ -4,7 +4,7 @@ const {
   getCountries,
   updateCountry,
   deleteCountry,
-} = require("../models/country");
+} = require("../models/country"); //require country models to avail its featured methods
 
 module.exports = {
   addCountry: (req, res) => {
@@ -28,7 +28,7 @@ module.exports = {
   getCountryByCountryId: (req, res) => {
     const { country_id } = req.query;
 
-    if(!country_id){
+    if (!country_id) {
       return;
     }
 

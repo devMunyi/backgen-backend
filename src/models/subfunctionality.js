@@ -1,5 +1,4 @@
-const { query } = require("express");
-const pool = require("../../config/db.config");
+const pool = require("../../config/db.config"); //require database configurations for CRUD operations
 
 module.exports = {
   addSubfunc: ({ func_id, name, added_by }, callback) => {

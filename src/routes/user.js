@@ -1,6 +1,7 @@
-require("dotenv").config();
-const router = require("express").Router();
-const passport = require("passport");
+require("dotenv").config(); //require environment variables
+const router = require("express").Router(); //require router to define expected client request
+const passport = require("passport"); //require passport
+const queryString = require("query-string");
 
 const {
   addUser,
@@ -16,32 +17,34 @@ const {
   googleOAuthSignup,
   githubOAuthSignup,
   githubOAuthSignin,
-} = require("../controllers/user");
+  facebookOAuthSignup,
+  facebookOAuthSignin,
+} = require("../controllers/user"); //require user controller to avail its featured methods
 
-////----Begin import of custom middlewares
+////----------------------------------Begin import of custom middlewares
 const {
   userRegisterValidation,
   userEditValidation,
   checkToken,
-  validateUserLogin,
-} = require("../../middlewares/user");
-const { google } = require("googleapis");
+} = require("../../middlewares/user"); //avail user add/edit validation middlewares
+const { google } = require("googleapis"); //avail googleapis to allow google OAUTH
 
-// ////---End import of custom middlewares
+////-----------------------------------End import of custom middlewares
 
 const oauth2ClientSignin = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.SIGNIN_GOOGLE_CALLBACK_URL
-); /// Initializing Google oauth signin client parameters
+); ///--Initializing Google oauth signin client parameters
 
 const oauth2ClientSignup = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.SIGNUP_GOOGLE_CALLBACK_URL
-); /// Initializing Google oauth signup client parameters
+); ///--Initializing Google oauth signup client parameters
 
-////----------Begin sign in with google route, without passport
+//---------------------------------Routes defination
+//--Begin sign in with google route, without passport
 router.get("/google/signin", (req, res) => {
   //generate url for google oauth
   function getGoogleAuthURL() {
@@ -66,9 +69,9 @@ router.get("/google/signin", (req, res) => {
 
 router.get("/google/signin/callback", googleOAuthSignin);
 
-////----End sign in with google route, without passport
+///--End sign in with google route, without passport
 
-////----Begin sign up with google route, without passport
+///--Begin sign up with google route, without passport
 router.get("/google/signup", (req, res) => {
   //generate url for google oauth
   function getGoogleAuthURL() {
@@ -93,9 +96,9 @@ router.get("/google/signup", (req, res) => {
 
 router.get("/google/signup/callback", googleOAuthSignup);
 
-///----End sign up with google route, without using passport
+///--End sign up with google route, without using passport
 
-///-----Begin sign in with github oauth without passport js
+///--Begin sign in with github oauth without passport js
 router.get("/github/signin", (req, res) => {
   res.redirect(
     `https://github.com/login/oauth/authorize?client_id=${process.env.SIGNIN_GITHUB_CLIENT_ID}`
@@ -103,9 +106,9 @@ router.get("/github/signin", (req, res) => {
 });
 
 router.get("/github/signin/callback", githubOAuthSignin);
-///-----End sign in with github oauth without passport js
+///--End sign in with github oauth without passport js
 
-///-----Begin sign up with github oauth without passport js
+///--Begin sign up with github oauth without passport js
 router.get("/github/signup", (req, res) => {
   res.redirect(
     `https://github.com/login/oauth/authorize?client_id=${process.env.SIGNUP_GITHUB_CLIENT_ID}`
@@ -113,13 +116,57 @@ router.get("/github/signup", (req, res) => {
 });
 
 router.get("/github/signup/callback", githubOAuthSignup);
-///-----End sign up with github oauth without passport js
+///--End sign up with github oauth without passport js
+
+///--Begin sign up with facebook route, without passport
+router.get("/facebook/signup", (req, res) => {
+  //generate url for facebook oauth
+  function getFacebookAuthURL() {
+    const stringifiedParams = queryString.stringify({
+      client_id: process.env.FACEBOOK_APP_ID,
+      redirect_uri: process.env.SIGNUP_FACEBOOK_CALLBACK_URL,
+      scope: ["email", "user_friends"].join(","), // comma seperated string
+      response_type: "code",
+      auth_type: "rerequest",
+      display: "popup",
+    });
+    return `https://www.facebook.com/v4.0/dialog/oauth?${stringifiedParams}`;
+  }
+
+  let fbOuthUrl = getFacebookAuthURL();
+  res.redirect(fbOuthUrl);
+});
+
+router.get("/facebook/signup/callback", facebookOAuthSignup);
+///--End sign up with facebook route, without using passport
+
+///--Begin sign up with facebook route, without passport
+router.get("/facebook/signin", (req, res) => {
+  //generate url for facebook oauth
+  function getFacebookAuthURL() {
+    const stringifiedParams = queryString.stringify({
+      client_id: process.env.FACEBOOK_APP_ID,
+      redirect_uri: process.env.SIGNIN_FACEBOOK_CALLBACK_URL,
+      scope: ["email", "user_friends"].join(","), // comma seperated string
+      response_type: "code",
+      auth_type: "rerequest",
+      display: "popup",
+    });
+    return `https://www.facebook.com/v4.0/dialog/oauth?${stringifiedParams}`;
+  }
+
+  let fbOuthUrl = getFacebookAuthURL();
+  //console.log("fb url => ", fbOuthUrl);
+  res.redirect(fbOuthUrl);
+});
+
+router.get("/facebook/signin/callback", facebookOAuthSignin);
+///--End sign up with facebook route, without using passport
 
 router.post("/forgot-password", forgotPassword); // forgot password route
 
 router.post("/reset-password", resetPassword); //reset password route
 
-///----Routes defination
 router.post("/add-user", userRegisterValidation, addUser); //register or add new user
 router.get("/users", getUsers); //get all users
 router.get("/user", getUserByUserId); //get a user by specified id param

@@ -1,10 +1,12 @@
+require("dotenv").config();
 const pool = require("../config/db.config");
+const axios = require("axios");
 
 module.exports = {
   //Get user by username from database by username
   checkUsersByUsername: (username, callback) => {
     pool.query(
-      `SELECT uid FROM pr_users WHERE username = ?`,
+      `SELECT uid FROM pr_users WHERE username = ? AND auth_provider = 'Local'`,
       [username],
       (error, results, fields) => {
         if (error) {
@@ -19,7 +21,7 @@ module.exports = {
   //Get user from database by username and id when updating
   checkIfSimilarUsernameExist: (username, id, callback) => {
     pool.query(
-      `SELECT uid FROM pr_users WHERE username = ? AND uid != ?`,
+      `SELECT uid FROM pr_users WHERE username = ? AND uid != ? AND auth_provider = 'Local'`,
       [username, id],
       (error, results, fields) => {
         if (error) {
@@ -34,7 +36,7 @@ module.exports = {
   //retrieve user from database by email
   checkUsersByEmail: (email, callback) => {
     pool.query(
-      `SELECT uid FROM pr_users WHERE email = ? AND status = 1`,
+      `SELECT uid FROM pr_users WHERE email = ? AND status = 1 AND auth_provider = 'Local'`,
       [email],
       (error, results, fields) => {
         if (error) {
@@ -49,7 +51,7 @@ module.exports = {
   //retrieve user by email and id
   checkIfSimilarEmailExist: (email, id, callback) => {
     pool.query(
-      `SELECT uid FROM pr_users WHERE email = ? AND uid != ?`,
+      `SELECT uid FROM pr_users WHERE email = ? AND uid != ? AND auth_provider = 'Local'`,
       [email, id],
       (error, results, fields) => {
         if (error) {

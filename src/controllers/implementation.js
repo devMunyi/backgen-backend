@@ -8,8 +8,8 @@ const {
   getTotalRecords,
   getTotalRecords2,
   getImplementationsByFunAndSubfun,
-} = require("../models/implementation");
-const { inputAvailable } = require("../../helpers/common");
+} = require("../models/implementation"); //require implementation models to avail its featured methods
+const { inputAvailable } = require("../../helpers/common"); //require common helper functions
 
 module.exports = {
   addImplementation: (req, res) => {

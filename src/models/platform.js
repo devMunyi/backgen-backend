@@ -1,4 +1,4 @@
-const pool = require("../../config/db.config");
+const pool = require("../../config/db.config"); //require database configurations for CRUD operations
 
 module.exports = {
   addPlatform: ({ name, description, icon, added_by }, callback) => {

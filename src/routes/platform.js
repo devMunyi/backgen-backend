@@ -4,27 +4,21 @@ const {
   getPlatformByPlatformId,
   updatePlatform,
   deletePlatform,
-  reactivatePlatform
-} = require("../controllers/platform");
-const router = require("express").Router();
+  reactivatePlatform,
+} = require("../controllers/platform"); //require platform controller to avail its featured methods
+const router = require("express").Router(); //require router to define expected client request
 
-/////-----Begin of imported custom middlewares
-const { checkToken } = require("../../middlewares/user");
+/////---------------------------Begin of imported custom middlewares
+const { checkToken } = require("../../middlewares/user"); //avail user checkToken middleware
 const {
   platformAddValidation,
-  platformIdValidation,
   platformEditValidation,
   validateImg,
-} = require("../../middlewares/platform");
-////----End of imported custom middlewares
+} = require("../../middlewares/platform"); //avail platform add/edit validation middlewares
+////----------------------------End of imported custom middlewares
 
-//Routes defination
-router.post(
-  "/add-platform",
-  validateImg,
-  platformAddValidation,
-  addPlatform
-);
+//////---------------------------Begin Routes defination
+router.post("/add-platform", validateImg, platformAddValidation, addPlatform);
 router.get("/platforms", getPlatforms);
 router.get("/platform", getPlatformByPlatformId);
 router.put(
@@ -33,10 +27,8 @@ router.put(
   platformEditValidation,
   updatePlatform
 );
-router.delete(
-  "/del-platform",
-  deletePlatform
-);
+router.delete("/del-platform", deletePlatform);
 router.put("/reactivate-platform", reactivatePlatform);
+//////---------------------------End Routes defination
 
 module.exports = router; //make the module available for imports

@@ -17,10 +17,10 @@ module.exports = {
   },
 
   //used when adding new codesnippet, to handle name/title uniqueness
-  checkCodesnippetsByText: (text, callback) => {
+  checkCodesnippetsBycomment_body: (comment_body, callback) => {
     pool.query(
-      `SELECT uid FROM pr_comments WHERE text = ?`,
-      [text],
+      `SELECT uid FROM pr_comments WHERE comment_body = ?`,
+      [comment_body],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -32,10 +32,10 @@ module.exports = {
   },
 
   //Used when editing language details, to handle name/title uniqueness
-  checkIfSimilarTextExist: (text, id, callback) => {
+  checkIfSimilarcomment_bodyExist: (comment_body, id, callback) => {
     pool.query(
-      `SELECT uid FROM pr_comments WHERE text = ? AND uid != ?`,
-      [text, 1, id],
+      `SELECT uid FROM pr_comments WHERE comment_body = ? AND uid != ?`,
+      [comment_body, 1, id],
       (error, results, fields) => {
         if (error) {
           return callback(error);

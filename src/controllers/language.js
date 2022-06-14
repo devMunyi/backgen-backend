@@ -5,9 +5,9 @@ const {
   updateLanguage,
   deleteLanguage,
   getTotalRecords,
-  reactivateLanguage
-} = require("../models/language");
-const { inputAvailable } = require("../../helpers/common");
+  reactivateLanguage,
+} = require("../models/language"); //require language models to avail its featured methods
+const { inputAvailable } = require("../../helpers/common"); //require common helper functions
 
 module.exports = {
   addLanguage: (req, res) => {
@@ -36,7 +36,7 @@ module.exports = {
     if (!where_) {
       where_ = "status = 1";
     }
-    
+
     let andsearch;
     search_ = inputAvailable(search_);
     if (search_ != undefined) {

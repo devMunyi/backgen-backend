@@ -6,10 +6,9 @@ const {
   deleteFunc,
   reactivateFunc,
   getTotalRecords,
-} = require("../models/functionality");
-const async = require("async");
-
-const { inputAvailable } = require("../../helpers/common");
+} = require("../models/functionality"); //require functionality models to avail its featured methods
+//const async = require("async");
+const { inputAvailable } = require("../../helpers/common"); //require common helper functions
 
 module.exports = {
   addFunc: (req, res) => {

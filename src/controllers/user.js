@@ -7,29 +7,30 @@ const {
   deleteUser,
   getUserByUsernameOrByEmail,
   getUserByUsernameOrByEmail2,
-  addUserByGthOrFbOrTwt,
   getCurrentUser,
   checkUserByEmail,
   checkUserById,
   userByEmailAndId,
   updatePassword,
-  addUserByGoogle,
-} = require("../models/user");
-const { genSaltSync, hashSync, compareSync } = require("bcrypt");
-const { sign, verify } = require("jsonwebtoken");
-const queryString = require("querystring");
-const axios = require("axios");
+  addUserByOauth,
+  getUserByAuthProviderId,
+} = require("../models/user"); //user model require
+const { genSaltSync, hashSync, compareSync } = require("bcrypt"); //require bcrypt to handle password
+const { sign, verify } = require("jsonwebtoken"); //require jwt to handle issuing of access tokens
+//const queryString = require("querystring");
+const axios = require("axios"); //require axios to handle API call using get, post, delete, put
+//const async = require("async");
+const nodemailer = require("nodemailer"); //require nodemailer to handle sending emails
+const { google } = require("googleapis"); //require googleapis to handle google OUATH
 
-const async = require("async");
-const nodemailer = require("nodemailer");
-const { google } = require("googleapis");
-
+//google oauth sign in options
 const oauth2ClientSignin = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.SIGNIN_GOOGLE_CALLBACK_URL
 );
 
+//google oauth sign up options
 const oauth2ClientSignup = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
@@ -193,10 +194,6 @@ module.exports = {
 
   currentUser: (req, res) => {
     const { uid } = req.user;
-
-    //const { country, ...rest } = result;
-    //console.log(rest);
-
     getCurrentUser(uid, (err, results) => {
       if (err) {
         console.log(err);
@@ -426,10 +423,11 @@ module.exports = {
     let fullname = googleUser.name;
     let photo = googleUser.picture;
     let provider = "Google";
+    let providerUserId = googleUser.id;
 
-    let user = { username, email, fullname, photo, provider };
+    let user = { username, email, fullname, photo, provider, providerUserId };
 
-    checkUserByEmail(email, (err, result) => {
+    getUserByAuthProviderId(providerUserId, (err, result) => {
       if (err) {
         console.log(err);
       }
@@ -443,7 +441,9 @@ module.exports = {
             "&message=" +
             "Sign in Error. Please Sign up with Google First" +
             "&provider=" +
-            provider
+            provider +
+            "&providerUserId=" +
+            providerUserId
         );
       }
 
@@ -473,7 +473,9 @@ module.exports = {
             "&photo=" +
             photo +
             "&provider=" +
-            provider
+            provider +
+            "&providerUserId=" +
+            providerUserId
         );
       }
     });
@@ -512,10 +514,11 @@ module.exports = {
     let fullname = googleUser.name;
     let photo = googleUser.picture;
     let provider = "Google";
+    let providerUserId = googleUser.id;
 
-    let user = { username, email, fullname, photo, provider };
+    let user = { username, email, fullname, photo, provider, providerUserId };
 
-    checkUserByEmail(email, (err, result) => {
+    getUserByAuthProviderId(providerUserId, (err, result) => {
       if (err) {
         console.log(err);
       }
@@ -529,13 +532,15 @@ module.exports = {
             "&message=" +
             "Google Account Already Exists. Sign in with Google Instead" +
             "&provider=" +
-            provider
+            provider +
+            "&providerUserId=" +
+            providerUserId
         );
       }
 
       if (!result) {
         //store user info
-        addUserByGoogle(user, (err, results) => {
+        addUserByOauth(user, (err, results) => {
           if (err) {
             console.log(err);
             return res.json(); //return empty response to client side
@@ -547,7 +552,9 @@ module.exports = {
                 "&message=" +
                 "Sign up success" +
                 "&provider=" +
-                provider
+                provider +
+                "&providerUserId=" +
+                providerUserId
             );
           }
         });
@@ -577,6 +584,221 @@ module.exports = {
     }
   },
 
+  facebookOAuthSignup: async (req, res) => {
+    const { code } = req.query;
+    const access_token = await getAccessTokenFromCode(code);
+    const facebookUser = await getFacebookUserData(access_token);
+
+    let username = "";
+    let { email } = facebookUser;
+    let fullname = facebookUser.name;
+    let photo = facebookUser.picture.data.url;
+    let provider = "Facebook";
+    let providerUserId = facebookUser.id;
+
+    let user = { username, email, fullname, photo, provider, providerUserId };
+    //return res.send(user);
+
+    getUserByAuthProviderId(providerUserId, (err, result) => {
+      if (err) {
+        console.log("Error : ", err.message);
+      }
+
+      if (result) {
+        //Similar user exists, redirect user to login with google instead
+        return res.redirect(
+          process.env.SIGNUP_CLIENT_URL +
+            "?success=" +
+            false +
+            "&message=" +
+            "Facebook Account Already Exists. Sign in with Facebook Instead" +
+            "&provider=" +
+            provider +
+            "&providerUserId" +
+            providerUserId
+        );
+      }
+
+      if (!result) {
+        //store user info
+        addUserByOauth(user, (err, results) => {
+          if (err) {
+            console.log(err);
+            return res.json(); //return empty response to client side
+          } else {
+            return res.redirect(
+              process.env.SIGNUP_CLIENT_URL +
+                "?success=" +
+                true +
+                "&message=" +
+                "Sign up success" +
+                "&provider=" +
+                provider +
+                "&providerUserId" +
+                providerUserId
+            );
+          }
+        });
+      }
+    });
+
+    //get user with code coming from query callback url
+    async function getFacebookUserData(access_token) {
+      try {
+        const { data } = await axios({
+          url: "https://graph.facebook.com/me",
+          method: "GET",
+          params: {
+            fields: [
+              "id",
+              "email",
+              "name",
+              "first_name",
+              "last_name",
+              "picture",
+            ].join(","), //id, firstname, last_name, middle_name, name, name_format, picture, short_name,
+            access_token,
+          },
+        });
+        //console.log(data); // { id, email, first_name, last_name }
+        return data;
+      } catch (error) {
+        console.log("Error : ", error.message);
+      }
+    }
+
+    async function getAccessTokenFromCode(code) {
+      try {
+        const { data } = await axios({
+          url: "https://graph.facebook.com/v4.0/oauth/access_token",
+          method: "GET",
+          params: {
+            client_id: process.env.FACEBOOK_APP_ID,
+            client_secret: process.env.FACEBOOK_APP_SECRET,
+            redirect_uri: process.env.SIGNUP_FACEBOOK_CALLBACK_URL + "/",
+            code,
+          },
+        });
+        //console.log(data); // { access_token, token_type, expires_in }
+        return data.access_token;
+      } catch (error) {
+        console.log("Error : ", error.message);
+      }
+    }
+  },
+
+  facebookOAuthSignin: async (req, res) => {
+    const { code } = req.query;
+    const access_token = await getAccessTokenFromCode(code);
+    const facebookUser = await getFacebookUserData(access_token);
+    console.log("FACEBOOK USER => ", facebookUser);
+
+    let username = "";
+    let email = facebookUser.email;
+    let fullname = facebookUser.name;
+    let photo = facebookUser.picture.data.url;
+    let provider = "Facebook";
+    let providerUserId = facebookUser.id;
+
+    let user = { username, email, fullname, photo, provider, providerUserId };
+    //return res.send(user);
+
+    getUserByAuthProviderId(providerUserId, (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+
+      if (!result) {
+        //redirect user back to login with success false
+        return res.redirect(
+          process.env.SIGNIN_CLIENT_URL +
+            "?success=" +
+            false +
+            "&message=" +
+            "Sign in Error. Please Sign up with Facebook First" +
+            "&provider=" +
+            provider +
+            "&providerUserId=" +
+            providerUserId
+        );
+      }
+
+      if (result) {
+        user.uid = result.uid;
+        const token = sign(user, process.env.JWT_SECRET, { expiresIn: "8h" }); //generate token to track user later
+
+        //rdirect user back to login page with a success token
+        return res.redirect(
+          process.env.SIGNIN_CLIENT_URL +
+            "?success=" +
+            true +
+            "&provider=" +
+            provider +
+            "&providerUserId=" +
+            providerUserId +
+            "&tkn=" +
+            token +
+            "&uid=" +
+            user.uid +
+            "&username=" +
+            username +
+            "&fullname=" +
+            fullname +
+            "&email=" +
+            email +
+            "&photo=" +
+            photo
+        );
+      }
+    });
+
+    //get user with code coming from query callback url
+    async function getFacebookUserData(access_token) {
+      try {
+        const { data } = await axios({
+          url: "https://graph.facebook.com/me",
+          method: "GET",
+          params: {
+            fields: [
+              "id",
+              "email",
+              "name",
+              "first_name",
+              "last_name",
+              "picture",
+            ].join(","), //id, firstname, last_name, middle_name, name, name_format, picture, short_name,
+            access_token,
+          },
+        });
+        //console.log(data); // { id, email, first_name, last_name }
+        return data;
+      } catch (error) {
+        console.log(error);
+        return res.json({ success: false, message: error.message });
+      }
+    }
+
+    async function getAccessTokenFromCode(code) {
+      try {
+        const { data } = await axios({
+          url: "https://graph.facebook.com/v4.0/oauth/access_token",
+          method: "GET",
+          params: {
+            client_id: process.env.FACEBOOK_APP_ID,
+            client_secret: process.env.FACEBOOK_APP_SECRET,
+            redirect_uri: process.env.SIGNIN_FACEBOOK_CALLBACK_URL + "/",
+            code,
+          },
+        });
+        //console.log(data); // { access_token, token_type, expires_in }
+        return data.access_token;
+      } catch (error) {
+        console.log(error);
+        return res.json({ success: false, message: error.message });
+      }
+    }
+  },
+
   githubOAuthSignin: async (req, res) => {
     const { code } = req.query;
 
@@ -588,7 +810,8 @@ module.exports = {
     let email = githubUser.email;
     let photo = githubUser.avatar_url;
     let provider = "Github";
-    let githubId = githubUser.id;
+    let providerUserId = githubUser.id;
+    console.log("GITHUB USER ID => ", providerUserId);
 
     let user = {
       username,
@@ -596,10 +819,11 @@ module.exports = {
       email,
       photo,
       provider,
+      providerUserId,
     };
 
     //db check
-    getUserByUsernameOrByEmail2({ email, username }, (err, result) => {
+    getUserByAuthProviderId(providerUserId, (err, result) => {
       if (!result) {
         //redirect user back to login with success false
         return res.redirect(
@@ -609,7 +833,9 @@ module.exports = {
             "&message=" +
             "Sign in Error. Please Sign up with Github First" +
             "&provider=" +
-            provider
+            provider +
+            "&providerUserId" +
+            providerUserId
         );
       }
 
@@ -636,7 +862,9 @@ module.exports = {
             "&photo=" +
             photo +
             "&provider=" +
-            provider
+            provider +
+            "&providerUserId = " +
+            providerUserId
         );
       }
     });
@@ -684,7 +912,8 @@ module.exports = {
     let email = githubUser.email;
     let photo = githubUser.avatar_url;
     let provider = "Github";
-    let githubId = githubUser.id;
+    let providerUserId = githubUser.id;
+    console.log("GITHUB USER ID => ", providerUserId);
 
     let user = {
       username,
@@ -692,10 +921,11 @@ module.exports = {
       email,
       photo,
       provider,
+      providerUserId,
     };
 
     //db check
-    getUserByUsernameOrByEmail2({ email, username }, (err, result) => {
+    getUserByAuthProviderId(providerUserId, (err, result) => {
       if (err) {
         console.log(err);
       }
@@ -709,13 +939,15 @@ module.exports = {
             "&message=" +
             "Github Account Already Exists. Sign in with Github Instead" +
             "&provider=" +
-            provider
+            provider +
+            "&providerUserId" +
+            providerUserId
         );
       }
 
       if (!result) {
         //store user info
-        addUserByGthOrFbOrTwt(user, (err, results) => {
+        addUserByOauth(user, (err, results) => {
           if (err) {
             console.log(err);
             return res.json(); //return empty response to client side
@@ -734,7 +966,7 @@ module.exports = {
       }
     });
 
-    ///get exchange code with access token
+    //get exchange code with access token
     async function getAccessToken(code) {
       const { data } = await axios({
         method: "post",

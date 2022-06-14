@@ -1,4 +1,4 @@
-const { addListener } = require("../../config/db.config");
+require("../../config/db.config"); //require database configurations
 const {
   addPlatform,
   getPlatformByPlatformId,
@@ -6,9 +6,9 @@ const {
   updatePlatform,
   deletePlatform,
   getTotalRecords,
-  reactivatePlatform
-} = require("../models/platform");
-const {inputAvailable} = require("../../helpers/common");
+  reactivatePlatform,
+} = require("../models/platform"); //require platform models to avail its featured methods
+const { inputAvailable } = require("../../helpers/common"); //require helper functions
 
 module.exports = {
   addPlatform: (req, res) => {
@@ -37,7 +37,7 @@ module.exports = {
     if (!where_) {
       where_ = "status = 1";
     }
-    
+
     let andsearch;
     search_ = inputAvailable(search_);
     if (search_ != undefined) {
@@ -68,7 +68,6 @@ module.exports = {
     queryObj.offset = parseInt(offset);
     queryObj.rpp = parseInt(rpp);
 
-
     getPlatforms(queryObj, (err, results) => {
       if (err) {
         console.log(err);
@@ -86,18 +85,18 @@ module.exports = {
           const icon = `/images/platform/${result.icon}`;
           result.icon = icon;
         });
-        
+
         //get all total records
         getTotalRecords(queryObj, (err2, results2) => {
-          if(err2){
-            console.log(err2)
+          if (err2) {
+            console.log(err2);
             return;
           }
 
           if (results2) {
             return res.json({
               success: true,
-              all_totals:results2.all_totals,
+              all_totals: results2.all_totals,
               data: results,
             });
           }
@@ -120,7 +119,7 @@ module.exports = {
       where_,
       platform_id: parseInt(platform_id),
     };
-    
+
     getPlatformByPlatformId(obj, (err, results) => {
       if (err) {
         console.log(err);
