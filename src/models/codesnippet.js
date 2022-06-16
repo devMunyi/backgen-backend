@@ -338,4 +338,22 @@ module.exports = {
       }
     );
   },
+
+  decrementCommentsTotal: (code_snippet_id, callback) => {
+    pool.query(
+      `UPDATE
+        pr_code_snippets
+      SET
+      total_comments = total_comments - 1
+      WHERE
+        uid = ?`,
+      [code_snippet_id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
+      }
+    );
+  },
 };

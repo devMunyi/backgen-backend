@@ -5,6 +5,8 @@ const {
   updateComment,
   deleteComment,
   getCommentsByCodesnippetId,
+  upvoteComment,
+  downvoteComment,
 } = require("../controllers/comment"); //require comment controller to avail its featured methods
 const router = require("express").Router(); //require router to define expected client request
 
@@ -23,6 +25,8 @@ router.get("/comment", getCommentByCommentId);
 router.put("/edit-comment", checkToken, commentEditValidation, updateComment);
 router.delete("/del-comment", checkToken, deleteComment);
 router.get("/comments-by-codeid", getCommentsByCodesnippetId);
+router.put("/upvote-comment", upvoteComment);
+router.put("/downvote-comment", downvoteComment);
 ////------End routes definations
 
 module.exports = router; ////make the module available for imports

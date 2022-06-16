@@ -1,7 +1,7 @@
 const pool = require("../../config/db.config"); //require database configurations for CRUD operations
-const util = require("util");
+//const util = require("util");
 // node native promisify
-const query = util.promisify(pool.query).bind(pool);
+//const query = util.promisify(pool.query).bind(pool);
 
 module.exports = {
   addComment: (
@@ -183,12 +183,30 @@ module.exports = {
     );
   },
 
-  incrementVotesTotal: (comment_id) => {
+  decrementRepliesTotal: ({ replying_to, code_snippet_id }, callback) => {
     pool.query(
       `UPDATE
       pr_comments
       SET
-      votes = votes + 1
+      total_replies = total_replies - 1
+      WHERE
+        uid = ? AND code_snippet_id = ?`,
+      [replying_to, code_snippet_id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
+      }
+    );
+  },
+
+  incrementCommentVotes: ({ comment_id, step }, callback) => {
+    pool.query(
+      `UPDATE
+      pr_comments
+      SET
+      votes = votes + ${step}
       WHERE
         uid = ?`,
       [comment_id],
@@ -197,6 +215,42 @@ module.exports = {
           return callback(error);
         }
         return callback(null, results);
+      }
+    );
+  },
+  decrementCommentVotes: ({ comment_id, step }, callback) => {
+    pool.query(
+      `UPDATE
+      pr_comments
+      SET
+      votes = votes - ${step}
+      WHERE
+        uid = ?`,
+      [comment_id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
+      }
+    );
+  },
+
+  commentVotes: (comment_id, callback) => {
+    pool.query(
+      `SELECT
+        votes
+      FROM
+        pr_comments
+      WHERE
+        uid = ?`,
+      [comment_id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        //console.log("RESULTS TOTAL =>", results);
+        return callback(null, results[0]);
       }
     );
   },

@@ -811,7 +811,6 @@ module.exports = {
     let photo = githubUser.avatar_url;
     let provider = "Github";
     let providerUserId = githubUser.id;
-    console.log("GITHUB USER ID => ", providerUserId);
 
     let user = {
       username,
