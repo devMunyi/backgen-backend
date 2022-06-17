@@ -122,11 +122,11 @@ module.exports = {
         c.func_id,
         c.subfunc_id,
         c.language_id,
+        l.name AS 'language_name',
         c.framework_id,
         lit.title AS 'language_implementation_type',
         uit.title AS 'user_implementation_type',
         f.name AS 'framework',
-        l.name AS 'language',
         c.added_by,
         u.fullname,
         u.username,
@@ -170,10 +170,13 @@ module.exports = {
         c.func_id,
         c.subfunc_id,
         c.language_id,
+        l.name AS 'language_name',
         c.framework_id,
         c.instructions,
         c.added_by,
         u.fullname,
+        u.username,
+        u.auth_provider AS 'provider',
         lit.title AS 'language_implementation_type',
         uit.title AS 'user_implementation_type',
         c.added_date
@@ -184,6 +187,8 @@ module.exports = {
         LEFT JOIN  pr_user_implementation_type uit
       ON c.user_impl_type_id = uit.uid
         LEFT JOIN pr_users u ON c.added_by = u.uid
+        LEFT JOIN  pr_languages l
+      ON c.language_id = l.uid
       WHERE
         c.uid = ? AND c.status = 1`,
       [id],
@@ -192,6 +197,49 @@ module.exports = {
           return callback(error);
         }
         return callback(null, results[0]);
+      }
+    );
+  },
+
+  searchCodesnippet: ({ where_, offset, rpp, andsearch }, callback) => {
+    pool.query(
+      `SELECT
+        c.uid,
+        c.title,
+        c.func_id,
+        c.subfunc_id,
+        c.language_id,
+        l.name AS 'language_name',
+        c.framework_id,
+        c.added_by,
+        c.added_date,
+        u.fullname,
+        u.username,
+        u.auth_provider AS 'provider',
+        lit.title AS 'language_implementation_type',
+        uit.title AS 'user_implementation_type'
+      FROM
+        pr_code_snippets c
+        LEFT JOIN  pr_language_implementation_type lit
+      ON c.lang_impl_type_id = lit.uid
+        LEFT JOIN  pr_user_implementation_type uit
+      ON c.user_impl_type_id = uit.uid
+        LEFT JOIN pr_users u ON c.added_by = u.uid
+        LEFT JOIN  pr_languages l
+      ON c.language_id = l.uid
+      WHERE
+       ${where_} ${andsearch}
+      ORDER BY
+        c.uid DESC
+      LIMIT
+        ?, ?`,
+      [offset, rpp],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        //console.log(results);
+        return callback(null, results);
       }
     );
   },
@@ -261,44 +309,6 @@ module.exports = {
         }
         //console.log(results);
         return callback(null, results[0]);
-      }
-    );
-  },
-
-  searchCodesnippet: ({ where_, offset, rpp, andsearch }, callback) => {
-    pool.query(
-      `SELECT
-        c.uid,
-        c.title,
-        c.func_id,
-        c.subfunc_id,
-        c.language_id,
-        c.framework_id,
-        c.added_by,
-        c.added_date,
-        u.fullname,
-        lit.title AS 'language_implementation_type',
-        uit.title AS 'user_implementation_type'
-      FROM
-        pr_code_snippets c
-        LEFT JOIN  pr_language_implementation_type lit
-      ON c.lang_impl_type_id = lit.uid
-        LEFT JOIN  pr_user_implementation_type uit
-      ON c.user_impl_type_id = uit.uid
-        LEFT JOIN pr_users u ON c.added_by = u.uid
-      WHERE
-       ${where_} ${andsearch}
-      ORDER BY
-        c.uid DESC
-      LIMIT
-        ?, ?`,
-      [offset, rpp],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        //console.log(results);
-        return callback(null, results);
       }
     );
   },
