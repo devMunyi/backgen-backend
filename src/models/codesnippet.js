@@ -126,6 +126,7 @@ module.exports = {
         c.framework_id,
         lit.title AS 'language_implementation_type',
         uit.title AS 'user_implementation_type',
+        uit.uid AS 'codestyle_id',
         f.name AS 'framework',
         c.added_by,
         u.fullname,
@@ -179,6 +180,7 @@ module.exports = {
         u.auth_provider AS 'provider',
         lit.title AS 'language_implementation_type',
         uit.title AS 'user_implementation_type',
+        uit.uid AS 'codestyle_id',
         c.added_date
       FROM
         pr_code_snippets c
@@ -217,7 +219,8 @@ module.exports = {
         u.username,
         u.auth_provider AS 'provider',
         lit.title AS 'language_implementation_type',
-        uit.title AS 'user_implementation_type'
+        uit.title AS 'user_implementation_type',
+        uit.uid AS 'codestyle_id'
       FROM
         pr_code_snippets c
         LEFT JOIN  pr_language_implementation_type lit
