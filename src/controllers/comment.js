@@ -39,41 +39,62 @@ module.exports = {
       }
 
       let { code_snippet_id, replying_to } = body;
-      if (replying_to == 0) {
-        //increment total_comments in the pr_code_snippets table
-        incrementCommentsTotal(code_snippet_id, (err2, results2) => {
-          if (err2) {
-            console.log(err2);
-          }
-
-          //ready to give a response for successful comment save
-          if (results2) {
-            return res.json({
-              success: true,
-              data: results,
-              message: "Added Successfully",
-            });
-          }
-        });
-      } else {
-        //increment total_replies in the pr_comments table
-        incrementRepliesTotal(
-          { code_snippet_id, replying_to },
-          (err3, results3) => {
-            if (err3) {
-              console.log(err3);
+      if (results) {
+        if (replying_to == 0) {
+          console.log("replying to == 0");
+          //increment total_comments in the pr_code_snippets table
+          incrementCommentsTotal(code_snippet_id, (err2, results2) => {
+            if (err2) {
+              console.log(err2);
             }
 
             //ready to give a response for successful comment save
-            if (results3) {
+            if (results2) {
               return res.json({
                 success: true,
-                data: results,
                 message: "Added Successfully",
               });
             }
-          }
-        );
+          });
+        }
+
+        if (replying_to > 0) {
+          //increment total_replies in the pr_comments table
+          incrementRepliesTotal(
+            { code_snippet_id, replying_to },
+            (err3, results3) => {
+              if (err3) {
+                console.log(err3);
+              }
+
+              //ready to give a response for successful comment save
+              if (results3) {
+                return res.json({
+                  success: true,
+                  message: "Added Successfully",
+                });
+
+                //get total comments for this code
+                // let { where_ } = req.body;
+                // console.log("where parameters via body => ", where_);
+                // getTotalCommentsCodeId(code_snippet_id, (err4, results4) => {
+                //   console.log("total comments resp => ", results4);
+                //   if (err4) {
+                //     console.log(err4);
+                //   }
+
+                //   if (results4) {
+                //     return res.json({
+                //       success: true,
+                //       message: "Added Successfully",
+                //       total_comments: results4.total_comments,
+                //     });
+                //   }
+                // });
+              }
+            }
+          );
+        }
       }
     });
   },
@@ -205,6 +226,7 @@ module.exports = {
   getCommentsByCodesnippetId: (req, res) => {
     let queryObj = {};
     let { where_, orderby, dir, offset, rpp } = req.query;
+    let { code_snippet_id } = where_;
 
     if (!where_) {
       return res.json();
@@ -224,11 +246,11 @@ module.exports = {
     if (!dir) {
       dir = "DESC";
     }
-    if (!offset) {
+    if (!(offset >= 0)) {
       offset = 0;
     }
 
-    if (!rpp) {
+    if (!rpp > 1) {
       rpp = 10;
     }
 

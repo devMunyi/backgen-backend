@@ -245,7 +245,7 @@ module.exports = {
   forgotPassword: (req, res) => {
     const { email } = req.body;
     if (!email || email.length < 1) {
-      return res.status(400).json({
+      return res.json({
         success: false,
         message: "Email is required",
       });
@@ -258,7 +258,7 @@ module.exports = {
       }
 
       if (!user) {
-        return res.status(400).json({
+        return res.json({
           success: false,
           message: "Email not found",
         });

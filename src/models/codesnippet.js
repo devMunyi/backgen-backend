@@ -181,7 +181,8 @@ module.exports = {
         lit.title AS 'language_implementation_type',
         uit.title AS 'user_implementation_type',
         uit.uid AS 'codestyle_id',
-        c.added_date
+        c.added_date,
+        c.total_comments
       FROM
         pr_code_snippets c
         LEFT JOIN  pr_language_implementation_type lit
