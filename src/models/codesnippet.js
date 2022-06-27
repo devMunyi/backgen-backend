@@ -127,6 +127,7 @@ module.exports = {
         lit.title AS 'language_implementation_type',
         uit.title AS 'user_implementation_type',
         uit.uid AS 'codestyle_id',
+        uit.title AS 'codestyle_name',
         f.name AS 'framework',
         c.added_by,
         u.fullname,
@@ -169,10 +170,13 @@ module.exports = {
         c.row_code,
         c.file_extension,
         c.func_id,
+        fn.name AS 'fun_name',
         c.subfunc_id,
+        sb.name AS 'subfun_name',
         c.language_id,
         l.name AS 'language_name',
         c.framework_id,
+        f.name AS 'framework_name',
         c.instructions,
         c.added_by,
         u.fullname,
@@ -181,6 +185,7 @@ module.exports = {
         lit.title AS 'language_implementation_type',
         uit.title AS 'user_implementation_type',
         uit.uid AS 'codestyle_id',
+        uit.title AS 'codestyle_name',
         c.added_date,
         c.total_comments
       FROM
@@ -192,6 +197,12 @@ module.exports = {
         LEFT JOIN pr_users u ON c.added_by = u.uid
         LEFT JOIN  pr_languages l
       ON c.language_id = l.uid
+        LEFT JOIN  pr_frameworks f
+      ON c.framework_id = f.uid
+      LEFT JOIN  pr_functionalities fn
+      ON c.func_id = fn.uid
+      LEFT JOIN pr_subfunctions sb
+      ON c.subfunc_id = sb.uid
       WHERE
         c.uid = ? AND c.status = 1`,
       [id],
@@ -210,10 +221,13 @@ module.exports = {
         c.uid,
         c.title,
         c.func_id,
+        fn.name AS 'fun_name',
         c.subfunc_id,
+        sb.name AS 'subfun_name',
         c.language_id,
         l.name AS 'language_name',
         c.framework_id,
+        f.name AS 'framework_name',
         c.added_by,
         c.added_date,
         u.fullname,
@@ -231,6 +245,12 @@ module.exports = {
         LEFT JOIN pr_users u ON c.added_by = u.uid
         LEFT JOIN  pr_languages l
       ON c.language_id = l.uid
+      LEFT JOIN  pr_frameworks f
+      ON c.framework_id = f.uid
+      LEFT JOIN  pr_functionalities fn
+      ON c.func_id = fn.uid
+      LEFT JOIN pr_subfunctions sb
+      ON c.subfunc_id = sb.uid
       WHERE
        ${where_} ${andsearch}
       ORDER BY
