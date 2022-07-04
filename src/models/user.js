@@ -90,7 +90,7 @@ module.exports = {
         email,
         country,
         auth_provider AS 'provider',
-        join_date
+        isAdmin
       FROM
         pr_users
       WHERE
@@ -118,7 +118,7 @@ module.exports = {
         email,
         country,
         auth_provider AS 'provider',
-        join_date
+        isAdmin
       FROM
         pr_users
       WHERE
@@ -164,7 +164,7 @@ module.exports = {
         country,
         password,
         auth_provider AS 'provider',
-        status
+        isAdmin
       FROM
         pr_users
       WHERE

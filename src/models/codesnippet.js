@@ -69,7 +69,6 @@ module.exports = {
       row_code,
       file_extension,
       instructions,
-      added_by,
     },
     callback
   ) => {
@@ -86,8 +85,7 @@ module.exports = {
         framework_id = ?,
         lang_impl_type_id = ?,
         user_impl_type_id = ?,
-        instructions = ?,
-        added_by = ?
+        instructions = ?
       WHERE
         uid = ?`,
       [
@@ -101,7 +99,6 @@ module.exports = {
         lang_impl_type_id,
         user_impl_type_id,
         instructions,
-        added_by,
         id,
       ],
       (error, results, fields) => {
@@ -114,6 +111,55 @@ module.exports = {
   },
 
   getCodeSnippets: ({ where_, offset, rpp }, callback) => {
+    pool.query(
+      `SELECT
+        c.uid,
+        c.title,
+        c.row_code,
+        c.func_id,
+        c.subfunc_id,
+        c.language_id,
+        l.name AS 'language_name',
+        c.framework_id,
+        lit.title AS 'language_implementation_type',
+        uit.title AS 'user_implementation_type',
+        uit.uid AS 'codestyle_id',
+        uit.title AS 'codestyle_name',
+        f.name AS 'framework',
+        c.added_by,
+        u.fullname,
+        u.username,
+        u.auth_provider AS 'provider',
+        c.instructions,
+        c.total_comments
+      FROM
+        pr_code_snippets c
+      LEFT JOIN  pr_language_implementation_type lit
+      ON c.lang_impl_type_id = lit.uid
+      LEFT JOIN  pr_user_implementation_type uit
+      ON c.user_impl_type_id = uit.uid
+      LEFT JOIN  pr_frameworks f
+      ON c.framework_id = f.uid
+      LEFT JOIN  pr_languages l
+      ON c.language_id = l.uid
+      LEFT JOIN pr_users u ON c.added_by = u.uid
+      WHERE
+        ${where_}
+      ORDER BY
+        c.uid DESC
+      LIMIT
+        ?, ?`,
+      [offset, rpp],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
+      }
+    );
+  },
+
+  getRelatedSolns: ({ where_, offset, rpp }, callback) => {
     pool.query(
       `SELECT
         c.uid,

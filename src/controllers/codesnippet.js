@@ -7,6 +7,7 @@ const {
   getTotalRecords,
   searchCodesnippet,
   searchTotals,
+  getRelatedSolns,
 } = require("../models/codesnippet"); //require codesnippet models to avail its featured methods
 const { inputAvailable } = require("../../helpers/common"); //require common helper functions
 const async = require("async");
@@ -291,6 +292,35 @@ module.exports = {
         success: true,
         message: "Code snippet deleted successfully!",
       });
+    });
+  },
+
+  getRelatedSolns: (req, res) => {
+    let { func_id, subfunc_id, codesnippet_id, offset, rpp } = req.query;
+    let where_ = `c.func_id = ${func_id} AND c.subfunc_id = ${subfunc_id} AND c.uid != ${codesnippet_id}`;
+    if (!offset) {
+      offset = 0;
+    }
+
+    if (!rpp) {
+      rpp = 25;
+    }
+
+    getRelatedSolns({ where_, offset, rpp }, (err, results) => {
+      if (err) {
+        console.log(err);
+        return res.json({
+          success: false,
+          message: err.message,
+        });
+      }
+
+      if (results) {
+        res.json({
+          success: true,
+          data: results,
+        });
+      }
     });
   },
 };

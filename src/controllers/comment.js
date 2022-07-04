@@ -277,6 +277,7 @@ module.exports = {
           if (err2) {
             console.log(err2);
           }
+          console.log("total comments => ", results2.total_comments);
 
           if (results2) {
             return res.json({
