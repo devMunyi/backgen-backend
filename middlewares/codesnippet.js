@@ -4,6 +4,8 @@ const {
   checkCodeEditDuplicate,
 } = require("../helpers/codesnippet");
 
+const { encode } = require("html-entities");
+
 module.exports = {
   codesnippetAddValidation: (req, res, next) => {
     //console.log("REQ BODY => ", req.body);
@@ -100,8 +102,8 @@ module.exports = {
           req.body.framework_id = parseInt(framework_id);
           req.body.lang_impl_type_id = lang_impl_type_id;
           req.body.user_impl_type_id = user_impl_type_id;
-          req.body.title = title;
-          req.body.row_code = row_code;
+          req.body.title = encode(title);
+          req.body.row_code = encode(row_code);
           req.body.file_extension = file_extension;
           req.body.instructions = instructions;
           req.body.added_by = added_by;
@@ -214,8 +216,8 @@ module.exports = {
           req.body.framework_id = parseInt(framework_id);
           req.body.lang_impl_type_id = lang_impl_type_id;
           req.body.user_impl_type_id = user_impl_type_id;
-          req.body.title = title;
-          req.body.row_code = row_code;
+          req.body.title = encode(title);
+          req.body.row_code = encode(row_code);
           req.body.file_extension = file_extension;
           req.body.instructions = instructions;
           req.body.added_by = added_by;

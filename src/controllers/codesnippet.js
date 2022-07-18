@@ -11,6 +11,7 @@ const {
 } = require("../models/codesnippet"); //require codesnippet models to avail its featured methods
 const { inputAvailable } = require("../../helpers/common"); //require common helper functions
 const async = require("async");
+const { decode } = require("html-entities");
 
 module.exports = {
   addCodeSnippet: (req, res) => {
@@ -262,6 +263,9 @@ module.exports = {
           message: "Record not found",
         });
       }
+
+      results.row_code = decode(results.row_code);
+      results.title = decode(results.title);
       return res.json({
         success: true,
         all_totals: 1,

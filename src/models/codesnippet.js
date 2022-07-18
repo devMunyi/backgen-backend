@@ -115,7 +115,6 @@ module.exports = {
       `SELECT
         c.uid,
         c.title,
-        c.row_code,
         c.func_id,
         c.subfunc_id,
         c.language_id,
@@ -125,13 +124,7 @@ module.exports = {
         uit.title AS 'user_implementation_type',
         uit.uid AS 'codestyle_id',
         uit.title AS 'codestyle_name',
-        f.name AS 'framework',
-        c.added_by,
-        u.fullname,
-        u.username,
-        u.auth_provider AS 'provider',
-        c.instructions,
-        c.total_comments
+        f.name AS 'framework'
       FROM
         pr_code_snippets c
       LEFT JOIN  pr_language_implementation_type lit
@@ -164,7 +157,6 @@ module.exports = {
       `SELECT
         c.uid,
         c.title,
-        c.row_code,
         c.func_id,
         c.subfunc_id,
         c.language_id,
@@ -174,13 +166,7 @@ module.exports = {
         uit.title AS 'user_implementation_type',
         uit.uid AS 'codestyle_id',
         uit.title AS 'codestyle_name',
-        f.name AS 'framework',
-        c.added_by,
-        u.fullname,
-        u.username,
-        u.auth_provider AS 'provider',
-        c.instructions,
-        c.total_comments
+        f.name AS 'framework'
       FROM
         pr_code_snippets c
       LEFT JOIN  pr_language_implementation_type lit
