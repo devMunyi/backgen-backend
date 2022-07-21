@@ -8,6 +8,7 @@ const {
   searchCodesnippet,
   searchTotals,
   getRelatedSolns,
+  reactivateCode,
 } = require("../models/codesnippet"); //require codesnippet models to avail its featured methods
 const { inputAvailable } = require("../../helpers/common"); //require common helper functions
 const async = require("async");
@@ -148,8 +149,6 @@ module.exports = {
       rpp,
       offset,
     } = req.query;
-
-    //console.log("USER IMPLEMENTATION =>", user_impl_type_id);
 
     if (!where_) {
       where_ = "c.status = 1";
@@ -325,6 +324,26 @@ module.exports = {
           data: results,
         });
       }
+    });
+  },
+
+  reactivateCode: (req, res) => {
+    const { codesnippet_id } = req.body;
+    reactivateCode(parseInt(codesnippet_id), (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: false,
+          message: "Record Not Found",
+        });
+      }
+      return res.json({
+        success: true,
+        message: "Solution activated successfully",
+      });
     });
   },
 };

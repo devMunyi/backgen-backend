@@ -6,6 +6,7 @@ const {
   deleteCodeSnippet,
   searchCodesnippet,
   getRelatedSolns,
+  reactivateCode,
 } = require("../controllers/codesnippet"); //require codesnippet controller to avail its featured methods
 const router = require("express").Router(); //require router to define expected client request
 
@@ -25,6 +26,7 @@ router.put("/edit-codesnippet", codesnippetEditValidation, updateCodeSnippet);
 router.delete("/del-codesnippet", deleteCodeSnippet);
 router.get("/search-codesnippet", searchCodesnippet);
 router.get("/related-solns", getRelatedSolns);
+router.put("/reactivate-codesnippet", reactivateCode);
 ////-----------------------End routes definations
 
 module.exports = router; //make the module available for imports

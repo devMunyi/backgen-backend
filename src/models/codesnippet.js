@@ -110,13 +110,15 @@ module.exports = {
     );
   },
 
-  getCodeSnippets: ({ where_, offset, rpp }, callback) => {
+  getCodeSnippets: ({ where_, offset, rpp, dir }, callback) => {
     pool.query(
       `SELECT
         c.uid,
         c.title,
         c.func_id,
+        fn.name AS 'fun_name',
         c.subfunc_id,
+        sb.name AS 'subfun_name',
         c.language_id,
         l.name AS 'language_name',
         c.framework_id,
@@ -124,7 +126,9 @@ module.exports = {
         uit.title AS 'user_implementation_type',
         uit.uid AS 'codestyle_id',
         uit.title AS 'codestyle_name',
-        f.name AS 'framework'
+        f.name AS 'framework',
+        c.status,
+        c.added_date
       FROM
         pr_code_snippets c
       LEFT JOIN  pr_language_implementation_type lit
@@ -136,10 +140,14 @@ module.exports = {
       LEFT JOIN  pr_languages l
       ON c.language_id = l.uid
       LEFT JOIN pr_users u ON c.added_by = u.uid
+      LEFT JOIN  pr_functionalities fn
+      ON c.func_id = fn.uid
+      LEFT JOIN pr_subfunctions sb
+      ON c.subfunc_id = sb.uid
       WHERE
         ${where_}
       ORDER BY
-        c.uid DESC
+        c.uid ${dir}
       LIMIT
         ?, ?`,
       [offset, rpp],
@@ -325,7 +333,7 @@ module.exports = {
   //   );
   // },
 
-  getTotalRecords: ({ where_, offset, rpp }, callback) => {
+  getTotalRecords: ({ where_ }, callback) => {
     pool.query(
       `SELECT
         COUNT(c.uid) AS all_totals
@@ -334,15 +342,12 @@ module.exports = {
       WHERE
         ${where_} 
       ORDER BY
-        c.uid DESC
-      LIMIT
-        ?, ?`,
-      [offset, rpp],
+        c.uid DESC`,
+      [],
       (error, results, fields) => {
         if (error) {
           return callback(error);
         }
-        //console.log("RESULTS TOTAL =>", results);
         return callback(null, results[0]);
       }
     );
@@ -382,7 +387,8 @@ module.exports = {
         if (error) {
           return callback(error);
         }
-        return callback(null, results[0]);
+        //console.log("delete response => ", results[0]);
+        return callback(null, results);
       }
     );
   },
@@ -414,6 +420,24 @@ module.exports = {
       WHERE
         uid = ?`,
       [code_snippet_id],
+      (error, results, fields) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
+      }
+    );
+  },
+
+  reactivateCode: (id, callback) => {
+    pool.query(
+      `UPDATE
+        pr_code_snippets
+      SET
+        status = ?
+      WHERE
+        uid = ?`,
+      [1, id],
       (error, results, fields) => {
         if (error) {
           return callback(error);
