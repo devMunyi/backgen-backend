@@ -146,8 +146,7 @@ module.exports = {
       ON c.subfunc_id = sb.uid
       WHERE
         ${where_}
-      ORDER BY
-        c.uid ${dir}
+      ORDER BY c.uid ${dir}
       LIMIT
         ?, ?`,
       [offset, rpp],
@@ -202,7 +201,7 @@ module.exports = {
     );
   },
 
-  getCodeSnippetByCodeSnippetId: (id, callback) => {
+  getCodeSnippetByCodeSnippetId: (where_, callback) => {
     pool.query(
       `SELECT
         c.uid,
@@ -243,9 +242,8 @@ module.exports = {
       ON c.func_id = fn.uid
       LEFT JOIN pr_subfunctions sb
       ON c.subfunc_id = sb.uid
-      WHERE
-        c.uid = ? AND c.status = 1`,
-      [id],
+      WHERE ${where_}`,
+      [],
       (error, results, fields) => {
         if (error) {
           return callback(error);
@@ -308,31 +306,6 @@ module.exports = {
     );
   },
 
-  // getImplNames: ({ where_, offset, rpp }, callback) => {
-  //   pool.query(
-  //     `SELECT
-  //       i.title AS 'implementation'
-  //      FROM
-  //       pr_code_snippets c
-  //     LEFT JOIN  pr_implementations i
-  //     ON c.implementation_id = i.uid
-  //     WHERE
-  //      ${where_}
-  //     ORDER BY
-  //       c.uid DESC
-  //     LIMIT
-  //       ?, ?`,
-  //     [offset, rpp],
-  //     (error, results, fields) => {
-  //       if (error) {
-  //         return callback(error);
-  //       }
-  //       //console.log("IMPL NAMES RESULTS =>", results);
-  //       return callback(null, results);
-  //     }
-  //   );
-  // },
-
   getTotalRecords: ({ where_ }, callback) => {
     pool.query(
       `SELECT
@@ -382,7 +355,7 @@ module.exports = {
         status = ?
       WHERE
         uid = ?`,
-      [0, id],
+      [3, id],
       (error, results, fields) => {
         if (error) {
           return callback(error);

@@ -66,18 +66,17 @@ module.exports = {
     let queryObj = {};
 
     //destructuring req query for the variables
-    let { where_, search_, rpp, offset } = req.query;
+    let { status, search_, rpp, offset } = req.query;
 
+    let where_ = Number.isFinite(status)
+      ? `c.status = ${status}`
+      : "c.status >= 0";
     let andsearch;
     search_ = inputAvailable(search_);
     if (search_ != undefined) {
       andsearch = `AND c.title LIKE '%${search_}%'`;
     } else {
       andsearch = `AND c.title LIKE ''`;
-    }
-
-    if (!where_) {
-      where_ = "c.status = 1";
     }
 
     if (!offset) {
@@ -137,7 +136,7 @@ module.exports = {
 
     //destructuring req query for the variables
     let {
-      where_,
+      status,
       search_,
       func_id,
       subfunc_id,
@@ -150,11 +149,15 @@ module.exports = {
       offset,
     } = req.query;
 
-    if (!where_) {
-      where_ = "c.status = 1";
+    let where_ = "";
+    status = parseInt(status);
+    if (Number.isFinite(status)) {
+      where_ = `c.status = ${status}`;
+    } else {
+      where_ = `c.status >= 0`;
     }
 
-    let andsearch;
+    let andsearch = "";
     search_ = inputAvailable(search_);
     if (search_ != undefined) {
       andsearch = ` AND c.title LIKE '%${search_}%'`;
@@ -244,13 +247,20 @@ module.exports = {
   },
 
   getCodeSnippetByCodeSnippetId: (req, res) => {
-    const { codesnippet_id } = req.query;
+    const { codesnippet_id, status } = req.query;
 
     if (!codesnippet_id) {
       return;
     }
 
-    getCodeSnippetByCodeSnippetId(parseInt(codesnippet_id), (err, results) => {
+    let where_ = `c.uid = ${codesnippet_id}`;
+    if (status) {
+      where_ += ` AND c.status = ${status}`;
+    } else {
+      where_ += ` AND c.status >= 0`;
+    }
+
+    getCodeSnippetByCodeSnippetId(where_, (err, results) => {
       if (err) {
         console.log(err);
         return;
@@ -299,8 +309,16 @@ module.exports = {
   },
 
   getRelatedSolns: (req, res) => {
-    let { func_id, subfunc_id, codesnippet_id, offset, rpp } = req.query;
+    let { func_id, subfunc_id, codesnippet_id, offset, rpp, status } =
+      req.query;
+
     let where_ = `c.func_id = ${func_id} AND c.subfunc_id = ${subfunc_id} AND c.uid != ${codesnippet_id}`;
+    if (status) {
+      where_ += ` AND c.status = ${status}`;
+    } else {
+      where_ += ` AND c.status >= 0`;
+    }
+
     if (!offset) {
       offset = 0;
     }
