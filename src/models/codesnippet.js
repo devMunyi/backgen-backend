@@ -110,7 +110,7 @@ module.exports = {
     );
   },
 
-  getCodeSnippets: ({ where_, offset, rpp, dir }, callback) => {
+  getCodeSnippets: ({ where_, offset, rpp, orderby }, callback) => {
     pool.query(
       `SELECT
         c.uid,
@@ -146,7 +146,7 @@ module.exports = {
       ON c.subfunc_id = sb.uid
       WHERE
         ${where_}
-      ORDER BY c.uid ${dir}
+      ORDER BY ${orderby}
       LIMIT
         ?, ?`,
       [offset, rpp],
@@ -253,7 +253,7 @@ module.exports = {
     );
   },
 
-  searchCodesnippet: ({ where_, offset, rpp, andsearch }, callback) => {
+  searchCodesnippet: ({ where_, offset, rpp, orderby }, callback) => {
     pool.query(
       `SELECT
         c.uid,
@@ -289,10 +289,7 @@ module.exports = {
       ON c.func_id = fn.uid
       LEFT JOIN pr_subfunctions sb
       ON c.subfunc_id = sb.uid
-      WHERE
-       ${where_} ${andsearch}
-      ORDER BY
-        c.uid DESC
+      WHERE ${where_} ORDER BY ${orderby}
       LIMIT
         ?, ?`,
       [offset, rpp],
@@ -313,9 +310,7 @@ module.exports = {
       FROM
         pr_code_snippets c
       WHERE
-        ${where_} 
-      ORDER BY
-        c.uid DESC`,
+        ${where_}`,
       [],
       (error, results, fields) => {
         if (error) {
@@ -326,16 +321,13 @@ module.exports = {
     );
   },
 
-  searchTotals: ({ where_, andsearch }, callback) => {
+  searchTotals: ({ where_ }, callback) => {
     pool.query(
       `SELECT
         count(c.uid) AS "search_totals"
       FROM
         pr_code_snippets c
-      WHERE
-       ${where_} ${andsearch}
-      ORDER BY
-        c.uid DESC `,
+      WHERE ${where_}`,
       [],
       (error, results, fields) => {
         if (error) {

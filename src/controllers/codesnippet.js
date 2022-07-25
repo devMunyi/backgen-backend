@@ -28,7 +28,8 @@ module.exports = {
       return res.json({
         success: true,
         data: results,
-        message: "Code snippet added Successfully",
+        message:
+          "Added Successfully. It will be visible to the public once reviewed",
       });
     });
   },
@@ -56,7 +57,7 @@ module.exports = {
 
       return res.json({
         success: true,
-        message: "Code snippet updated successfully!",
+        message: "Update successful",
       });
     });
   },
@@ -66,18 +67,18 @@ module.exports = {
     let queryObj = {};
 
     //destructuring req query for the variables
-    let { status, search_, rpp, offset } = req.query;
+    let { status, search_, rpp, offset, orderby, dir } = req.query;
+    status = parseInt(status);
 
     let where_ = Number.isFinite(status)
       ? `c.status = ${status}`
       : "c.status >= 0";
-    let andsearch;
+
     search_ = inputAvailable(search_);
     if (search_ != undefined) {
-      andsearch = `AND c.title LIKE '%${search_}%'`;
-    } else {
-      andsearch = `AND c.title LIKE ''`;
+      where_ += ` AND c.title LIKE '%${search_}%'`;
     }
+    console.log("where clause string => ", where_);
 
     if (!offset) {
       offset = 0;
@@ -88,11 +89,23 @@ module.exports = {
       rpp = 7;
     }
 
+    if (!orderby) {
+      orderby = "c.uid";
+    } else {
+      orderby = `c.${orderby}`;
+    }
+
+    if (!dir) {
+      dir = "DESC";
+    }
+
+    orderby = `${orderby} ${dir}`;
+
     //add data to queryObj object
     queryObj.where_ = where_;
     queryObj.offset = parseInt(offset);
     queryObj.rpp = parseInt(rpp);
-    queryObj.andsearch = andsearch;
+    queryObj.orderby = orderby;
 
     searchCodesnippet(queryObj, (err, results) => {
       if (err) {
@@ -157,11 +170,9 @@ module.exports = {
       where_ = `c.status >= 0`;
     }
 
-    let andsearch = "";
     search_ = inputAvailable(search_);
     if (search_ != undefined) {
-      andsearch = ` AND c.title LIKE '%${search_}%'`;
-      where_ += andsearch;
+      where_ += ` AND c.title LIKE '%${search_}%'`;
     }
 
     if (func_id) {
@@ -192,14 +203,6 @@ module.exports = {
       where_ += implementation_;
     }
 
-    if (!orderby) {
-      orderby = "c.title";
-    }
-
-    if (!dir) {
-      dir = "ASC";
-    }
-
     if (!offset) {
       offset = 0;
     }
@@ -207,6 +210,18 @@ module.exports = {
     if (!rpp) {
       rpp = 10;
     }
+
+    if (!orderby) {
+      orderby = "c.uid";
+    } else {
+      orderby = `c.${orderby}`;
+    }
+
+    if (!dir) {
+      dir = "DESC";
+    }
+
+    orderby = `${orderby} ${dir}`;
 
     queryObj.where_ = where_;
     queryObj.orderby = orderby;
@@ -309,10 +324,17 @@ module.exports = {
   },
 
   getRelatedSolns: (req, res) => {
-    let { func_id, subfunc_id, codesnippet_id, offset, rpp, status } =
-      req.query;
+    let {
+      func_id,
+      language_id,
+      subfunc_id,
+      codesnippet_id,
+      offset,
+      rpp,
+      status,
+    } = req.query;
 
-    let where_ = `c.func_id = ${func_id} AND c.subfunc_id = ${subfunc_id} AND c.uid != ${codesnippet_id}`;
+    let where_ = `c.func_id = ${func_id} AND c.subfunc_id = ${subfunc_id} AND c.language_id =${language_id} AND c.uid != ${codesnippet_id}`;
     if (status) {
       where_ += ` AND c.status = ${status}`;
     } else {
