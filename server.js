@@ -22,7 +22,19 @@ app.use(express.json()); //enable express to receive form data in json format
 app.use(express.urlencoded({ extended: false })); //enable express to receive form data
 app.use(fileUpload()); //handles file uploads
 app.use("/back", express.static("public")); //defines where static file requests should be retrieved
-app.use(cors()); //handles cross-domain requests
+app.use(
+  cors({
+    origin: [
+      "https://zidiapp.com",
+      "https://www.zidiapp.com",
+      "https://backgen.net",
+      "https://www.backgen.net",
+      "http://localhost",
+    ],
+    methods: "GET, POST, PUT, DELETE, OPTIONS",
+    credentials: true,
+  })
+); //handles cross-domain requests
 
 // app.use(function (req, res, next) {
 //   res.header("Access-Control-Allow-Credentials", true);
