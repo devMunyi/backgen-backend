@@ -1,3 +1,4 @@
+const path = require("path");
 const {
   addComment,
   getCommentByCommentId,
@@ -626,5 +627,48 @@ module.exports = {
         });
       }
     });
+  },
+
+  uploadImg: (req, res) => {
+    if (!req.files) {
+      return res.json({ success: false, message: "File not found" });
+    } else {
+      const file = req.files.upload;
+      const fileName = file.name;
+      const fileSize = file.size;
+      const miniFileSize = 1024 * 1024 * 5;
+      const extensionName = path.extname(fileName);
+      const allowedExtensions = [".png", ".jpg", "jpeg"];
+
+      if (!allowedExtensions.includes(extensionName)) {
+        return res.json({
+          success: false,
+          message:
+            "Invalid image. Only .jpeg, .jpg and .png file types are allowed",
+        });
+      } else if (fileSize > miniFileSize) {
+        return res.json({
+          success: false,
+          message: "File size exceeds minimum required 5mbs",
+        });
+      }
+      const sanitizedFileName =
+        fileName.toLowerCase().slice(0, -4) +
+        "-" +
+        Date.now() +
+        path.extname(fileName);
+
+      const file_destination = `./public/images/other/${sanitizedFileName}`;
+
+      file.mv(file_destination, (err) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).send(err);
+        } else {
+          url = `${process.env.SERVER_URL}/images/other/${sanitizedFileName}`;
+          return res.json({ success: true, url });
+        }
+      });
+    }
   },
 };
