@@ -18,7 +18,7 @@ module.exports = {
 
   checkCodeAddDuplicate: (row_code, callback) => {
     pool.query(
-      `SELECT uid FROM pr_code_snippets WHERE row_code = ?`,
+      `SELECT uid FROM pr_code_snippets WHERE row_code = ? AND status NOT IN(0,3)`,
       [row_code],
       (error, results, fields) => {
         if (error) {
@@ -32,7 +32,7 @@ module.exports = {
 
   checkCodeEditDuplicate: (row_code, id, callback) => {
     pool.query(
-      `SELECT uid FROM pr_code_snippets WHERE row_code = ? AND uid != ?`,
+      `SELECT uid FROM pr_code_snippets WHERE row_code = ? AND uid != ? AND AND status NOT IN(0,3)`,
       [row_code, id],
       (error, results, fields) => {
         if (error) {
