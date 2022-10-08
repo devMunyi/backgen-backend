@@ -1,37 +1,31 @@
-# ZIDI Backend
+# ZIDI
 
  Zidi is a code sharing platform that aims to provide clean, universally acceptable code for all backend processes in all major languages. Anticipating to develop productivity tools for backend developers to make their work easier. 
 
-## Built With
-
+## Backend Built With 
 - NodeJs
 - Express
 - MySQL
 
+
+## Frontend [source code](https://github.com/devMunyi/zidi-app), Built With
+
+- jQuery
+- Bootstrap
+- PHP
+
+
 ## [Live Demo](https://zidiapp.com/)
 
-
-## Getting Started
-
-To get a local copy up and running follow these simple example steps.
-
-### Prerequisites
-    Github
-    CODE EDITOR
-    GITHUB
-    GIT
-
-### Setup
-    Create a repository.
-    Include your linter files in your folder.
-    Open your code editor
-    Clone your repository
 
 ## Authors
 
 👤 **Samuel Munyi**
 - GitHub: [@githubhandle](https://github.com/devMunyi)
 - LinkedIn: [LinkedIn](https://www.linkedin.com/in/samuel-munyi-01315b174/)
+
+👤 **ngarama**
+- GitHub: [@githubhandle](https://github.com/ngarama)
 
 
 ## 🤝 Contributing
