@@ -1,59 +1,36 @@
-//const cookieSession = require("cookie-session");
-//const passport = require("passport");
-require("dotenv").config();
-//require("./src/passport");
-const express = require("express");
-const cors = require("cors");
-const morgan = require("morgan");
-const fileUpload = require("express-fileupload");
-const { readdirSync } = require("fs");
-const compression = require("compression");
-//const session = require("express-session");
-//const MySQLStore = require("express-mysql-session")(session);
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
+const fileUpload = require('express-fileupload');
+const { readdirSync } = require('fs');
+const compression = require('compression');
 
 const app = express();
 const port = process.env.PORT || 5000;
-const hostname = "localhost";
+const hostname = 'localhost';
 
 //configuring key middlewares
 app.use(compression()); //compresses static files
-app.use(morgan("dev")); //keep tracks of incoming requests
+app.use(morgan('dev')); //keep tracks of incoming requests
 app.use(express.json()); //enable express to receive form data in json format
 app.use(express.urlencoded({ extended: false })); //enable express to receive form data
 app.use(fileUpload()); //handles file uploads
-app.use("/back", express.static("public")); //defines where static file requests should be retrieved
+app.use('/back', express.static('public')); //defines where static file requests should be retrieved
 app.use(
   cors({
     origin: [
-      "https://zidiapp.com",
-      "https://www.zidiapp.com",
-      "https://backgen.net",
-      "https://www.backgen.net",
-      "http://localhost",
+      'https://zidiapp.com',
+      'https://www.zidiapp.com',
+      'https://backgen.net',
+      'https://www.backgen.net',
+      'http://localhost',
+      'www.backgen.net',
     ],
-    methods: "GET, POST, PUT, DELETE, OPTIONS",
+    methods: 'GET, POST, PUT, DELETE, OPTIONS',
     credentials: true,
   })
 ); //handles cross-domain requests
-
-// app.use(function (req, res, next) {
-//   res.header("Access-Control-Allow-Credentials", true);
-//   let allowedOrigins = [
-//     "https://zidiapp.com",
-//     "https://backgen.net",
-//     "http://localhost",
-//   ];
-//   let origin = req.headers.origin;
-//   if (allowedOrigins.includes(origin)) {
-//     res.header("Access-Control-Allow-Origin", origin); // restrict it to the required domain
-//   }
-//   res.header(
-//     "Access-Control-Allow-Headers",
-//     "Origin, X-Requested-With, Content-Type, Accept, Authorization, X-HTTP-Method-Override, Set-Cookie, Cookie"
-//   );
-//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-//   next();
-// }); // --------------- SECOND CHANGE -------------------
 
 //express-session configurations
 const storeOptions = {
@@ -64,41 +41,16 @@ const storeOptions = {
   clearExpired: true,
 }; //db store
 
-if (process.env.NODE_ENV !== "Development") {
+if (process.env.NODE_ENV !== 'Development') {
   storeOptions.host = process.env.HOST;
   storeOptions.user = process.env.USER;
   storeOptions.password = process.env.PASS;
   storeOptions.database = process.env.DATABASE;
 }
 
-// const sessionStore = new MySQLStore(storeOptions);
-// const sessionOptions = {
-//   name: process.env.SESSION_KEY,
-//   secret: process.env.SESSION_SECRET,
-//   resave: false,
-//   saveUninitialized: false,
-//   store: sessionStore,
-//   cookie: {
-//     sameSite: "lax", //"strict" or "none"
-//     secure: false,
-//     maxAge: 1000 * 60 * 60 * 12, //12hours
-//   },
-// };
-
-// if (process.env.NODE_ENV !== "Development") {
-//   sessionOptions.cookie.sameSite = "none";
-//   sessionOptions.cookie.secure = true;
-//   sessionOptions.cookie.httpOnly = false;
-// }
-
-//app.use(session(sessionOptions));
-
-//app.use(passport.initialize()); //initialize passport
-//app.use(passport.session()); //initialize session with passport
-
 //Autoload routes
-readdirSync("./src/routes").map((r) =>
-  app.use("/back", require(`./src/routes/${r}`))
+readdirSync('./src/routes').map((r) =>
+  app.use('/back', require(`./src/routes/${r}`))
 );
 
 //listen for incoming requests

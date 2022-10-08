@@ -9,10 +9,10 @@ const {
   searchTotals,
   getRelatedSolns,
   reactivateCode,
-} = require("../models/codesnippet"); //require codesnippet models to avail its featured methods
-const { inputAvailable } = require("../../helpers/common"); //require common helper functions
-const async = require("async");
-const { decode } = require("html-entities");
+} = require('../models/codesnippet'); //require codesnippet models to avail its featured methods
+const { inputAvailable } = require('../../helpers/common'); //require common helper functions
+const async = require('async');
+const { decode } = require('html-entities');
 
 module.exports = {
   addCodeSnippet: (req, res) => {
@@ -22,14 +22,14 @@ module.exports = {
         console.log(err);
         return res.status(500).json({
           success: false,
-          message: "Error occured in adding a new code snippet",
+          message: 'Error occured in adding a new code snippet',
         });
       }
       return res.json({
         success: true,
         data: results,
         message:
-          "Added Successfully. It will be visible to the public once reviewed",
+          'Added Successfully. It will be visible to the public once reviewed',
       });
     });
   },
@@ -51,13 +51,13 @@ module.exports = {
       if (!results) {
         return res.json({
           success: false,
-          message: "Failed to update code snippet",
+          message: 'Failed to update code snippet',
         });
       }
 
       return res.json({
         success: true,
-        message: "Update successful",
+        message: 'Update successful',
       });
     });
   },
@@ -72,13 +72,13 @@ module.exports = {
 
     let where_ = Number.isFinite(status)
       ? `c.status = ${status}`
-      : "c.status >= 0";
+      : 'c.status >= 0';
 
     search_ = inputAvailable(search_);
     if (search_ != undefined) {
       where_ += ` AND c.title LIKE '%${search_}%'`;
     }
-    console.log("where clause string => ", where_);
+    console.log('where clause string => ', where_);
 
     if (!offset) {
       offset = 0;
@@ -90,13 +90,13 @@ module.exports = {
     }
 
     if (!orderby) {
-      orderby = "c.uid";
+      orderby = 'c.uid';
     } else {
       orderby = `c.${orderby}`;
     }
 
     if (!dir) {
-      dir = "DESC";
+      dir = 'DESC';
     }
 
     orderby = `${orderby} ${dir}`;
@@ -117,7 +117,7 @@ module.exports = {
         return res.json({
           success: false,
           all_totals: 0,
-          message: "No record(s) found",
+          message: 'No record(s) found',
         });
       } else {
         searchTotals(queryObj, (err, result) => {
@@ -128,7 +128,7 @@ module.exports = {
             return res.json({
               success: false,
               search_totals: 0,
-              message: "No record(s) found",
+              message: 'No record(s) found',
             });
           } else {
             //get all total records
@@ -162,7 +162,7 @@ module.exports = {
       offset,
     } = req.query;
 
-    let where_ = "";
+    let where_ = '';
     status = parseInt(status);
     if (Number.isFinite(status)) {
       where_ = `c.status = ${status}`;
@@ -212,13 +212,13 @@ module.exports = {
     }
 
     if (!orderby) {
-      orderby = "c.uid";
+      orderby = 'c.uid';
     } else {
       orderby = `c.${orderby}`;
     }
 
     if (!dir) {
-      dir = "DESC";
+      dir = 'DESC';
     }
 
     orderby = `${orderby} ${dir}`;
@@ -239,7 +239,7 @@ module.exports = {
         return res.json({
           success: false,
           all_totals: 0,
-          message: "No record(s) found",
+          message: 'No record(s) found',
         });
       } else {
         //get all total records
@@ -284,7 +284,7 @@ module.exports = {
         return res.json({
           success: false,
           all_totals: 0,
-          message: "Record not found",
+          message: 'Record not found',
         });
       }
 
@@ -313,12 +313,12 @@ module.exports = {
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Code snippet deleted successfully!",
+        message: 'Code snippet deleted successfully!',
       });
     });
   },
@@ -377,12 +377,12 @@ module.exports = {
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Solution activated successfully",
+        message: 'Solution activated successfully',
       });
     });
   },

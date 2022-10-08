@@ -2,9 +2,9 @@ const {
   checkCodesnippetId,
   checkCodeAddDuplicate,
   checkCodeEditDuplicate,
-} = require("../helpers/codesnippet");
+} = require('../helpers/codesnippet');
 
-const { encode } = require("html-entities");
+const { encode } = require('html-entities');
 
 module.exports = {
   codesnippetAddValidation: (req, res, next) => {
@@ -36,52 +36,52 @@ module.exports = {
     if (!func_id || func_id < 1) {
       return res.json({
         success: false,
-        message: "Please select a function",
+        message: 'Please select a function',
       });
     } else if (!subfunc_id) {
       return res.json({
         success: false,
-        message: "Please select a subfunction",
+        message: 'Please select a subfunction',
       });
     } else if (!language_id || language_id < 1) {
       return res.json({
         success: false,
-        message: "Please select language",
+        message: 'Please select language',
       });
     } else if (!framework_id) {
       return res.json({
         success: false,
-        message: "Please select framework",
+        message: 'Please select framework',
       });
     } else if (!lang_impl_type_id || lang_impl_type_id < 1) {
       return res.json({
         success: false,
-        message: "Please select language implementation type",
+        message: 'Please select language implementation type',
       });
     } else if (!user_impl_type_id || user_impl_type_id < 1) {
       return res.json({
         success: false,
-        message: "Please select your implementation type",
+        message: 'Please select your implementation type',
       });
     } else if (!title || title.length < 1) {
       return res.json({
         success: false,
-        message: "Please add a user friendly code title",
+        message: 'Please add a user friendly code title',
       });
     } else if (!row_code || row_code.length < 1) {
       return res.json({
         success: false,
-        message: "Code is required",
+        message: 'Code is required',
       });
     } else if (!file_extension || file_extension.length < 1) {
       return res.json({
         success: false,
-        message: "File extension used with code added is required",
+        message: 'File extension used with code added is required',
       });
     } else if (!added_by) {
       return res.json({
         success: false,
-        message: "Contributer id is required",
+        message: 'Contributer id is required',
       });
     } else {
       checkCodeAddDuplicate(row_code, (err, result) => {
@@ -92,7 +92,7 @@ module.exports = {
         if (result) {
           return res.json({
             success: false,
-            message: "A similar code already exists",
+            message: 'A similar code already exists',
           });
         } else {
           //update request body with sanitized data
@@ -133,7 +133,7 @@ module.exports = {
     if (!codesnippet_id) {
       return res.json({
         success: false,
-        message: "Bad request",
+        message: 'Bad request',
       });
     }
 
@@ -151,52 +151,52 @@ module.exports = {
     if (!func_id || func_id < 1) {
       return res.json({
         success: false,
-        message: "Please select a function",
+        message: 'Please select a function',
       });
     } else if (!subfunc_id) {
       return res.json({
         success: false,
-        message: "Please select a subfunction",
+        message: 'Please select a subfunction',
       });
     } else if (!language_id || language_id < 1) {
       return res.json({
         success: false,
-        message: "Please select language",
+        message: 'Please select language',
       });
     } else if (!framework_id) {
       return res.json({
         success: false,
-        message: "Please select framework",
+        message: 'Please select framework',
       });
     } else if (!lang_impl_type_id || lang_impl_type_id < 1) {
       return res.json({
         success: false,
-        message: "Please select langauge implementation type",
+        message: 'Please select langauge implementation type',
       });
     } else if (!user_impl_type_id || user_impl_type_id < 1) {
       return res.json({
         success: false,
-        message: "Please select your implementation type",
+        message: 'Please select your implementation type',
       });
     } else if (!title || title.length < 1) {
       return res.json({
         success: false,
-        message: "Please add a user friendly code title",
+        message: 'Please add a user friendly code title',
       });
     } else if (!row_code || row_code.length < 1) {
       return res.json({
         success: false,
-        message: "Code is required",
+        message: 'Code is required',
       });
     } else if (!file_extension || file_extension.length < 1) {
       return res.json({
         success: false,
-        message: "File extension used with code added is required",
+        message: 'File extension used with code added is required',
       });
     } else if (!added_by) {
       return res.json({
         success: false,
-        message: "Contributer id is required",
+        message: 'Contributer id is required',
       });
     } else {
       checkCodeEditDuplicate(row_code, codesnippet_id, (err, result) => {
@@ -206,7 +206,7 @@ module.exports = {
         } else if (result) {
           return res.json({
             success: false,
-            message: "A similar code already exists",
+            message: 'A similar code already exists',
           });
         } else {
           //update request body with sanitinized data
@@ -236,7 +236,7 @@ module.exports = {
       } else if (!row) {
         return res.json({
           success: false,
-          message: "Invalid code snippet id",
+          message: 'Invalid code snippet id',
         });
       } else {
         next();
