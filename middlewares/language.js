@@ -1,9 +1,9 @@
-const path = require("path");
+const path = require('path');
 const {
   checkLanguageId,
   checkLanguagesByName,
   checkIfSimilarNameExist,
-} = require("../helpers/language");
+} = require('../helpers/language');
 
 module.exports = {
   languageAddValidation: (req, res, next) => {
@@ -14,23 +14,26 @@ module.exports = {
     if (!name || name.length < 1) {
       return res.json({
         success: false,
-        message: "Language name is required",
+        message: 'Language name is required',
       });
     } else if (!added_by) {
       return res.json({
         success: false,
-        message: "Author is required",
+        message: 'Author is required',
       });
     } else if (name.length > 0) {
       checkLanguagesByName(name, (err, result) => {
         if (err) {
           console.log(err);
-          return;
+          return res.json({
+            success: false,
+            message: 'Something went wrong. Try again later',
+          });
         }
         if (result) {
           return res.json({
             success: false,
-            message: "Language name already exists",
+            message: 'Language name already exists',
           });
         } else {
           req.body.name = name;
@@ -47,23 +50,26 @@ module.exports = {
     if (!name || name.length < 1) {
       return res.json({
         success: false,
-        message: "Language name is required",
+        message: 'Language name is required',
       });
     } else if (!added_by) {
       return res.json({
         success: false,
-        message: "Author is required",
+        message: 'Author is required',
       });
     } else if (name.length > 0) {
       const langId = parseInt(language_id);
       checkIfSimilarNameExist(name, langId, (err, result) => {
         if (err) {
           console.log(err);
-          return;
+          return res.json({
+            success: false,
+            message: 'Something went wrong. Try again later',
+          });
         } else if (result) {
           return res.json({
             success: false,
-            message: "Language name already exists",
+            message: 'Language name already exists',
           });
         } else {
           req.body.name = name;
@@ -78,10 +84,14 @@ module.exports = {
     checkLanguageId(langId, (err, row) => {
       if (err) {
         console.log(err);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       } else if (!row) {
         return res.json({
           success: false,
-          message: "Invalid language id",
+          message: 'Invalid language id',
         });
       } else {
         next();
@@ -91,7 +101,7 @@ module.exports = {
 
   validateImg: (req, res, next) => {
     if (!req.files) {
-      req.body.icon = "";
+      req.body.icon = '';
       return next();
     } else {
       const file = req.files.icon;
@@ -99,23 +109,23 @@ module.exports = {
       const fileSize = file.size;
       const miniFileSize = 1024 * 1024 * 5;
       const extensionName = path.extname(fileName);
-      const allowedExtensions = [".png", ".jpg", "jpeg"];
+      const allowedExtensions = ['.png', '.jpg', 'jpeg'];
 
       if (!allowedExtensions.includes(extensionName)) {
         return res.json({
           success: false,
           message:
-            "Invalid image. Only .jpeg, .jpg and .png file types are allowed",
+            'Invalid image. Only .jpeg, .jpg and .png file types are allowed',
         });
       } else if (fileSize > miniFileSize) {
         return res.json({
           success: false,
-          message: "File size exceeds minimum required 5mbs",
+          message: 'File size exceeds minimum required 5mbs',
         });
       }
       const sanitizedFileName =
         fileName.toLowerCase().slice(0, -4) +
-        "-" +
+        '-' +
         Date.now() +
         path.extname(fileName);
 
@@ -124,7 +134,10 @@ module.exports = {
       file.mv(file_destination, (err) => {
         if (err) {
           console.log(err);
-          return res.status(500).send(err);
+          return res.json({
+            success: false,
+            message: 'Something went wrong. Try again later',
+          });
         } else {
           //console.log("File uploaded to => ", file_destination);
           req.body.icon = sanitizedFileName;

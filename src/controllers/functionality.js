@@ -6,9 +6,9 @@ const {
   deleteFunc,
   reactivateFunc,
   getTotalRecords,
-} = require("../models/functionality"); //require functionality models to avail its featured methods
+} = require('../models/functionality'); //require functionality models to avail its featured methods
 //const async = require("async");
-const { inputAvailable } = require("../../helpers/common"); //require common helper functions
+const { inputAvailable } = require('../../helpers/common'); //require common helper functions
 
 module.exports = {
   addFunc: (req, res) => {
@@ -19,13 +19,13 @@ module.exports = {
         console.log(err);
         return res.json({
           success: false,
-          message: "Error occured in adding a new functionality",
+          message: 'Error occured in adding a new functionality',
         });
       }
       return res.json({
         success: true,
         data: results,
-        message: "Functionality added Successfully",
+        message: 'Functionality added Successfully',
       });
     });
   },
@@ -35,7 +35,7 @@ module.exports = {
 
     let { where_, search_, orderby, dir, offset, rpp } = req.query;
     if (!where_) {
-      where_ = "status = 1";
+      where_ = 'status = 1';
     }
 
     let andsearch;
@@ -43,14 +43,14 @@ module.exports = {
     if (search_ != undefined) {
       andsearch = `AND name LIKE '%${search_}%'`;
     } else {
-      andsearch = "";
+      andsearch = '';
     }
 
     if (!orderby) {
-      orderby = "name";
+      orderby = 'name';
     }
     if (!dir) {
-      dir = "ASC";
+      dir = 'ASC';
     }
     if (!offset) {
       offset = 0;
@@ -70,12 +70,15 @@ module.exports = {
     getFuncs(queryObj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "No record(s) found",
+          message: 'No record(s) found',
         });
       }
 
@@ -89,7 +92,10 @@ module.exports = {
         getTotalRecords(queryObj, (err2, results2) => {
           if (err2) {
             console.log(err2);
-            return;
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (results2) {
@@ -122,12 +128,15 @@ module.exports = {
     getFuncByFuncId(obj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record not found",
+          message: 'Record not found',
         });
       }
 
@@ -149,19 +158,22 @@ module.exports = {
     updateFunc(parseInt(func_id), body, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (!results) {
         return res.json({
           success: false,
-          message: "Failed to update functionality",
+          message: 'Failed to update functionality',
         });
       }
 
       return res.json({
         success: true,
-        message: "Functionality updated successfully",
+        message: 'Functionality updated successfully',
       });
     });
   },
@@ -170,17 +182,20 @@ module.exports = {
     deleteFunc(parseInt(func_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Functionality deleted successfully",
+        message: 'Functionality deleted successfully',
       });
     });
   },
@@ -190,17 +205,20 @@ module.exports = {
     reactivateFunc(parseInt(func_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Functionality activated successfully",
+        message: 'Functionality activated successfully',
       });
     });
   },

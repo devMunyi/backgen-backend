@@ -1,4 +1,4 @@
-require("../../config/db.config"); //require database configurations
+require('../../config/db.config'); //require database configurations
 const {
   addPlatform,
   getPlatformByPlatformId,
@@ -7,8 +7,8 @@ const {
   deletePlatform,
   getTotalRecords,
   reactivatePlatform,
-} = require("../models/platform"); //require platform models to avail its featured methods
-const { inputAvailable } = require("../../helpers/common"); //require helper functions
+} = require('../models/platform'); //require platform models to avail its featured methods
+const { inputAvailable } = require('../../helpers/common'); //require helper functions
 
 module.exports = {
   addPlatform: (req, res) => {
@@ -17,15 +17,15 @@ module.exports = {
     addPlatform(body, (err, results) => {
       if (err) {
         console.log(err);
-        return res.status(500).json({
+        return res.json({
           success: false,
-          message: "Error occured in adding a new platform",
+          message: 'Error occured in adding a new platform',
         });
       }
       return res.json({
         success: true,
         data: results,
-        message: "Platform added Successfully",
+        message: 'Platform added Successfully',
       });
     });
   },
@@ -35,7 +35,7 @@ module.exports = {
 
     let { where_, search_, orderby, dir, offset, rpp } = req.query;
     if (!where_) {
-      where_ = "status = 1";
+      where_ = 'status = 1';
     }
 
     let andsearch;
@@ -43,14 +43,14 @@ module.exports = {
     if (search_ != undefined) {
       andsearch = `AND name LIKE '%${search_}%'`;
     } else {
-      andsearch = "";
+      andsearch = '';
     }
 
     if (!orderby) {
-      orderby = "name";
+      orderby = 'name';
     }
     if (!dir) {
-      dir = "ASC";
+      dir = 'ASC';
     }
     if (!offset) {
       offset = 0;
@@ -71,12 +71,15 @@ module.exports = {
     getPlatforms(queryObj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "No record(s) found",
+          message: 'No record(s) found',
         });
       }
 
@@ -90,7 +93,10 @@ module.exports = {
         getTotalRecords(queryObj, (err2, results2) => {
           if (err2) {
             console.log(err2);
-            return;
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (results2) {
@@ -112,7 +118,10 @@ module.exports = {
     }
 
     if (!platform_id) {
-      return res.json();
+      return res.json({
+        success: false,
+        message: 'Not found',
+      });
     }
 
     let obj = {
@@ -123,12 +132,15 @@ module.exports = {
     getPlatformByPlatformId(obj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record not found",
+          message: 'Record not found',
         });
       }
       if (results) {
@@ -150,19 +162,22 @@ module.exports = {
     updatePlatform(parseInt(platform_id), body, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (!results) {
         return res.json({
           success: false,
-          message: "Failed to update platform",
+          message: 'Failed to update platform',
         });
       }
 
       return res.json({
         success: true,
-        message: "Platform updated successfully!",
+        message: 'Platform updated successfully!',
       });
     });
   },
@@ -171,17 +186,20 @@ module.exports = {
     deletePlatform(parseInt(platform_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Platform deleted successfully!",
+        message: 'Platform deleted successfully!',
       });
     });
   },
@@ -191,17 +209,20 @@ module.exports = {
     reactivatePlatform(parseInt(platform_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Platform activated successfully",
+        message: 'Platform activated successfully',
       });
     });
   },

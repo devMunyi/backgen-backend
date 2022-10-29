@@ -6,8 +6,8 @@ const {
   deleteDbms,
   reactivateDbms,
   getTotalRecords,
-} = require("../models/dbms"); //require dbms models to avail its featured methods
-const { inputAvailable } = require("../../helpers/common"); //require common helper functions
+} = require('../models/dbms'); //require dbms models to avail its featured methods
+const { inputAvailable } = require('../../helpers/common'); //require common helper functions
 
 module.exports = {
   addDbms: (req, res) => {
@@ -16,15 +16,15 @@ module.exports = {
     addDbms(body, (err, results) => {
       if (err) {
         console.log(err);
-        return res.status(500).json({
+        return res.json({
           success: false,
-          message: "Error occured in adding a new dbms",
+          message: 'Error occured in adding a new dbms',
         });
       }
       return res.json({
         success: true,
         data: results,
-        message: "Dbms added Successfully",
+        message: 'Dbms added Successfully',
       });
     });
   },
@@ -34,7 +34,7 @@ module.exports = {
 
     let { where_, search_, orderby, dir, offset, rpp } = req.query;
     if (!where_) {
-      where_ = "status = 1";
+      where_ = 'status = 1';
     }
 
     let andsearch;
@@ -42,14 +42,14 @@ module.exports = {
     if (search_ != undefined) {
       andsearch = `AND name LIKE '%${search_}%'`;
     } else {
-      andsearch = "";
+      andsearch = '';
     }
 
     if (!orderby) {
-      orderby = "name";
+      orderby = 'name';
     }
     if (!dir) {
-      dir = "ASC";
+      dir = 'ASC';
     }
     if (!offset) {
       offset = 0;
@@ -70,12 +70,15 @@ module.exports = {
     getDbmses(queryObj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "No record(s) found",
+          message: 'No record(s) found',
         });
       }
 
@@ -89,7 +92,10 @@ module.exports = {
         getTotalRecords(queryObj, (err2, results2) => {
           if (err2) {
             console.log(err2);
-            return;
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (results2) {
@@ -111,7 +117,10 @@ module.exports = {
     }
 
     if (!dbms_id) {
-      return res.json();
+      return res.json({
+        success: false,
+        message: 'Not found',
+      });
     }
 
     let obj = {
@@ -122,12 +131,15 @@ module.exports = {
     getDbmsByDbmsId(obj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record not found",
+          message: 'Record not found',
         });
       }
 
@@ -150,20 +162,23 @@ module.exports = {
     updateDbms(parseInt(dbms_id), body, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (!results) {
         return res.json({
           success: false,
-          message: "Failed to update dbms",
+          message: 'Failed to update dbms',
         });
       }
 
       if (results) {
         return res.json({
           success: true,
-          message: "Dbms updated successfully!",
+          message: 'Dbms updated successfully!',
         });
       }
     });
@@ -174,17 +189,20 @@ module.exports = {
     deleteDbms(parseInt(dbms_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Dbms deleted successfully!",
+        message: 'Dbms deleted successfully!',
       });
     });
   },
@@ -194,17 +212,20 @@ module.exports = {
     reactivateDbms(parseInt(dbms_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Dbms activated successfully",
+        message: 'Dbms activated successfully',
       });
     });
   },

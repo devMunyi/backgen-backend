@@ -1,9 +1,9 @@
-const path = require("path");
+const path = require('path');
 const {
   checkSubfunsByName,
   checkSubfunId,
   checkIfSimilarNameExist,
-} = require("../helpers/subfunctionality");
+} = require('../helpers/subfunctionality');
 
 module.exports = {
   subfunAddValidation: (req, res, next) => {
@@ -15,28 +15,31 @@ module.exports = {
     if (!name || name.length < 1) {
       return res.json({
         success: false,
-        message: "Subfunctionality name is required",
+        message: 'Subfunctionality name is required',
       });
     } else if (!func_id || func_id < 1) {
       return res.json({
         success: false,
-        message: "Please select functionality",
+        message: 'Please select functionality',
       });
     } else if (!added_by) {
       return res.json({
         success: false,
-        message: "Author is required",
+        message: 'Author is required',
       });
     } else if (name.length > 0) {
       checkSubfunsByName(name, (err, result) => {
         if (err) {
           console.log(err);
-          return;
+          return res.json({
+            success: false,
+            message: 'Something went wrong. Try again later',
+          });
         }
         if (result) {
           return res.json({
             success: false,
-            message: "Subfunctionality name already exists",
+            message: 'Subfunctionality name already exists',
           });
         } else {
           req.body.name = name;
@@ -55,28 +58,31 @@ module.exports = {
     if (!name || name.length < 1) {
       return res.json({
         success: false,
-        message: "Subfunctionality name is required",
+        message: 'Subfunctionality name is required',
       });
     } else if (!func_id || func_id < 1) {
       return res.json({
         success: false,
-        message: "Please select functionality",
+        message: 'Please select functionality',
       });
     } else if (!added_by) {
       return res.json({
         success: false,
-        message: "Author is required",
+        message: 'Author is required',
       });
     } else if (name.length > 0) {
       subfunId = parseInt(subfun_id);
       checkIfSimilarNameExist(name, subfunId, (err, result) => {
         if (err) {
           console.log(err);
-          return;
+          return res.json({
+            success: false,
+            message: 'Something went wrong. Try again later',
+          });
         } else if (result) {
           return res.json({
             success: false,
-            message: "Subfunctionality name already exists",
+            message: 'Subfunctionality name already exists',
           });
         } else {
           req.body.name = name;
@@ -91,10 +97,14 @@ module.exports = {
     checkSubfunId(subfunId, (err, row) => {
       if (err) {
         console.log(err);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       } else if (!row) {
         return res.json({
           success: false,
-          message: "Invalid subfunctionality id",
+          message: 'Invalid subfunctionality id',
         });
       } else {
         next();
@@ -104,7 +114,7 @@ module.exports = {
 
   validateImg: (req, res, next) => {
     if (!req.files) {
-      req.body.icon = "";
+      req.body.icon = '';
       return next();
     } else {
       const file = req.files.icon;
@@ -112,23 +122,23 @@ module.exports = {
       const fileSize = file.size;
       const miniFileSize = 1024 * 1024 * 5;
       const extensionName = path.extname(fileName);
-      const allowedExtensions = [".png", ".jpg", "jpeg"];
+      const allowedExtensions = ['.png', '.jpg', 'jpeg'];
 
       if (!allowedExtensions.includes(extensionName)) {
         return res.json({
           success: false,
           message:
-            "Invalid image. Only .jpeg, .jpg and .png file types are allowed",
+            'Invalid image. Only .jpeg, .jpg and .png file types are allowed',
         });
       } else if (fileSize > miniFileSize) {
         return res.json({
           success: false,
-          message: "File size exceeds minimum required 5mbs",
+          message: 'File size exceeds minimum required 5mbs',
         });
       }
       const sanitizedFileName =
         fileName.toLowerCase().slice(0, -4) +
-        "-" +
+        '-' +
         Date.now() +
         path.extname(fileName);
 
@@ -137,7 +147,10 @@ module.exports = {
       file.mv(file_destination, (err) => {
         if (err) {
           console.log(err);
-          return res.status(500).send(err);
+          return res.json({
+            success: false,
+            message: 'Something went wrong. Try again later',
+          });
         } else {
           //console.log("File uploaded to => ", file_destination);
           req.body.icon = sanitizedFileName;

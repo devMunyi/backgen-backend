@@ -8,7 +8,6 @@ const { encode } = require('html-entities');
 
 module.exports = {
   codesnippetAddValidation: (req, res, next) => {
-    //console.log("REQ BODY => ", req.body);
     let {
       func_id,
       subfunc_id,
@@ -87,7 +86,10 @@ module.exports = {
       checkCodeAddDuplicate(row_code, (err, result) => {
         if (err) {
           console.log(err);
-          return;
+          return res.json({
+            success: false,
+            message: 'Something went wrong. Try again later',
+          });
         }
         if (result) {
           return res.json({
@@ -202,7 +204,10 @@ module.exports = {
       checkCodeEditDuplicate(row_code, codesnippet_id, (err, result) => {
         if (err) {
           console.log(err);
-          return;
+          return res.json({
+            success: false,
+            message: 'Something went wrong. Try again later',
+          });
         } else if (result) {
           return res.json({
             success: false,
@@ -233,6 +238,10 @@ module.exports = {
     checkCodesnippetId(impId, (err, row) => {
       if (err) {
         console.log(err);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       } else if (!row) {
         return res.json({
           success: false,

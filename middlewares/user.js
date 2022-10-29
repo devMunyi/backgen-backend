@@ -1,7 +1,7 @@
-require("dotenv").config();
-const { verify } = require("jsonwebtoken");
-const expressJWT = require("express-jwt");
-const { compareSync } = require("bcrypt");
+require('dotenv').config();
+const { verify } = require('jsonwebtoken');
+const expressJWT = require('express-jwt');
+const { compareSync } = require('bcrypt');
 const secret = process.env.JWT_SECRET;
 const {
   checkIfSimilarUsernameExist,
@@ -9,18 +9,18 @@ const {
   checkUsersByEmail,
   checkUsersByUsername,
   getUserByUsernameOrByEmail,
-} = require("../helpers/user");
+} = require('../helpers/user');
 
 module.exports = {
   //use either requireSignin or checkToken to validate token
   requireSignin: expressJWT({
     secret,
-    algorithms: ["HS256"],
+    algorithms: ['HS256'],
   }),
 
   //validate token
   checkToken: (req, res, next) => {
-    let token = req.get("authorization");
+    let token = req.get('authorization');
     if (token) {
       token = token.slice(7);
       verify(token, secret, (err, decoded) => {
@@ -28,7 +28,7 @@ module.exports = {
         if (err) {
           res.json({
             success: false,
-            message: "Invalid token, please login.",
+            message: 'Invalid token, please login.',
           });
         } else {
           req.user = decoded;
@@ -38,7 +38,7 @@ module.exports = {
     } else {
       res.json({
         success: false,
-        message: "Access denied! unauthorized user",
+        message: 'Access denied! unauthorized user',
       });
     }
   },
@@ -51,18 +51,22 @@ module.exports = {
     if (!email || email.length < 1) {
       return res.send({
         success: false,
-        message: "Email is required",
+        message: 'Email is required',
       });
     }
 
     //check if the email exist in the database
     checkUsersByEmail(email, (err, result) => {
       if (err) {
-        return console.log(err);
+        console.log(err);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       } else if (!result) {
         return res.json({
           success: false,
-          message: "User email not registered",
+          message: 'User email not registered',
         });
       } else {
         req.body.email = email;
@@ -84,58 +88,64 @@ module.exports = {
     if (!username || username.length < 1) {
       return res.json({
         success: false,
-        message: "Username is required",
+        message: 'Username is required',
       });
     } else if (!fullname || fullname.length < 5) {
       return res.json({
         success: false,
-        message: "Fullname is required and should be min 5 characters",
+        message: 'Fullname is required and should be min 5 characters',
       });
     } else if (!email || email.length < 5) {
       return res.json({
         success: false,
-        message: "Valid Email is required",
+        message: 'Valid Email is required',
       });
     } else if (!country || country < 1) {
       return res.json({
         success: false,
-        message: "Country is required",
+        message: 'Country is required',
       });
     } else if (!password || password.length < 6) {
       return res.json({
         success: false,
-        message: "Password is required and should be min 6 characters long",
+        message: 'Password is required and should be min 6 characters long',
       });
     } else if (!cpassword) {
       return res.json({
         success: false,
-        message: "Confirm password is required",
+        message: 'Confirm password is required',
       });
     } else if (password !== cpassword) {
       return res.json({
         success: false,
-        message: "Passwords do not match.",
+        message: 'Passwords do not match.',
       });
     } else if (username.length > 0) {
       checkUsersByUsername(username, (err, result) => {
         if (err) {
           console.log(err);
-          return;
+          return res.json({
+            success: false,
+            message: 'Something went wrong. Try again later',
+          });
         } else if (result) {
           return res.json({
             success: false,
-            message: "Username already taken",
+            message: 'Username already taken',
           });
         } else {
           if (email.length > 0) {
             checkUsersByEmail(email, (err, result) => {
               if (err) {
                 console.log(err);
-                return;
+                return res.json({
+                  success: false,
+                  message: 'Something went wrong. Try again later',
+                });
               } else if (result) {
                 return res.json({
                   success: false,
-                  message: "Email already taken",
+                  message: 'Email already taken',
                 });
               } else {
                 req.body.username = username;
@@ -167,57 +177,63 @@ module.exports = {
     if (!username || username.length < 1) {
       return res.json({
         success: false,
-        message: "Username is required",
+        message: 'Username is required',
       });
     } else if (!fullname || fullname.length < 5) {
       return res.json({
         success: false,
-        message: "Fullname is required and should be min 5 characters",
+        message: 'Fullname is required and should be min 5 characters',
       });
     } else if (!email || email.length < 3) {
       return res.json({
         success: false,
-        message: "Valid Email is required",
+        message: 'Valid Email is required',
       });
     } else if (!country || country < 1) {
       return res.json({
         success: false,
-        message: "Country is required",
+        message: 'Country is required',
       });
     } else if (!password || password.length < 6) {
       return res.json({
         success: false,
-        message: "Password is required and should be min 6 characters long",
+        message: 'Password is required and should be min 6 characters long',
       });
     } else if (!cpassword) {
       return res.json({
         success: false,
-        message: "Confirm password is required",
+        message: 'Confirm password is required',
       });
     } else if (password !== cpassword) {
       return res.json({
         success: false,
-        message: "Passwords do not match.",
+        message: 'Passwords do not match.',
       });
     } else if (username.length > 0) {
       checkIfSimilarUsernameExist(username, userid, (err, result) => {
         if (err) {
           console.log(err);
-          return;
+          return res.json({
+            success: false,
+            message: 'Something went wrong. Try again later',
+          });
         } else if (result) {
           return res.json({
             success: false,
-            message: "Username already taken",
+            message: 'Username already taken',
           });
         } else if (username.length > 0) {
           checkIfSimilarEmailExist(email, userid, (err, result) => {
             if (err) {
               console.log(err);
-              return;
+              return res.json({
+                success: false,
+                message: 'Something went wrong. Try again later',
+              });
             } else if (result) {
               return res.json({
                 success: false,
-                message: "Email already taken",
+                message: 'Email already taken',
               });
             } else {
               req.body.username = username;
@@ -238,29 +254,33 @@ module.exports = {
     if (username.length < 1) {
       return res.send({
         success: false,
-        message: "Username is required",
+        message: 'Username is required',
       });
     } else if (password.length < 1) {
       return res.send({
         success: false,
-        message: "Password is required",
+        message: 'Password is required',
       });
     } else {
       getUserByUsernameOrByEmail(username, (err, user) => {
         if (err) {
-          return console.log(err); //when some errors occur
+          console.log(err); //when some errors occur
+          return res.json({
+            success: false,
+            message: 'Something went wrong. Try again later',
+          });
         }
         if (!user) {
           return res.json({
             success: false,
-            message: "Invalid username",
+            message: 'Invalid username',
           });
         }
         //invalid password
         if (!compareSync(password, user.password)) {
           return res.json({
             success: false,
-            message: "Incorrect password",
+            message: 'Incorrect password',
           });
         } else {
           let { password, ...rest } = user;

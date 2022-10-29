@@ -6,8 +6,8 @@ const {
   deleteLanguage,
   getTotalRecords,
   reactivateLanguage,
-} = require("../models/language"); //require language models to avail its featured methods
-const { inputAvailable } = require("../../helpers/common"); //require common helper functions
+} = require('../models/language'); //require language models to avail its featured methods
+const { inputAvailable } = require('../../helpers/common'); //require common helper functions
 
 module.exports = {
   addLanguage: (req, res) => {
@@ -16,15 +16,15 @@ module.exports = {
     addLanguage(body, (err, results) => {
       if (err) {
         console.log(err);
-        return res.status(500).json({
+        return res.json({
           success: false,
-          message: "Error occured in adding a new language",
+          message: 'Error occured in adding a new language',
         });
       }
       return res.json({
         success: true,
         data: results,
-        message: "Language added Successfully",
+        message: 'Language added Successfully',
       });
     });
   },
@@ -34,7 +34,7 @@ module.exports = {
 
     let { where_, search_, orderby, dir, offset, rpp } = req.query;
     if (!where_) {
-      where_ = "status = 1";
+      where_ = 'status = 1';
     }
 
     let andsearch;
@@ -42,14 +42,14 @@ module.exports = {
     if (search_ != undefined) {
       andsearch = `AND name LIKE '%${search_}%'`;
     } else {
-      andsearch = "";
+      andsearch = '';
     }
 
     if (!orderby) {
-      orderby = "name";
+      orderby = 'name';
     }
     if (!dir) {
-      dir = "ASC";
+      dir = 'ASC';
     }
     if (!offset) {
       offset = 0;
@@ -69,12 +69,15 @@ module.exports = {
     getLanguages(queryObj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "No record(s) found",
+          message: 'No record(s) found',
         });
       }
       if (results) {
@@ -87,7 +90,10 @@ module.exports = {
         getTotalRecords(queryObj, (err2, results2) => {
           if (err2) {
             console.log(err2);
-            return;
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (results2) {
@@ -109,7 +115,10 @@ module.exports = {
     }
 
     if (!language_id) {
-      return res.json();
+      return res.json({
+        success: false,
+        message: 'Not found',
+      });
     }
 
     let obj = {
@@ -120,12 +129,15 @@ module.exports = {
     getLanguageByLanguageId(obj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record not found",
+          message: 'Record not found',
         });
       }
 
@@ -148,19 +160,22 @@ module.exports = {
     updateLanguage(parseInt(language_id), body, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (!results) {
         return res.json({
           success: false,
-          message: "Failed to update language",
+          message: 'Failed to update language',
         });
       }
 
       return res.json({
         success: true,
-        message: "Language updated successfully!",
+        message: 'Language updated successfully!',
       });
     });
   },
@@ -170,17 +185,20 @@ module.exports = {
     deleteLanguage(parseInt(language_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Langauage deleted successfully!",
+        message: 'Langauage deleted successfully!',
       });
     });
   },
@@ -190,17 +208,20 @@ module.exports = {
     reactivateLanguage(parseInt(language_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Language activated successfully",
+        message: 'Language activated successfully',
       });
     });
   },

@@ -5,8 +5,8 @@ const {
   updateFramework,
   deleteFramework,
   getTotalRecords,
-} = require("../models/framework"); //require framework models to avail its featured methods
-const { inputAvailable } = require("../../helpers/common"); //require common helper functions
+} = require('../models/framework'); //require framework models to avail its featured methods
+const { inputAvailable } = require('../../helpers/common'); //require common helper functions
 
 module.exports = {
   addFramework: (req, res) => {
@@ -15,15 +15,15 @@ module.exports = {
     addFramework(body, (err, results) => {
       if (err) {
         console.log(err);
-        return res.status(500).json({
+        return res.json({
           success: false,
-          message: "Error occured in adding a new framework",
+          message: 'Error occured in adding a new framework',
         });
       }
       return res.json({
         success: true,
         data: results,
-        message: "Framework added Successfully",
+        message: 'Framework added Successfully',
       });
     });
   },
@@ -33,7 +33,7 @@ module.exports = {
 
     let { language_id, where_, search_, orderby, dir, offset, rpp } = req.query;
     if (!where_) {
-      where_ = "f.status = 1";
+      where_ = 'f.status = 1';
     }
 
     let andsearch;
@@ -41,14 +41,14 @@ module.exports = {
     if (search_ != undefined) {
       andsearch = `AND f.name LIKE '%${search_}%'`;
     } else {
-      andsearch = "";
+      andsearch = '';
     }
 
     if (!orderby) {
-      orderby = "f.name";
+      orderby = 'f.name';
     }
     if (!dir) {
-      dir = "ASC";
+      dir = 'ASC';
     }
     if (!offset) {
       offset = 0;
@@ -70,12 +70,15 @@ module.exports = {
     getFrameworks(queryObj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "No record(s) found",
+          message: 'No record(s) found',
         });
       }
       if (results) {
@@ -88,7 +91,10 @@ module.exports = {
         getTotalRecords(queryObj, (err2, results2) => {
           if (err2) {
             console.log(err2);
-            return;
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (results2) {
@@ -110,7 +116,10 @@ module.exports = {
     }
 
     if (!framework_id) {
-      return res.json();
+      return res.json({
+        success: false,
+        message: 'Not found',
+      });
     }
 
     let obj = {
@@ -121,12 +130,15 @@ module.exports = {
     getFrameworkByFrameworkId(obj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record not found",
+          message: 'Record not found',
         });
       }
       if (results) {
@@ -147,19 +159,22 @@ module.exports = {
     updateFramework(parseInt(framework_id), body, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (!results) {
         return res.json({
           success: false,
-          message: "Failed to update framework",
+          message: 'Failed to update framework',
         });
       }
 
       return res.json({
         success: true,
-        message: "Framework updated successfully!",
+        message: 'Framework updated successfully!',
       });
     });
   },
@@ -168,17 +183,20 @@ module.exports = {
     deleteFramework(parseInt(framework_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Framework deleted successfully!",
+        message: 'Framework deleted successfully!',
       });
     });
   },
@@ -188,17 +206,20 @@ module.exports = {
     reactivateFramework(parseInt(framework_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Framework activated successfully",
+        message: 'Framework activated successfully',
       });
     });
   },

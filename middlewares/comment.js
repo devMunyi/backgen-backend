@@ -1,4 +1,4 @@
-const { checkCommentId } = require("../helpers/comment");
+const { checkCommentId } = require('../helpers/comment');
 
 module.exports = {
   commentAddValidation: (req, res, next) => {
@@ -8,22 +8,22 @@ module.exports = {
     if (code_snippet_id < 1) {
       return res.json({
         success: false,
-        message: "Code snippet id required",
+        message: 'Code snippet id required',
       });
     } else if (!comment_body || comment_body.length < 1) {
       return res.json({
         success: false,
-        message: "Comment content required",
+        message: 'Comment content required',
       });
     } else if (!added_by) {
       return res.json({
         success: false,
-        message: "Author is required",
+        message: 'Author is required',
       });
     } else if (replying_to < 0) {
       return res.json({
         success: false,
-        message: "Reply to is required",
+        message: 'Reply to is required',
       });
     } else {
       req.body.comment_body = comment_body;
@@ -39,12 +39,12 @@ module.exports = {
     if (!comment_id || comment_id < 1) {
       return res.json({
         success: false,
-        message: "Comment id is required",
+        message: 'Comment id is required',
       });
     } else if (!comment_body || comment_body.length < 1) {
       return res.json({
         success: false,
-        message: "Comment content is required",
+        message: 'Comment content is required',
       });
     } else {
       req.body.comment_body = comment_body;
@@ -55,14 +55,18 @@ module.exports = {
 
   commentIdValidation: (req, res, next) => {
     const comment_id = req.body.comment_id;
-    console.log("COMMENNT ID =>", comment_id);
+    console.log('COMMENNT ID =>', comment_id);
     checkCommentId(comment_id, (err, row) => {
       if (err) {
         console.log(err);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       } else if (!row) {
         return res.json({
           success: false,
-          message: "Invalid comment id",
+          message: 'Invalid comment id',
         });
       } else {
         next();

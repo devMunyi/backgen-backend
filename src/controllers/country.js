@@ -4,7 +4,7 @@ const {
   getCountries,
   updateCountry,
   deleteCountry,
-} = require("../models/country"); //require country models to avail its featured methods
+} = require('../models/country'); //require country models to avail its featured methods
 
 module.exports = {
   addCountry: (req, res) => {
@@ -13,15 +13,15 @@ module.exports = {
     addCountry(body, (err, results) => {
       if (err) {
         console.log(err);
-        return res.status(500).json({
+        return res.json({
           success: false,
-          message: "Error occured in adding a new country",
+          message: 'Something went wrong. Try again later',
         });
       }
       return res.json({
         success: true,
         data: results,
-        message: "Country added Successfully",
+        message: 'Country added Successfully',
       });
     });
   },
@@ -29,18 +29,24 @@ module.exports = {
     const { country_id } = req.query;
 
     if (!country_id) {
-      return;
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
     }
 
     getCountryByCountryId(parseInt(country_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record not found",
+          message: 'Record not found',
         });
       }
 
@@ -64,10 +70,10 @@ module.exports = {
       status = 1;
     }
     if (!orderby) {
-      orderby = "name";
+      orderby = 'name';
     }
     if (!dir) {
-      dir = "ASC";
+      dir = 'ASC';
     }
     if (!offset) {
       offset = 0;
@@ -86,12 +92,15 @@ module.exports = {
     getCountries(queryObj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "No record(s) found",
+          message: 'No record(s) found',
         });
       }
 
@@ -116,19 +125,22 @@ module.exports = {
     updateCountry(parseInt(country_id), body, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (!results) {
         return res.json({
           success: false,
-          message: "Failed to update country",
+          message: 'Failed to update country',
         });
       }
 
       return res.json({
         success: true,
-        message: "Country updated successfully!",
+        message: 'Country updated successfully!',
       });
     });
   },
@@ -137,17 +149,20 @@ module.exports = {
     deleteCountry(parseInt(country_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Country deleted successfully!",
+        message: 'Country deleted successfully!',
       });
     });
   },

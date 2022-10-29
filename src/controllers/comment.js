@@ -1,4 +1,4 @@
-const path = require("path");
+const path = require('path');
 const {
   addComment,
   getCommentByCommentId,
@@ -12,18 +12,18 @@ const {
   incrementCommentVotes,
   decrementCommentVotes,
   commentVotes,
-} = require("../models/comment"); //require comment models to avail its featured methods
+} = require('../models/comment'); //require comment models to avail its featured methods
 const {
   incrementCommentsTotal,
   decrementCommentsTotal,
-} = require("../models/codesnippet");
+} = require('../models/codesnippet');
 const {
   addUpvote,
   addDownvote,
   updateUpvote,
   updateDownvote,
   voteCheckByPostIdUserIdAndTable,
-} = require("../models/votes");
+} = require('../models/votes');
 //const { inputAvailable } = require("../../helpers/common"); //require common helper functions
 //const { json } = require("express");
 
@@ -33,27 +33,31 @@ module.exports = {
     addComment(body, (err, results) => {
       if (err) {
         console.log(err);
-        return res.status(500).json({
+        return res.json({
           success: false,
-          message: "Error occured in adding a new comment",
+          message: 'Error occured in adding a new comment',
         });
       }
 
       let { code_snippet_id, replying_to } = body;
       if (results) {
         if (replying_to == 0) {
-          console.log("replying to == 0");
+          console.log('replying to == 0');
           //increment total_comments in the pr_code_snippets table
           incrementCommentsTotal(code_snippet_id, (err2, results2) => {
             if (err2) {
               console.log(err2);
+              return res.json({
+                success: false,
+                message: 'Something went wrong. Try again later',
+              });
             }
 
             //ready to give a response for successful comment save
             if (results2) {
               return res.json({
                 success: true,
-                message: "Added Successfully",
+                message: 'Added Successfully',
               });
             }
           });
@@ -66,32 +70,18 @@ module.exports = {
             (err3, results3) => {
               if (err3) {
                 console.log(err3);
+                return res.json({
+                  success: false,
+                  message: 'Something went wrong. Try again later',
+                });
               }
 
               //ready to give a response for successful comment save
               if (results3) {
                 return res.json({
                   success: true,
-                  message: "Added Successfully",
+                  message: 'Added Successfully',
                 });
-
-                //get total comments for this code
-                // let { where_ } = req.body;
-                // console.log("where parameters via body => ", where_);
-                // getTotalCommentsCodeId(code_snippet_id, (err4, results4) => {
-                //   console.log("total comments resp => ", results4);
-                //   if (err4) {
-                //     console.log(err4);
-                //   }
-
-                //   if (results4) {
-                //     return res.json({
-                //       success: true,
-                //       message: "Added Successfully",
-                //       total_comments: results4.total_comments,
-                //     });
-                //   }
-                // });
               }
             }
           );
@@ -103,18 +93,24 @@ module.exports = {
     const { comment_id } = req.query;
 
     if (!comment_id) {
-      return res.json();
+      return res.json({
+        success: false,
+        message: 'Not found',
+      });
     }
 
     getCommentByCommentId(parseInt(comment_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record not found",
+          message: 'Record not found',
         });
       }
       return res.json({
@@ -127,12 +123,15 @@ module.exports = {
     getComments((err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "No record(s) found",
+          message: 'No record(s) found',
         });
       }
       return res.json({
@@ -146,19 +145,22 @@ module.exports = {
     updateComment(body, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (!results) {
         return res.json({
           success: false,
-          message: "Failed to update",
+          message: 'Failed to update',
         });
       }
 
       return res.json({
         success: true,
-        message: "Updated successfully!",
+        message: 'Updated successfully!',
       });
     });
   },
@@ -168,12 +170,15 @@ module.exports = {
     deleteComment(parseInt(comment_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
 
@@ -183,6 +188,10 @@ module.exports = {
           decrementCommentsTotal(code_snippet_id, (err2, results2) => {
             if (err2) {
               console.log(err2);
+              return res.json({
+                success: false,
+                message: 'Something went wrong. Try again later',
+              });
             }
 
             //ready to give a response for successful comment delete
@@ -190,7 +199,7 @@ module.exports = {
               return res.json({
                 success: true,
                 data: results,
-                message: "Deleted Successfully",
+                message: 'Deleted Successfully',
               });
             }
           });
@@ -202,13 +211,17 @@ module.exports = {
               (err3, results3) => {
                 if (err3) {
                   console.log(err3);
+                  return res.json({
+                    success: false,
+                    message: 'Something went wrong. Try again later',
+                  });
                 }
 
                 //ready to give a response for successful comment delete
                 if (results3) {
                   return res.json({
                     success: true,
-                    message: "Deleted Successfully",
+                    message: 'Deleted Successfully',
                   });
                 }
               }
@@ -216,7 +229,7 @@ module.exports = {
           } else {
             return res.json({
               success: true,
-              message: "Deleted Successfully",
+              message: 'Deleted Successfully',
             });
           }
         }
@@ -242,10 +255,10 @@ module.exports = {
     // }
 
     if (!orderby) {
-      orderby = "cmt.uid";
+      orderby = 'cmt.uid';
     }
     if (!dir) {
-      dir = "DESC";
+      dir = 'DESC';
     }
     if (!(offset >= 0)) {
       offset = 0;
@@ -264,12 +277,15 @@ module.exports = {
     getCommentsByCodesnippetId(queryObj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "No record(s) found",
+          message: 'No record(s) found',
         });
       }
 
@@ -277,8 +293,11 @@ module.exports = {
         getTotalCommentsCodeId(where_, (err2, results2) => {
           if (err2) {
             console.log(err2);
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
-          console.log("total comments => ", results2.total_comments);
 
           if (results2) {
             return res.json({
@@ -300,6 +319,10 @@ module.exports = {
     voteCheckByPostIdUserIdAndTable(body, (err1, result1) => {
       if (err1) {
         console.log(err1);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       //when db result = undefined will mean not vote record seen, thus can be recorded
       if (result1 == undefined) {
@@ -307,6 +330,10 @@ module.exports = {
         addUpvote(body, (err2, result2) => {
           if (err2) {
             console.log(err2);
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (result2) {
@@ -316,18 +343,26 @@ module.exports = {
               (err3, result3) => {
                 if (err3) {
                   console.log(err3);
+                  return res.json({
+                    success: false,
+                    message: 'Something went wrong. Try again later',
+                  });
                 }
 
                 if (result3) {
                   commentVotes(post_id, (err4, result4) => {
                     if (err4) {
                       console.log(err4);
+                      return res.json({
+                        success: false,
+                        message: 'Something went wrong. Try again later',
+                      });
                     }
 
                     if (result4) {
                       return res.json({
                         success: true,
-                        message: "Upvote recorded",
+                        message: 'Upvote recorded',
                         votes: result4.votes,
                       });
                     }
@@ -344,6 +379,10 @@ module.exports = {
         updateUpvote(body, (err2, result2) => {
           if (err2) {
             console.log(err2);
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (result2) {
@@ -351,6 +390,10 @@ module.exports = {
             updateDownvote(body, (err3, result3) => {
               if (err3) {
                 console.log(err3);
+                return res.json({
+                  success: false,
+                  message: 'Something went wrong. Try again later',
+                });
               }
 
               if (result3) {
@@ -359,6 +402,10 @@ module.exports = {
                   (err4, result4) => {
                     if (err4) {
                       console.log(err4);
+                      return res.json({
+                        success: false,
+                        message: 'Something went wrong. Try again later',
+                      });
                     }
 
                     if (result4) {
@@ -366,12 +413,16 @@ module.exports = {
                       commentVotes(post_id, (err5, result5) => {
                         if (err5) {
                           console.log(err5);
+                          return res.json({
+                            success: false,
+                            message: 'Something went wrong. Try again later',
+                          });
                         }
 
                         if (result5) {
                           return res.json({
                             success: true,
-                            message: "Upvote recorded",
+                            message: 'Upvote recorded',
                             votes: result5.votes,
                           });
                         }
@@ -391,6 +442,10 @@ module.exports = {
         updateUpvote(body, (err2, result2) => {
           if (err2) {
             console.log(err2);
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (result2) {
@@ -399,6 +454,10 @@ module.exports = {
               (err3, result3) => {
                 if (err3) {
                   console.log(err3);
+                  return res.json({
+                    success: false,
+                    message: 'Something went wrong. Try again later',
+                  });
                 }
 
                 if (result3) {
@@ -406,12 +465,16 @@ module.exports = {
                   commentVotes(post_id, (err4, result4) => {
                     if (err4) {
                       console.log(err4);
+                      return res.json({
+                        success: false,
+                        message: 'Something went wrong. Try again later',
+                      });
                     }
 
                     if (result4) {
                       return res.json({
                         success: true,
-                        message: "Upvote reverted",
+                        message: 'Upvote reverted',
                         votes: result4.votes,
                       });
                     }
@@ -428,6 +491,10 @@ module.exports = {
         updateUpvote(body, (err2, result2) => {
           if (err2) {
             console.log(err2);
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (result2) {
@@ -436,6 +503,10 @@ module.exports = {
               (err3, result3) => {
                 if (err3) {
                   console.log(err3);
+                  return res.json({
+                    success: false,
+                    message: 'Something went wrong. Try again later',
+                  });
                 }
 
                 if (result3) {
@@ -443,12 +514,16 @@ module.exports = {
                   commentVotes(post_id, (err4, result4) => {
                     if (err4) {
                       console.log(err4);
+                      return res.json({
+                        success: false,
+                        message: 'Something went wrong. Try again later',
+                      });
                     }
 
                     if (result4) {
                       return res.json({
                         success: true,
-                        message: "Upvote recorded",
+                        message: 'Upvote recorded',
                         votes: result4.votes,
                       });
                     }
@@ -469,6 +544,10 @@ module.exports = {
     voteCheckByPostIdUserIdAndTable(body, (err1, result1) => {
       if (err1) {
         console.log(err1);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       //when db result = undefined will mean not vote record seen, thus can be recorded
       if (result1 == undefined) {
@@ -476,6 +555,10 @@ module.exports = {
         addDownvote(body, (err2, result2) => {
           if (err2) {
             console.log(err2);
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (result2) {
@@ -485,18 +568,26 @@ module.exports = {
               (err3, result3) => {
                 if (err3) {
                   console.log(err3);
+                  return res.json({
+                    success: false,
+                    message: 'Something went wrong. Try again later',
+                  });
                 }
 
                 if (result3) {
                   commentVotes(post_id, (err4, result4) => {
                     if (err4) {
                       console.log(err4);
+                      return res.json({
+                        success: false,
+                        message: 'Something went wrong. Try again later',
+                      });
                     }
 
                     if (result4) {
                       return res.json({
                         success: true,
-                        message: "Downvote recorded",
+                        message: 'Downvote recorded',
                         votes: result4.votes,
                       });
                     }
@@ -513,6 +604,10 @@ module.exports = {
         updateDownvote(body, (err2, result2) => {
           if (err2) {
             console.log(err2);
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (result2) {
@@ -520,6 +615,10 @@ module.exports = {
             updateUpvote(body, (err3, result3) => {
               if (err3) {
                 console.log(err3);
+                return res.json({
+                  success: false,
+                  message: 'Something went wrong. Try again later',
+                });
               }
 
               if (result3) {
@@ -528,17 +627,25 @@ module.exports = {
                   (err4, result4) => {
                     if (err4) {
                       console.log(err4);
+                      return res.json({
+                        success: false,
+                        message: 'Something went wrong. Try again later',
+                      });
                     }
                     if (result4) {
                       //now get the updated post votes
                       commentVotes(post_id, (err5, result5) => {
                         if (err5) {
                           console.log(err5);
+                          return res.json({
+                            success: false,
+                            message: 'Something went wrong. Try again later',
+                          });
                         }
                         if (result5) {
                           return res.json({
                             success: true,
-                            message: "Downvote recorded",
+                            message: 'Downvote recorded',
                             votes: result5.votes,
                           });
                         }
@@ -558,6 +665,10 @@ module.exports = {
         updateDownvote(body, (err2, result2) => {
           if (err2) {
             console.log(err2);
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (result2) {
@@ -566,6 +677,10 @@ module.exports = {
               (err3, result3) => {
                 if (err3) {
                   console.log(err3);
+                  return res.json({
+                    success: false,
+                    message: 'Something went wrong. Try again later',
+                  });
                 }
 
                 if (result3) {
@@ -573,12 +688,16 @@ module.exports = {
                   commentVotes(post_id, (err4, result4) => {
                     if (err4) {
                       console.log(err4);
+                      return res.json({
+                        success: false,
+                        message: 'Something went wrong. Try again later',
+                      });
                     }
 
                     if (result4) {
                       return res.json({
                         success: true,
-                        message: "Downvote reverted",
+                        message: 'Downvote reverted',
                         votes: result4.votes,
                       });
                     }
@@ -595,6 +714,10 @@ module.exports = {
         updateDownvote(body, (err2, result2) => {
           if (err2) {
             console.log(err2);
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (result2) {
@@ -603,6 +726,10 @@ module.exports = {
               (err3, result3) => {
                 if (err3) {
                   console.log(err3);
+                  return res.json({
+                    success: false,
+                    message: 'Something went wrong. Try again later',
+                  });
                 }
 
                 if (result3) {
@@ -610,12 +737,16 @@ module.exports = {
                   commentVotes(post_id, (err4, result4) => {
                     if (err4) {
                       console.log(err4);
+                      return res.json({
+                        success: false,
+                        message: 'Something went wrong. Try again later',
+                      });
                     }
 
                     if (result4) {
                       return res.json({
                         success: true,
-                        message: "Downvote recorded",
+                        message: 'Downvote recorded',
                         votes: result4.votes,
                       });
                     }
@@ -631,30 +762,30 @@ module.exports = {
 
   uploadImg: (req, res) => {
     if (!req.files) {
-      return res.json({ success: false, message: "File not found" });
+      return res.json({ success: false, message: 'File not found' });
     } else {
       const file = req.files.upload;
       const fileName = file.name;
       const fileSize = file.size;
       const miniFileSize = 1024 * 1024 * 5;
       const extensionName = path.extname(fileName);
-      const allowedExtensions = [".png", ".jpg", "jpeg"];
+      const allowedExtensions = ['.png', '.jpg', 'jpeg'];
 
       if (!allowedExtensions.includes(extensionName)) {
         return res.json({
           success: false,
           message:
-            "Invalid image. Only .jpeg, .jpg and .png file types are allowed",
+            'Invalid image. Only .jpeg, .jpg and .png file types are allowed',
         });
       } else if (fileSize > miniFileSize) {
         return res.json({
           success: false,
-          message: "File size exceeds minimum required 5mbs",
+          message: 'File size exceeds minimum required 5mbs',
         });
       }
       const sanitizedFileName =
         fileName.toLowerCase().slice(0, -4) +
-        "-" +
+        '-' +
         Date.now() +
         path.extname(fileName);
 
@@ -663,7 +794,10 @@ module.exports = {
       file.mv(file_destination, (err) => {
         if (err) {
           console.log(err);
-          return res.status(500).send(err);
+          return res.json({
+            success: false,
+            message: 'Something went wrong. Try again later',
+          });
         } else {
           url = `${process.env.SERVER_URL}/images/other/${sanitizedFileName}`;
           return res.json({ success: true, url });

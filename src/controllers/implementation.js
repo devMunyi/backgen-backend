@@ -8,8 +8,8 @@ const {
   getTotalRecords,
   getTotalRecords2,
   getImplementationsByFunAndSubfun,
-} = require("../models/implementation"); //require implementation models to avail its featured methods
-const { inputAvailable } = require("../../helpers/common"); //require common helper functions
+} = require('../models/implementation'); //require implementation models to avail its featured methods
+const { inputAvailable } = require('../../helpers/common'); //require common helper functions
 
 module.exports = {
   addImplementation: (req, res) => {
@@ -17,15 +17,15 @@ module.exports = {
     addImplementation(body, (err, results) => {
       if (err) {
         console.log(err);
-        return res.status(500).json({
+        return res.json({
           success: false,
-          message: "Error occured in adding a new implementation",
+          message: 'Error occured in adding a new implementation',
         });
       }
       return res.json({
         success: true,
         data: results,
-        message: "Implementation added Successfully",
+        message: 'Implementation added Successfully',
       });
     });
   },
@@ -36,7 +36,7 @@ module.exports = {
     let { where_, search_, orderby, dir, offset, rpp } = req.query;
 
     if (!where_) {
-      where_ = "status = 1";
+      where_ = 'status = 1';
     }
 
     let andsearch;
@@ -44,14 +44,14 @@ module.exports = {
     if (search_ != undefined) {
       andsearch = `AND title LIKE '%${search_}%'`;
     } else {
-      andsearch = "";
+      andsearch = '';
     }
 
     if (!orderby) {
-      orderby = "title";
+      orderby = 'title';
     }
     if (!dir) {
-      dir = "ASC";
+      dir = 'ASC';
     }
     if (!offset) {
       offset = 0;
@@ -72,19 +72,25 @@ module.exports = {
     getImplementations(queryObj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "No record(s) found",
+          message: 'No record(s) found',
         });
       } else {
         //get all total records
         getTotalRecords(queryObj, (err2, results2) => {
           if (err2) {
             console.log(err2);
-            return;
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (results2) {
@@ -114,19 +120,25 @@ module.exports = {
     getImplementationsByFunAndSubfun(obj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       } else {
         getTotalRecords2(obj, (err2, results2) => {
           if (err2) {
             console.log(err2);
-            return;
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           }
 
           if (results2) {
@@ -159,13 +171,16 @@ module.exports = {
     getImplementationByImplementationId(obj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
           all_totals: 0,
-          message: "Record not found",
+          message: 'Record not found',
         });
       }
       return res.json({
@@ -181,19 +196,22 @@ module.exports = {
     updateImplementation(parseInt(implementation_id), body, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (!results) {
         return res.json({
           success: false,
-          message: "Failed to update implementation",
+          message: 'Failed to update implementation',
         });
       }
 
       return res.json({
         success: true,
-        message: "Implementation updated successfully!",
+        message: 'Implementation updated successfully!',
       });
     });
   },
@@ -202,17 +220,20 @@ module.exports = {
     deleteImplementation(parseInt(implementation_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Implementation deleted successfully!",
+        message: 'Implementation deleted successfully!',
       });
     });
   },
@@ -222,17 +243,20 @@ module.exports = {
     reactivateImplementation(parseInt(implementation_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       return res.json({
         success: true,
-        message: "Implementation activated successfully",
+        message: 'Implementation activated successfully',
       });
     });
   },

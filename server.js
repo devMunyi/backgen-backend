@@ -25,7 +25,6 @@ app.use(
       'https://backgen.net',
       'https://www.backgen.net',
       'http://localhost',
-      'www.backgen.net',
     ],
     methods: 'GET, POST, PUT, DELETE, OPTIONS',
     credentials: true,

@@ -1,4 +1,4 @@
-const { checkImplementationId } = require("../helpers/implementation");
+const { checkImplementationId } = require('../helpers/implementation');
 
 module.exports = {
   implementationAddValidation: (req, res, next) => {
@@ -10,22 +10,22 @@ module.exports = {
     if (!title || title.length < 1) {
       return res.json({
         success: false,
-        message: "Implementation title is required",
+        message: 'Implementation title is required',
       });
     } else if (!func_id || func_id < 1) {
       return res.json({
         success: false,
-        message: "Please select function",
+        message: 'Please select function',
       });
     } else if (!subfunc_id) {
       return res.json({
         success: false,
-        message: "Please select sub-function",
+        message: 'Please select sub-function',
       });
     } else if (!added_by) {
       return res.json({
         success: false,
-        message: "Author is required",
+        message: 'Author is required',
       });
     } else {
       req.body.title = title;
@@ -42,22 +42,22 @@ module.exports = {
     if (!func_id || func_id < 1) {
       return res.json({
         success: false,
-        message: "Please select function",
+        message: 'Please select function',
       });
     } else if (!subfunc_id) {
       return res.json({
         success: false,
-        message: "Please select sub-function",
+        message: 'Please select sub-function',
       });
     } else if (!title || title.length < 1) {
       return res.json({
         success: false,
-        message: "Title is required",
+        message: 'Title is required',
       });
     } else if (!added_by) {
       return res.json({
         success: false,
-        message: "Author is required",
+        message: 'Author is required',
       });
     } else {
       req.body.title = title;
@@ -70,10 +70,14 @@ module.exports = {
     checkImplementationId(impId, (err, row) => {
       if (err) {
         console.log(err);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       } else if (!row) {
         return res.json({
           success: false,
-          message: "Invalid implementation id",
+          message: 'Invalid implementation id',
         });
       } else {
         next();

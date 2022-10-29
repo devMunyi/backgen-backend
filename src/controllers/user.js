@@ -1,4 +1,4 @@
-require("dotenv").config();
+require('dotenv').config();
 const {
   addUser,
   getUserByUserId,
@@ -14,14 +14,14 @@ const {
   updatePassword,
   addUserByOauth,
   getUserByAuthProviderId,
-} = require("../models/user"); //user model require
-const { genSaltSync, hashSync, compareSync } = require("bcrypt"); //require bcrypt to handle password
-const { sign, verify } = require("jsonwebtoken"); //require jwt to handle issuing of access tokens
+} = require('../models/user'); //user model require
+const { genSaltSync, hashSync, compareSync } = require('bcrypt'); //require bcrypt to handle password
+const { sign, verify } = require('jsonwebtoken'); //require jwt to handle issuing of access tokens
 //const queryString = require("querystring");
-const axios = require("axios"); //require axios to handle API call using get, post, delete, put
+const axios = require('axios'); //require axios to handle API call using get, post, delete, put
 //const async = require("async");
-const nodemailer = require("nodemailer"); //require nodemailer to handle sending emails
-const { google } = require("googleapis"); //require googleapis to handle google OUATH
+const nodemailer = require('nodemailer'); //require nodemailer to handle sending emails
+const { google } = require('googleapis'); //require googleapis to handle google OUATH
 
 //google oauth sign in options
 const oauth2ClientSignin = new google.auth.OAuth2(
@@ -42,18 +42,24 @@ module.exports = {
     const { user_id } = req.query;
 
     if (!user_id) {
-      return;
+      return res.json({
+        success: false,
+        message: 'Invalid request',
+      });
     }
 
     getUserByUserId(parseInt(user_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record not found",
+          message: 'Record not found',
         });
       }
       return res.json({
@@ -72,10 +78,10 @@ module.exports = {
       status = 1;
     }
     if (!orderby) {
-      orderby = "username";
+      orderby = 'username';
     }
     if (!dir) {
-      dir = "ASC";
+      dir = 'ASC';
     }
     if (!offset) {
       offset = 0;
@@ -94,12 +100,15 @@ module.exports = {
     getUsers(queryObj, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "No record(s) found",
+          message: 'No record(s) found',
         });
       }
       return res.json({
@@ -117,19 +126,22 @@ module.exports = {
     updateUser(parseInt(user_id), body, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (!results) {
         return res.json({
           success: false,
-          message: "Failed to update user",
+          message: 'Failed to update user',
         });
       }
 
       return res.json({
         success: true,
-        message: "User updated successfully!",
+        message: 'User updated successfully!',
       });
     });
   },
@@ -139,18 +151,21 @@ module.exports = {
     deleteUser(parseInt(user_id), (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Record Not Found",
+          message: 'Record Not Found',
         });
       }
       console.log(results);
       return res.json({
         success: true,
-        message: "User deleted successfully!",
+        message: 'User deleted successfully!',
       });
     });
   },
@@ -161,12 +176,15 @@ module.exports = {
     getUserByUsernameOrByEmail(username, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "Invalid username",
+          message: 'Invalid username',
         });
       }
       const result = compareSync(password, results.password);
@@ -175,18 +193,18 @@ module.exports = {
         const { password, ...rest } = results;
         //results.password = undefined;
         const jsontoken = sign(rest, process.env.JWT_SECRET, {
-          expiresIn: "8h",
+          expiresIn: '8h',
         });
         return res.json({
           success: true,
-          message: "Log in success",
-          token: "Bearer " + jsontoken,
+          message: 'Log in success',
+          token: 'Bearer ' + jsontoken,
           user: rest,
         });
       } else {
         return res.json({
           success: false,
-          message: "Incorrect password",
+          message: 'Incorrect password',
         });
       }
     });
@@ -197,12 +215,15 @@ module.exports = {
     getCurrentUser(uid, (err, results) => {
       if (err) {
         console.log(err);
-        return;
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
       if (!results) {
         return res.json({
           success: false,
-          message: "No recod found",
+          message: 'No recod found',
         });
       }
       if (results) {
@@ -222,21 +243,21 @@ module.exports = {
     addUser(body, (err, results) => {
       if (err) {
         console.log(err);
-        return res.status(500).json({
+        return res.json({
           success: false,
-          message: "Error occured in adding a new user",
+          message: 'Error occured in adding a new user',
         });
       }
       if (!results) {
-        return res.status(500).json({
+        return res.json({
           success: false,
-          message: "Error occured in adding a new user",
+          message: 'Error occured in adding a new user',
         });
       } else {
         return res.json({
           success: true,
           data: results,
-          message: "User added Successfully. You can now login.",
+          message: 'User added Successfully. You can now login.',
         });
       }
     });
@@ -247,20 +268,24 @@ module.exports = {
     if (!email || email.length < 1) {
       return res.json({
         success: false,
-        message: "Email is required",
+        message: 'Email is required',
       });
     }
 
     //make sure that user exists in the db
     checkUserByEmail(email, (err, user) => {
       if (err) {
-        return console.log(err);
+        console.log(err);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (!user) {
         return res.json({
           success: false,
-          message: "Email not found",
+          message: 'Email not found',
         });
       }
 
@@ -272,13 +297,13 @@ module.exports = {
         fullname: user.fullname,
       };
 
-      const token = sign(payload, secret, { expiresIn: "1h" });
+      const token = sign(payload, secret, { expiresIn: '1h' });
       const link = `${process.env.PASSWORD_RESET_URL}?uid=${user.uid}&token=${token}`;
       //console.log(link);
 
       //send password reset link as mail
       const transporter = nodemailer.createTransport({
-        service: "gmail",
+        service: 'gmail',
         auth: {
           user: process.env.APP_EMAIL,
           pass: process.env.APP_EMAIL_PASS,
@@ -288,7 +313,7 @@ module.exports = {
       const mailOptions = {
         from: process.env.APP_EMAIL,
         to: payload.email,
-        subject: "Password Reset Link",
+        subject: 'Password Reset Link',
         html: `<p><b>Dear ${payload.fullname},</b></p>
         <p>To reset your password, please click <a href='${link}'>here</a> and follow the instructions provided.</p>
         <p>If you have trouble clicking on the link provided, you may copy and paste the following URL into your browser:</p>
@@ -303,12 +328,16 @@ module.exports = {
 
       transporter.sendMail(mailOptions, function (error, info) {
         if (error) {
-          return console.log(error);
+          console.log(error);
+          return res.json({
+            success: false,
+            message: 'Something went wrong. Try again later',
+          });
         } else {
           //console.log("Email sent: " + info.accepted);
-          return res.status(200).send({
+          return res.send({
             success: true,
-            message: "Password reset link has been sent to your email...",
+            message: 'Password reset link has been sent to your email...',
           });
         }
       });
@@ -321,7 +350,7 @@ module.exports = {
     if (!uid || !token) {
       return res.json({
         success: false,
-        message: "Invalid password reset token",
+        message: 'Invalid password reset token',
       });
     }
 
@@ -330,13 +359,17 @@ module.exports = {
     //make sure that user exists in the db
     checkUserById(uid, (err, user) => {
       if (err) {
-        return console.log(err);
+        console.log(err);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (!user) {
         return res.json({
           success: false,
-          message: "Email not found",
+          message: 'Email not found',
         });
       }
 
@@ -350,29 +383,33 @@ module.exports = {
         if (!password || password.length < 6) {
           return res.json({
             success: false,
-            message: "Password is required and should be min 6 characters long",
+            message: 'Password is required and should be min 6 characters long',
           });
         } else if (!cpassword) {
           return res.json({
             success: false,
-            message: "Confirm password is required",
+            message: 'Confirm password is required',
           });
         } else if (password !== cpassword) {
           return res.json({
             success: false,
-            message: "Passwords do not match.",
+            message: 'Passwords do not match.',
           });
         } else {
           //find that user with payload id and email exist and update the password
           userByEmailAndId({ uid: pUid, email: pEmail }, (err, resp) => {
             if (err) {
-              return console.log(err);
+              console.log(err);
+              return res.json({
+                success: false,
+                message: 'Something went wrong. Try again later',
+              });
             }
 
             if (!resp) {
               return res.json({
                 success: false,
-                message: "Invalid user id",
+                message: 'Invalid user id',
               });
             }
 
@@ -384,19 +421,23 @@ module.exports = {
               //save the updated passoword
               updatePassword(user, (err, resp2) => {
                 if (err) {
-                  return console.log(err);
+                  console.log(err);
+                  return res.json({
+                    success: false,
+                    message: 'Something went wrong. Try again later',
+                  });
                 }
 
                 if (!resp2) {
                   return res.json({
                     success: false,
-                    message: "Password update Failed. Please Try Again",
+                    message: 'Password update Failed. Please Try Again',
                   });
                 } else {
-                  return res.status(200).json({
+                  return res.json({
                     success: true,
                     message:
-                      "Successful. You can now use your new password to login",
+                      'Successful. You can now use your new password to login',
                   });
                 }
               });
@@ -418,11 +459,11 @@ module.exports = {
 
     const googleUser = await getGoogleUser(code);
 
-    let username = "";
+    let username = '';
     let { email } = googleUser;
     let fullname = googleUser.name;
     let photo = googleUser.picture;
-    let provider = "Google";
+    let provider = 'Google';
     let providerUserId = googleUser.id;
 
     let user = { username, email, fullname, photo, provider, providerUserId };
@@ -430,19 +471,23 @@ module.exports = {
     getUserByAuthProviderId(providerUserId, (err, result) => {
       if (err) {
         console.log(err);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (!result) {
         //redirect user back to login with success false
         return res.redirect(
           process.env.SIGNIN_CLIENT_URL +
-            "?success=" +
+            '?success=' +
             false +
-            "&message=" +
-            "Sign in Error. Please Sign up with Google First" +
-            "&provider=" +
+            '&message=' +
+            'Sign in Error. Please Sign up with Google First' +
+            '&provider=' +
             provider +
-            "&providerUserId=" +
+            '&providerUserId=' +
             providerUserId
         );
       }
@@ -453,28 +498,28 @@ module.exports = {
         //console.log("USER => ", user);
 
         //successful login
-        const token = sign(user, process.env.JWT_SECRET, { expiresIn: "8h" }); //generate token to track user later
+        const token = sign(user, process.env.JWT_SECRET, { expiresIn: '8h' }); //generate token to track user later
 
         //rdirect user back to login page with a success token
         return res.redirect(
           process.env.SIGNIN_CLIENT_URL +
-            "?success=" +
+            '?success=' +
             true +
-            "&tkn=" +
+            '&tkn=' +
             token +
-            "&uid=" +
+            '&uid=' +
             user.uid +
-            "&username=" +
+            '&username=' +
             username +
-            "&fullname=" +
+            '&fullname=' +
             fullname +
-            "&email=" +
+            '&email=' +
             email +
-            "&photo=" +
+            '&photo=' +
             photo +
-            "&provider=" +
+            '&provider=' +
             provider +
-            "&providerUserId=" +
+            '&providerUserId=' +
             providerUserId
         );
       }
@@ -509,11 +554,11 @@ module.exports = {
 
     const googleUser = await getGoogleUser(code);
 
-    let username = "";
+    let username = '';
     let { email } = googleUser;
     let fullname = googleUser.name;
     let photo = googleUser.picture;
-    let provider = "Google";
+    let provider = 'Google';
     let providerUserId = googleUser.id;
 
     let user = { username, email, fullname, photo, provider, providerUserId };
@@ -521,19 +566,23 @@ module.exports = {
     getUserByAuthProviderId(providerUserId, (err, result) => {
       if (err) {
         console.log(err);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (result) {
         //Similar user exists, redirect user to login with google instead
         return res.redirect(
           process.env.SIGNUP_CLIENT_URL +
-            "?success=" +
+            '?success=' +
             false +
-            "&message=" +
-            "Google Account Already Exists. Sign in with Google Instead" +
-            "&provider=" +
+            '&message=' +
+            'Google Account Already Exists. Sign in with Google Instead' +
+            '&provider=' +
             provider +
-            "&providerUserId=" +
+            '&providerUserId=' +
             providerUserId
         );
       }
@@ -543,17 +592,20 @@ module.exports = {
         addUserByOauth(user, (err, results) => {
           if (err) {
             console.log(err);
-            return res.json(); //return empty response to client side
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           } else {
             return res.redirect(
               process.env.SIGNUP_CLIENT_URL +
-                "?success=" +
+                '?success=' +
                 true +
-                "&message=" +
-                "Sign up success" +
-                "&provider=" +
+                '&message=' +
+                'Sign up success' +
+                '&provider=' +
                 provider +
-                "&providerUserId=" +
+                '&providerUserId=' +
                 providerUserId
             );
           }
@@ -589,11 +641,11 @@ module.exports = {
     const access_token = await getAccessTokenFromCode(code);
     const facebookUser = await getFacebookUserData(access_token);
 
-    let username = "";
+    let username = '';
     let { email } = facebookUser;
     let fullname = facebookUser.name;
     let photo = facebookUser.picture.data.url;
-    let provider = "Facebook";
+    let provider = 'Facebook';
     let providerUserId = facebookUser.id;
 
     let user = { username, email, fullname, photo, provider, providerUserId };
@@ -601,20 +653,20 @@ module.exports = {
 
     getUserByAuthProviderId(providerUserId, (err, result) => {
       if (err) {
-        console.log("Error : ", err.message);
+        console.log('Error : ', err.message);
       }
 
       if (result) {
         //Similar user exists, redirect user to login with google instead
         return res.redirect(
           process.env.SIGNUP_CLIENT_URL +
-            "?success=" +
+            '?success=' +
             false +
-            "&message=" +
-            "Facebook Account Already Exists. Sign in with Facebook Instead" +
-            "&provider=" +
+            '&message=' +
+            'Facebook Account Already Exists. Sign in with Facebook Instead' +
+            '&provider=' +
             provider +
-            "&providerUserId" +
+            '&providerUserId' +
             providerUserId
         );
       }
@@ -624,17 +676,20 @@ module.exports = {
         addUserByOauth(user, (err, results) => {
           if (err) {
             console.log(err);
-            return res.json(); //return empty response to client side
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           } else {
             return res.redirect(
               process.env.SIGNUP_CLIENT_URL +
-                "?success=" +
+                '?success=' +
                 true +
-                "&message=" +
-                "Sign up success" +
-                "&provider=" +
+                '&message=' +
+                'Sign up success' +
+                '&provider=' +
                 provider +
-                "&providerUserId" +
+                '&providerUserId' +
                 providerUserId
             );
           }
@@ -646,43 +701,43 @@ module.exports = {
     async function getFacebookUserData(access_token) {
       try {
         const { data } = await axios({
-          url: "https://graph.facebook.com/me",
-          method: "GET",
+          url: 'https://graph.facebook.com/me',
+          method: 'GET',
           params: {
             fields: [
-              "id",
-              "email",
-              "name",
-              "first_name",
-              "last_name",
-              "picture",
-            ].join(","), //id, firstname, last_name, middle_name, name, name_format, picture, short_name,
+              'id',
+              'email',
+              'name',
+              'first_name',
+              'last_name',
+              'picture',
+            ].join(','), //id, firstname, last_name, middle_name, name, name_format, picture, short_name,
             access_token,
           },
         });
         //console.log(data); // { id, email, first_name, last_name }
         return data;
       } catch (error) {
-        console.log("Error : ", error.message);
+        console.log('Error : ', error.message);
       }
     }
 
     async function getAccessTokenFromCode(code) {
       try {
         const { data } = await axios({
-          url: "https://graph.facebook.com/v4.0/oauth/access_token",
-          method: "GET",
+          url: 'https://graph.facebook.com/v4.0/oauth/access_token',
+          method: 'GET',
           params: {
             client_id: process.env.FACEBOOK_APP_ID,
             client_secret: process.env.FACEBOOK_APP_SECRET,
-            redirect_uri: process.env.SIGNUP_FACEBOOK_CALLBACK_URL + "/",
+            redirect_uri: process.env.SIGNUP_FACEBOOK_CALLBACK_URL + '/',
             code,
           },
         });
         //console.log(data); // { access_token, token_type, expires_in }
         return data.access_token;
       } catch (error) {
-        console.log("Error : ", error.message);
+        console.log('Error : ', error.message);
       }
     }
   },
@@ -691,13 +746,13 @@ module.exports = {
     const { code } = req.query;
     const access_token = await getAccessTokenFromCode(code);
     const facebookUser = await getFacebookUserData(access_token);
-    console.log("FACEBOOK USER => ", facebookUser);
+    console.log('FACEBOOK USER => ', facebookUser);
 
-    let username = "";
+    let username = '';
     let email = facebookUser.email;
     let fullname = facebookUser.name;
     let photo = facebookUser.picture.data.url;
-    let provider = "Facebook";
+    let provider = 'Facebook';
     let providerUserId = facebookUser.id;
 
     let user = { username, email, fullname, photo, provider, providerUserId };
@@ -706,47 +761,51 @@ module.exports = {
     getUserByAuthProviderId(providerUserId, (err, result) => {
       if (err) {
         console.log(err);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (!result) {
         //redirect user back to login with success false
         return res.redirect(
           process.env.SIGNIN_CLIENT_URL +
-            "?success=" +
+            '?success=' +
             false +
-            "&message=" +
-            "Sign in Error. Please Sign up with Facebook First" +
-            "&provider=" +
+            '&message=' +
+            'Sign in Error. Please Sign up with Facebook First' +
+            '&provider=' +
             provider +
-            "&providerUserId=" +
+            '&providerUserId=' +
             providerUserId
         );
       }
 
       if (result) {
         user.uid = result.uid;
-        const token = sign(user, process.env.JWT_SECRET, { expiresIn: "8h" }); //generate token to track user later
+        const token = sign(user, process.env.JWT_SECRET, { expiresIn: '8h' }); //generate token to track user later
 
         //rdirect user back to login page with a success token
         return res.redirect(
           process.env.SIGNIN_CLIENT_URL +
-            "?success=" +
+            '?success=' +
             true +
-            "&provider=" +
+            '&provider=' +
             provider +
-            "&providerUserId=" +
+            '&providerUserId=' +
             providerUserId +
-            "&tkn=" +
+            '&tkn=' +
             token +
-            "&uid=" +
+            '&uid=' +
             user.uid +
-            "&username=" +
+            '&username=' +
             username +
-            "&fullname=" +
+            '&fullname=' +
             fullname +
-            "&email=" +
+            '&email=' +
             email +
-            "&photo=" +
+            '&photo=' +
             photo
         );
       }
@@ -756,17 +815,17 @@ module.exports = {
     async function getFacebookUserData(access_token) {
       try {
         const { data } = await axios({
-          url: "https://graph.facebook.com/me",
-          method: "GET",
+          url: 'https://graph.facebook.com/me',
+          method: 'GET',
           params: {
             fields: [
-              "id",
-              "email",
-              "name",
-              "first_name",
-              "last_name",
-              "picture",
-            ].join(","), //id, firstname, last_name, middle_name, name, name_format, picture, short_name,
+              'id',
+              'email',
+              'name',
+              'first_name',
+              'last_name',
+              'picture',
+            ].join(','), //id, firstname, last_name, middle_name, name, name_format, picture, short_name,
             access_token,
           },
         });
@@ -774,19 +833,22 @@ module.exports = {
         return data;
       } catch (error) {
         console.log(error);
-        return res.json({ success: false, message: error.message });
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
     }
 
     async function getAccessTokenFromCode(code) {
       try {
         const { data } = await axios({
-          url: "https://graph.facebook.com/v4.0/oauth/access_token",
-          method: "GET",
+          url: 'https://graph.facebook.com/v4.0/oauth/access_token',
+          method: 'GET',
           params: {
             client_id: process.env.FACEBOOK_APP_ID,
             client_secret: process.env.FACEBOOK_APP_SECRET,
-            redirect_uri: process.env.SIGNIN_FACEBOOK_CALLBACK_URL + "/",
+            redirect_uri: process.env.SIGNIN_FACEBOOK_CALLBACK_URL + '/',
             code,
           },
         });
@@ -809,7 +871,7 @@ module.exports = {
     let fullname = githubUser.name;
     let email = githubUser.email;
     let photo = githubUser.avatar_url;
-    let provider = "Github";
+    let provider = 'Github';
     let providerUserId = githubUser.id;
 
     let user = {
@@ -827,13 +889,13 @@ module.exports = {
         //redirect user back to login with success false
         return res.redirect(
           process.env.SIGNIN_CLIENT_URL +
-            "?success=" +
+            '?success=' +
             false +
-            "&message=" +
-            "Sign in Error. Please Sign up with Github First" +
-            "&provider=" +
+            '&message=' +
+            'Sign in Error. Please Sign up with Github First' +
+            '&provider=' +
             provider +
-            "&providerUserId" +
+            '&providerUserId' +
             providerUserId
         );
       }
@@ -841,28 +903,28 @@ module.exports = {
       if (result) {
         user.uid = result.uid;
         //successful login
-        const token = sign(user, process.env.JWT_SECRET, { expiresIn: "8h" }); //generate token to track user later
+        const token = sign(user, process.env.JWT_SECRET, { expiresIn: '8h' }); //generate token to track user later
 
         //rdirect user back to login page with a success token
         return res.redirect(
           process.env.SIGNIN_CLIENT_URL +
-            "?success=" +
+            '?success=' +
             true +
-            "&tkn=" +
+            '&tkn=' +
             token +
-            "&uid=" +
+            '&uid=' +
             user.uid +
-            "&username=" +
+            '&username=' +
             username +
-            "&fullname=" +
+            '&fullname=' +
             fullname +
-            "&email=" +
+            '&email=' +
             email +
-            "&photo=" +
+            '&photo=' +
             photo +
-            "&provider=" +
+            '&provider=' +
             provider +
-            "&providerUserId = " +
+            '&providerUserId = ' +
             providerUserId
         );
       }
@@ -871,14 +933,14 @@ module.exports = {
     ///get exchange code with access token
     async function getAccessToken(code) {
       const { data } = await axios({
-        method: "post",
+        method: 'post',
         url:
-          "https://github.com/login/oauth/access_token?" +
+          'https://github.com/login/oauth/access_token?' +
           `client_id=${process.env.SIGNIN_GITHUB_CLIENT_ID}&` +
           `client_secret=${process.env.SIGNIN_GITHUB_CLIENT_SECRET}&` +
           `code=${code}`,
         headers: {
-          accept: "application/json",
+          accept: 'application/json',
         },
       });
 
@@ -888,10 +950,10 @@ module.exports = {
     //exchange user info with access token
     async function getGithubUser(accessToken) {
       const { data } = await axios({
-        method: "get",
+        method: 'get',
         url: `https://api.github.com/user`,
         headers: {
-          accept: "application/json",
+          accept: 'application/json',
           Authorization: `token ${accessToken}`,
         },
       });
@@ -910,9 +972,9 @@ module.exports = {
     let fullname = githubUser.name;
     let email = githubUser.email;
     let photo = githubUser.avatar_url;
-    let provider = "Github";
+    let provider = 'Github';
     let providerUserId = githubUser.id;
-    console.log("GITHUB USER ID => ", providerUserId);
+    console.log('GITHUB USER ID => ', providerUserId);
 
     let user = {
       username,
@@ -927,19 +989,23 @@ module.exports = {
     getUserByAuthProviderId(providerUserId, (err, result) => {
       if (err) {
         console.log(err);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
       }
 
       if (result) {
         //Similar user exists, redirect user to login with google instead
         return res.redirect(
           process.env.SIGNUP_CLIENT_URL +
-            "?success=" +
+            '?success=' +
             false +
-            "&message=" +
-            "Github Account Already Exists. Sign in with Github Instead" +
-            "&provider=" +
+            '&message=' +
+            'Github Account Already Exists. Sign in with Github Instead' +
+            '&provider=' +
             provider +
-            "&providerUserId" +
+            '&providerUserId' +
             providerUserId
         );
       }
@@ -949,15 +1015,18 @@ module.exports = {
         addUserByOauth(user, (err, results) => {
           if (err) {
             console.log(err);
-            return res.json(); //return empty response to client side
+            return res.json({
+              success: false,
+              message: 'Something went wrong. Try again later',
+            });
           } else {
             return res.redirect(
               process.env.SIGNUP_CLIENT_URL +
-                "?success=" +
+                '?success=' +
                 true +
-                "&message=" +
-                "Sign up success" +
-                "&provider=" +
+                '&message=' +
+                'Sign up success' +
+                '&provider=' +
                 provider
             );
           }
@@ -968,14 +1037,14 @@ module.exports = {
     //get exchange code with access token
     async function getAccessToken(code) {
       const { data } = await axios({
-        method: "post",
+        method: 'post',
         url:
-          "https://github.com/login/oauth/access_token?" +
+          'https://github.com/login/oauth/access_token?' +
           `client_id=${process.env.SIGNUP_GITHUB_CLIENT_ID}&` +
           `client_secret=${process.env.SIGNUP_GITHUB_CLIENT_SECRET}&` +
           `code=${code}`,
         headers: {
-          accept: "application/json",
+          accept: 'application/json',
         },
       });
 
@@ -985,10 +1054,10 @@ module.exports = {
     //exchange user info with access token
     async function getGithubUser(accessToken) {
       const { data } = await axios({
-        method: "get",
+        method: 'get',
         url: `https://api.github.com/user`,
         headers: {
-          accept: "application/json",
+          accept: 'application/json',
           Authorization: `token ${accessToken}`,
         },
       });
