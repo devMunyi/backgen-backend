@@ -9,6 +9,7 @@ const {
   searchTotals,
   getRelatedSolns,
   reactivateCode,
+  incrementViewsTotal,
 } = require('../models/codesnippet'); //require codesnippet models to avail its featured methods
 const { inputAvailable } = require('../../helpers/common'); //require common helper functions
 const async = require('async');
@@ -283,7 +284,7 @@ module.exports = {
     if (!codesnippet_id) {
       return res.json({
         success: false,
-        message: 'Something went wrong. Try again later',
+        message: 'Not Found',
       });
     }
 
@@ -310,12 +311,32 @@ module.exports = {
         });
       }
 
-      results.row_code = decode(results.row_code);
-      results.title = decode(results.title);
-      return res.json({
-        success: true,
-        all_totals: 1,
-        data: results,
+      // we have results, hence increment views for the code by 1
+      incrementViewsTotal(codesnippet_id, (err2, results2) => {
+        if (err2) {
+          console.log(err2);
+          return res.json({
+            success: false,
+            message: 'Something went wrong. Try again later',
+          });
+        }
+
+        if (!results2) {
+          return res.json({
+            success: false,
+            all_totals: 0,
+            message: 'Record not found',
+          });
+        }
+
+        results.row_code = decode(results.row_code);
+        results.title = decode(results.title);
+        results.views = results.views + 1;
+        return res.json({
+          success: true,
+          all_totals: 1,
+          data: results,
+        });
       });
     });
   },

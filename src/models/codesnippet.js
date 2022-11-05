@@ -1,4 +1,4 @@
-const pool = require("../../config/db.config"); //require database configurations for CRUD operations
+const pool = require('../../config/db.config'); //require database configurations for CRUD operations
 
 module.exports = {
   addCodeSnippet: (
@@ -226,7 +226,8 @@ module.exports = {
         uit.uid AS 'codestyle_id',
         uit.title AS 'codestyle_name',
         c.added_date,
-        c.total_comments
+        c.total_comments,
+        c.views
       FROM
         pr_code_snippets c
         LEFT JOIN  pr_language_implementation_type lit
@@ -244,7 +245,7 @@ module.exports = {
       ON c.subfunc_id = sb.uid
       WHERE ${where_}`,
       [],
-      (error, results, fields) => {
+      (error, results) => {
         if (error) {
           return callback(error);
         }
@@ -358,6 +359,24 @@ module.exports = {
     );
   },
 
+  incrementViewsTotal: (code_snippet_id, callback) => {
+    pool.query(
+      `UPDATE
+        pr_code_snippets
+      SET
+      views = views + 1
+      WHERE
+        uid = ?`,
+      [code_snippet_id],
+      (error, results) => {
+        if (error) {
+          return callback(error);
+        }
+        return callback(null, results);
+      }
+    );
+  },
+
   incrementCommentsTotal: (code_snippet_id, callback) => {
     pool.query(
       `UPDATE
@@ -367,7 +386,7 @@ module.exports = {
       WHERE
         uid = ?`,
       [code_snippet_id],
-      (error, results, fields) => {
+      (error, results) => {
         if (error) {
           return callback(error);
         }
