@@ -128,7 +128,8 @@ module.exports = {
         uit.title AS 'codestyle_name',
         f.name AS 'framework',
         c.status,
-        c.added_date
+        c.added_date,
+        c.views
       FROM
         pr_code_snippets c
       LEFT JOIN  pr_language_implementation_type lit
@@ -173,7 +174,8 @@ module.exports = {
         uit.title AS 'user_implementation_type',
         uit.uid AS 'codestyle_id',
         uit.title AS 'codestyle_name',
-        f.name AS 'framework'
+        f.name AS 'framework',
+        c.views
       FROM
         pr_code_snippets c
       LEFT JOIN  pr_language_implementation_type lit
