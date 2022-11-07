@@ -14,6 +14,10 @@ const {
 const { inputAvailable } = require('../../helpers/common'); //require common helper functions
 const async = require('async');
 const { decode } = require('html-entities');
+const serverErrorMSG = {
+  success: false,
+  message: 'Server error. Please try again later',
+};
 
 module.exports = {
   addCodeSnippet: (req, res) => {
@@ -21,10 +25,7 @@ module.exports = {
     addCodeSnippet(body, (err, results) => {
       if (err) {
         console.log(err);
-        return res.json({
-          success: false,
-          message: 'Error occured in adding a new code snippet',
-        });
+        return res.json(serverErrorMSG);
       }
       return res.json({
         success: true,
@@ -40,16 +41,13 @@ module.exports = {
     const { codesnippet_id } = req.body;
 
     if (!codesnippet_id) {
-      return res.json();
+      return res.json({ success: false, message: 'Not Found' });
     }
 
     updateCodeSnippet(codesnippet_id, body, (err, results) => {
       if (err) {
         console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
+        return res.json(serverErrorMSG);
       }
 
       if (!results) {
@@ -114,10 +112,7 @@ module.exports = {
     searchCodesnippet(queryObj, (err, results) => {
       if (err) {
         console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
+        return res.json(serverErrorMSG);
       }
       if (!results) {
         //console.log(queryObj);
@@ -130,10 +125,7 @@ module.exports = {
         searchTotals(queryObj, (err, result) => {
           if (err) {
             console.log(err);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
+            return res.json(serverErrorMSG);
           }
           if (!result) {
             return res.json({
@@ -243,10 +235,7 @@ module.exports = {
     getCodeSnippets(queryObj, (err, results) => {
       if (err) {
         console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
+        return res.json(serverErrorMSG);
       }
       if (!results) {
         //console.log(queryObj);
@@ -279,8 +268,10 @@ module.exports = {
   },
 
   getCodeSnippetByCodeSnippetId: (req, res) => {
+    // destructure codesnippet_id and status values
     const { codesnippet_id, status } = req.query;
 
+    // ensure codesnippet id is provided
     if (!codesnippet_id) {
       return res.json({
         success: false,
@@ -288,21 +279,13 @@ module.exports = {
       });
     }
 
-    let where_ = `c.uid = ${codesnippet_id}`;
-    if (status) {
-      where_ += ` AND c.status = ${status}`;
-    } else {
-      where_ += ` AND c.status >= 0`;
-    }
-
-    getCodeSnippetByCodeSnippetId(where_, (err, results) => {
+    // increment views for the code by 1
+    incrementViewsTotal(codesnippet_id, (err, results) => {
       if (err) {
         console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
+        return res.json(serverErrorMSG);
       }
+
       if (!results) {
         return res.json({
           success: false,
@@ -311,16 +294,20 @@ module.exports = {
         });
       }
 
-      // we have results, hence increment views for the code by 1
-      incrementViewsTotal(codesnippet_id, (err2, results2) => {
+      // arrange query params
+      let where_ = `c.uid = ${codesnippet_id}`;
+      if (status) {
+        where_ += ` AND c.status = ${status}`;
+      } else {
+        where_ += ` AND c.status >= 0`;
+      }
+
+      // get codesnippet by id
+      getCodeSnippetByCodeSnippetId(where_, (err2, results2) => {
         if (err2) {
           console.log(err2);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
+          return res.json(serverErrorMSG);
         }
-
         if (!results2) {
           return res.json({
             success: false,
@@ -329,13 +316,12 @@ module.exports = {
           });
         }
 
-        results.row_code = decode(results.row_code);
-        results.title = decode(results.title);
-        results.views = results.views + 1;
+        results2.row_code = decode(results2.row_code);
+        results2.title = decode(results2.title);
         return res.json({
           success: true,
           all_totals: 1,
-          data: results,
+          data: results2,
         });
       });
     });
@@ -354,10 +340,7 @@ module.exports = {
     deleteCodeSnippet(parseInt(parseInt(codesnippet_id)), (err, results) => {
       if (err) {
         console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
+        return res.json(serverErrorMSG);
       }
       if (!results) {
         return res.json({
@@ -401,10 +384,7 @@ module.exports = {
     getRelatedSolns({ where_, offset, rpp }, (err, results) => {
       if (err) {
         console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
+        return res.json(serverErrorMSG);
       }
 
       if (results) {
@@ -421,10 +401,7 @@ module.exports = {
     reactivateCode(parseInt(codesnippet_id), (err, results) => {
       if (err) {
         console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
+        return res.json(serverErrorMSG);
       }
       if (!results) {
         return res.json({
