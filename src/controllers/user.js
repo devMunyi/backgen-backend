@@ -195,6 +195,8 @@ module.exports = {
         const jsontoken = sign(rest, process.env.JWT_SECRET, {
           expiresIn: '8h',
         });
+
+        console.log('Logged in');
         return res.json({
           success: true,
           message: 'Log in success',

@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "apicache": "^1.6.3",
     "async": "^3.2.3",
     "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
