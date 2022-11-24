@@ -1,36 +1,37 @@
-require('../../config/db.config'); //require database configurations
+require('../../config/db.config'); // require database configurations
 const {
   addPlatform,
   getPlatformByPlatformId,
   getPlatforms,
   updatePlatform,
   deletePlatform,
-  getTotalRecords,
   reactivatePlatform,
-} = require('../models/platform'); //require platform models to avail its featured methods
-const { inputAvailable } = require('../../helpers/common'); //require helper functions
+} = require('../models/platform'); // require platform models to avail its featured methods
+const { inputAvailable } = require('../../helpers/common'); // require helper functions
+const { totalRecords } = require('../models/common');
 
 module.exports = {
-  addPlatform: (req, res) => {
+  addPlatform: async (req, res) => {
     const { body } = req;
 
-    addPlatform(body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Error occured in adding a new platform',
-        });
-      }
+    try {
+      const result = await addPlatform(body);
+
       return res.json({
         success: true,
-        data: results,
+        data: result,
         message: 'Platform added Successfully',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Error occured in adding a new platform',
+      });
+    }
   },
 
-  getPlatforms: (req, res) => {
+  getPlatforms: async (req, res) => {
     let queryObj = {};
 
     let { where_, search_, orderby, dir, offset, rpp } = req.query;
@@ -60,58 +61,42 @@ module.exports = {
       rpp = 10;
     }
 
-    //add data to queryObj object
+    // add data to queryObj object
     queryObj.where_ = where_;
     queryObj.andsearch = andsearch;
-    queryObj.orderby = orderby;
-    queryObj.dir = dir;
+    queryObj.orderby = `${orderby} ${dir}`;
     queryObj.offset = parseInt(offset);
     queryObj.rpp = parseInt(rpp);
 
-    getPlatforms(queryObj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'No record(s) found',
-        });
-      }
+    try {
+      const results = await getPlatforms(queryObj);
 
-      if (results) {
-        results.map((result) => {
-          const icon = `/images/platform/${result.icon}`;
-          result.icon = icon;
-        });
+      results.map((result) => {
+        const icon = `/images/platform/${result.icon}`;
+        result.icon = icon;
+      });
 
-        //get all total records
-        getTotalRecords(queryObj, (err2, results2) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          }
+      const { all_totals } = await totalRecords({
+        table: 'pr_platforms',
+        field: 'uid',
+        where_,
+      });
 
-          if (results2) {
-            return res.json({
-              success: true,
-              all_totals: results2.all_totals,
-              data: results,
-            });
-          }
-        });
-      }
-    });
+      return res.json({
+        success: true,
+        all_totals,
+        data: results,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  getPlatformByPlatformId: (req, res) => {
+  getPlatformByPlatformId: async (req, res) => {
     let { where_, platform_id } = req.query;
     if (!where_) {
       where_ = `status = 1`;
@@ -129,49 +114,37 @@ module.exports = {
       platform_id: parseInt(platform_id),
     };
 
-    getPlatformByPlatformId(obj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record not found',
-        });
-      }
-      if (results) {
-        const { icon } = results;
-        results.icon = `/images/platform/${icon}`;
+    try {
+      const results = await getPlatformByPlatformId(obj);
 
-        return res.json({
-          success: true,
-          data: results,
-        });
-      }
-    });
+      const { icon } = results;
+      results.icon = `/images/platform/${icon}`;
+
+      return res.json({
+        success: true,
+        data: results[0],
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  updatePlatform: (req, res) => {
+  updatePlatform: async (req, res) => {
     const { body } = req;
 
     const { platform_id } = req.body;
-    updatePlatform(parseInt(platform_id), body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
 
-      if (!results) {
+    try {
+      const result = await updatePlatform(parseInt(platform_id), body);
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Failed to update platform',
+          message: 'Record not found!',
         });
       }
 
@@ -179,51 +152,64 @@ module.exports = {
         success: true,
         message: 'Platform updated successfully!',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
-  deletePlatform: (req, res) => {
+
+  deletePlatform: async (req, res) => {
     const { platform_id } = req.body;
-    deletePlatform(parseInt(platform_id), (err, results) => {
-      if (err) {
-        console.log(err);
+
+    try {
+      const results = await deletePlatform(parseInt(platform_id));
+
+      if (results.affectedRows === 0 && results.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
+          message: 'Record not found!',
         });
       }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record Not Found',
-        });
-      }
+
       return res.json({
         success: true,
         message: 'Platform deleted successfully!',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  reactivatePlatform: (req, res) => {
+  reactivatePlatform: async (req, res) => {
     const { platform_id } = req.body;
-    reactivatePlatform(parseInt(platform_id), (err, results) => {
-      if (err) {
-        console.log(err);
+
+    try {
+      const results = await reactivatePlatform(parseInt(platform_id));
+
+      if (results.affectedRows === 0 && results.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
+          message: 'Record not found',
         });
       }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record Not Found',
-        });
-      }
+
       return res.json({
         success: true,
         message: 'Platform activated successfully',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 };

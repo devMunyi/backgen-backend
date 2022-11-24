@@ -9,11 +9,10 @@ const {
 } = require('../helpers/country');
 
 module.exports = {
-  countryAddValidation: (req, res, next) => {
+  countryAddValidation: async (req, res, next) => {
     let { name, abbrev, added_by } = req.body;
-    //console.log(req.body.name);
-    name = name.trim();
-    abbrev = abbrev.trim();
+    name = name?.trim();
+    abbrev = abbrev?.trim();
 
     if (!name || name.length < 1) {
       return res.json({
@@ -31,92 +30,101 @@ module.exports = {
         message: 'Author is required',
       });
     } else if (name.length > 0) {
-      checkCountriesByName(name, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        }
-        if (result) {
+      try {
+        const result = await checkCountriesByName(name);
+
+        if (result.length) {
           return res.json({
             success: false,
             message: 'Country name already exists',
           });
-        } else {
-          req.body.name = name;
-          const abbrev_ = abbrev.toUpperCase();
-          req.body.abbrev = abbrev_;
-          next();
         }
-      });
-    }
-  },
 
-  countryEditValidation: (req, res, next) => {
-    let { name, abbrev, added_by, country_id } = req.body;
+        req.body.name = name;
+        const abbrev_ = abbrev.toUpperCase();
+        req.body.abbrev = abbrev_;
 
-    name = name.trim();
-    abbrev = abbrev.trim();
-
-    if (!name || name.length < 1) {
-      return res.json({
-        success: false,
-        message: 'Country name is required',
-      });
-    } else if (!abbrev || abbrev.length != 3) {
-      return res.json({
-        success: false,
-        message: 'Abbreviation is required and should be 3 characters only',
-      });
-    } else if (!added_by) {
-      return res.json({
-        success: false,
-        message: 'Author is required',
-      });
-    } else if (name.length > 0) {
-      countryId = parseInt(country_id);
-      checkIfSimilarNameExist(name, countryId, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        } else if (result) {
-          return res.json({
-            success: false,
-            message: 'Country name already exists',
-          });
-        } else {
-          req.body.name = name;
-          const abbrev_ = abbrev.toUpperCase();
-          req.body.abbrev = abbrev_;
-          next();
-        }
-      });
-    }
-  },
-
-  countryIdValidation: (req, res, next) => {
-    let countryId = parseInt(req.body.country_id);
-    checkCountryId(countryId, (err, row) => {
-      if (err) {
-        console.log(err);
+        next();
+      } catch (error) {
+        console.log(error);
         return res.json({
           success: false,
           message: 'Something went wrong. Try again later',
         });
-      } else if (!row) {
+      }
+    }
+  },
+
+  countryEditValidation: async (req, res, next) => {
+    let { name, abbrev, added_by, country_id } = req.body;
+
+    name = name?.trim();
+    abbrev = abbrev?.trim();
+
+    if (!name || name.length < 1) {
+      return res.json({
+        success: false,
+        message: 'Country name is required',
+      });
+    } else if (!abbrev || abbrev.length != 3) {
+      return res.json({
+        success: false,
+        message: 'Abbreviation is required and should be 3 characters only',
+      });
+    } else if (!added_by) {
+      return res.json({
+        success: false,
+        message: 'Author is required',
+      });
+    } else if (name.length > 0) {
+      country_id = parseInt(country_id);
+
+      try {
+        const result = await checkIfSimilarNameExist(name, country_id);
+
+        if (result.length) {
+          return res.json({
+            success: false,
+            message: 'Country name already exists',
+          });
+        }
+
+        req.body.name = name;
+        const abbrev_ = abbrev.toUpperCase();
+        req.body.abbrev = abbrev_;
+
+        next();
+      } catch (error) {
+        console.log(error);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
+      }
+    }
+  },
+
+  countryIdValidation: async (req, res, next) => {
+    let countryId = parseInt(req.body.country_id);
+
+    try {
+      const result = await checkCountryId(countryId);
+
+      if (result.length === 0) {
         return res.json({
           success: false,
           message: 'Invalid country id',
         });
-      } else {
-        next();
       }
-    });
+
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
   validateImg: async (req, res, next) => {

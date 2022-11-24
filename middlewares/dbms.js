@@ -6,10 +6,10 @@ const {
 } = require('../helpers/dbms');
 
 module.exports = {
-  dbmsAddValidation: (req, res, next) => {
+  dbmsAddValidation: async (req, res, next) => {
     let { name, added_by } = req.body;
     //console.log(req.body.name);
-    name = name.trim();
+    name = name?.trim();
 
     if (!name || name.length < 1) {
       return res.json({
@@ -22,30 +22,32 @@ module.exports = {
         message: 'Author is required',
       });
     } else if (name.length > 0) {
-      checkDbmsesByName(name, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        }
-        if (result) {
+      try {
+        const result = await checkDbmsesByName(name);
+
+        if (result.length) {
           return res.json({
             success: false,
             message: 'Dbms name already exists',
           });
-        } else {
-          req.body.name = name;
-          next();
         }
-      });
+
+        req.body.name = name;
+        next();
+      } catch (error) {
+        console.log(error);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
+      }
     }
   },
 
-  dbmsEditValidation: (req, res, next) => {
+  dbmsEditValidation: async (req, res, next) => {
     let { name, added_by, dbms_id } = req.body;
-    name = name.trim();
+
+    name = name?.trim();
 
     if (!name || name.length < 1) {
       return res.json({
@@ -59,44 +61,51 @@ module.exports = {
       });
     } else if (name.length > 0) {
       dbms_id = parseInt(dbms_id);
-      checkIfSimilarNameExist(name, dbms_id, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        } else if (result) {
+
+      try {
+        const result = await checkIfSimilarNameExist(name, dbms_id);
+
+        if (result.length) {
           return res.json({
             success: false,
             message: 'Dbms name already exists',
           });
-        } else {
-          req.body.name = name;
-          next();
         }
-      });
-    }
-  },
 
-  dbmsIdValidation: (req, res, next) => {
-    const dbmsId = parseInt(req.body.dbms_id);
-    checkDbmsId(dbmsId, (err, row) => {
-      if (err) {
-        console.log(err);
+        req.body.name = name;
+
+        next();
+      } catch (error) {
+        console.log(error);
         return res.json({
           success: false,
           message: 'Something went wrong. Try again later',
         });
-      } else if (!row) {
+      }
+    }
+  },
+
+  dbmsIdValidation: async (req, res, next) => {
+    const dbmsId = parseInt(req.body.dbms_id);
+
+    try {
+      const result = await checkDbmsId(dbmsId);
+
+      if (result.length === 0) {
         return res.json({
           success: false,
           message: 'Invalid dbms id',
         });
-      } else {
-        next();
       }
-    });
+
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
   validateImg: (req, res, next) => {
@@ -139,9 +148,8 @@ module.exports = {
             message: 'Something went wrong. Try again later',
           });
         } else {
-          //console.log("File uploaded to => ", file_destination);
           req.body.icon = sanitizedFileName;
-          next();
+          return next();
         }
       });
     }

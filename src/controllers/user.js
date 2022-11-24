@@ -6,7 +6,6 @@ const {
   updateUser,
   deleteUser,
   getUserByUsernameOrByEmail,
-  getUserByUsernameOrByEmail2,
   getCurrentUser,
   checkUserByEmail,
   checkUserById,
@@ -21,64 +20,67 @@ const { sign, verify } = require('jsonwebtoken'); //require jwt to handle issuin
 const axios = require('axios'); //require axios to handle API call using get, post, delete, put
 //const async = require("async");
 const nodemailer = require('nodemailer'); //require nodemailer to handle sending emails
-const { google } = require('googleapis'); //require googleapis to handle google OUATH
+const { promisify } = require('util');
 
-//google oauth sign in options
-const oauth2ClientSignin = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.SIGNIN_GOOGLE_CALLBACK_URL
-);
+// require helper methods
+const { inputAvailable } = require('../../helpers/common');
 
-//google oauth sign up options
-const oauth2ClientSignup = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID,
-  process.env.GOOGLE_CLIENT_SECRET,
-  process.env.SIGNUP_GOOGLE_CALLBACK_URL
-);
+// require helper methods
+const {
+  getAccessTokenSignup,
+  getAccessTokenSignin,
+  getGithubUser,
+  getGoogleUserSignup,
+  getGoogleUserSignin,
+} = require('../../helpers/user');
 
 module.exports = {
-  getUserByUserId: (req, res) => {
+  getUserByUserId: async (req, res) => {
     const { user_id } = req.query;
 
     if (!user_id) {
       return res.json({
         success: false,
-        message: 'Invalid request',
+        message: 'User id is required',
       });
     }
 
-    getUserByUserId(parseInt(user_id), (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record not found',
-        });
-      }
+    try {
+      const results = await getUserByUserId(parseInt(user_id));
+
+      return res.json({
+        success: true,
+        data: results[0],
+      });
+    } catch (error) {
+      console.log(error);
       return res.json({
         success: false,
-        data: results,
+        message: 'Something went wrong. Try again later',
       });
-    });
+    }
   },
-  getUsers: (req, res) => {
-    //console.log(req.user);
+
+  getUsers: async (req, res) => {
     let queryObj = {};
 
-    let { status, orderby, dir, offset, rpp } = req.body;
+    let { where_, status, search_, orderby, dir, offset, rpp } = req.query;
 
     if (!status) {
       status = 1;
     }
+
+    if (!where_) {
+      where_ = `status = ${status}`;
+    }
+
+    search_ = inputAvailable(search_);
+    if (search_ != undefined) {
+      where_ += ` AND (username LIKE '%${search_}%' OR email LIKE '%${search_}%' OR fullname LIKE '%${search_}%')`;
+    }
+
     if (!orderby) {
-      orderby = 'username';
+      orderby = 'fullname';
     }
     if (!dir) {
       dir = 'ASC';
@@ -91,51 +93,41 @@ module.exports = {
       rpp = 10;
     }
 
-    //add data to queryObj object
-    queryObj.status = parseInt(status);
-    queryObj.orderby = orderby;
-    queryObj.dir = dir;
+    // add data to queryObj object
+    queryObj.orderby = `${orderby} ${dir}`;
     queryObj.offset = parseInt(offset);
     queryObj.rpp = parseInt(rpp);
-    getUsers(queryObj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'No record(s) found',
-        });
-      }
+    queryObj.where_ = where_;
+
+    try {
+      const results = await getUsers(queryObj);
+
       return res.json({
         success: true,
         data: results,
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
-  updateUser: (req, res) => {
+
+  updateUser: async (req, res) => {
     const { body } = req;
     const salt = genSaltSync(10);
     body.password = hashSync(body.password, salt);
     const { user_id } = req.body;
 
-    updateUser(parseInt(user_id), body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
+    try {
+      const result = await updateUser(parseInt(user_id), body);
 
-      if (!results) {
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Failed to update user',
+          message: 'Record to update not found!',
         });
       }
 
@@ -143,130 +135,137 @@ module.exports = {
         success: true,
         message: 'User updated successfully!',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  deleteUser: (req, res) => {
+  deleteUser: async (req, res) => {
     const { user_id } = req.body;
-    deleteUser(parseInt(user_id), (err, results) => {
-      if (err) {
-        console.log(err);
+
+    try {
+      const result = await deleteUser(parseInt(user_id));
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
+          message: 'User record to delete not found!',
         });
       }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record Not Found',
-        });
-      }
-      console.log(results);
+
       return res.json({
         success: true,
         message: 'User deleted successfully!',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  loginUser: (req, res) => {
-    const { username, password } = req.body;
-    //console.log("USERNAME => ", username);
-    getUserByUsernameOrByEmail(username, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
+  loginUser: async (req, res) => {
+    try {
+      const { username, password: inputPassword } = req.body;
+      const results = await getUserByUsernameOrByEmail(username);
+
+      // validate username
+      if (results.length === 0) {
         return res.json({
           success: false,
           message: 'Invalid username',
         });
       }
-      const result = compareSync(password, results.password);
-      if (result) {
-        //console.log(results);
-        const { password, ...rest } = results;
-        //results.password = undefined;
-        const jsontoken = sign(rest, process.env.JWT_SECRET, {
-          expiresIn: '8h',
-        });
 
-        console.log('Logged in');
-        return res.json({
-          success: true,
-          message: 'Log in success',
-          token: 'Bearer ' + jsontoken,
-          user: rest,
-        });
-      } else {
+      // validate password
+      const isValidPwd = compareSync(inputPassword, results[0].password);
+
+      if (!isValidPwd) {
         return res.json({
           success: false,
           message: 'Incorrect password',
         });
       }
-    });
+
+      // separate user password from the rest of user info
+      const { password, ...rest } = results[0];
+
+      const jsontoken = sign(rest, process.env.JWT_SECRET, {
+        expiresIn: '8h',
+      });
+
+      return res.json({
+        success: true,
+        message: 'Log in success',
+        token: 'Bearer ' + jsontoken,
+        user: rest,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  currentUser: (req, res) => {
+  currentUser: async (req, res) => {
     const { uid } = req.user;
-    getCurrentUser(uid, (err, results) => {
-      if (err) {
-        console.log(err);
+
+    try {
+      const results = await getCurrentUser(uid);
+
+      if (results.length === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
+          message: 'No record found',
         });
       }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'No recod found',
-        });
-      }
-      if (results) {
-        return res.json({
-          success: true,
-          sameUser: results,
-        });
-      }
-    });
+
+      return res.json({
+        success: true,
+        sameUser: results[0].uid,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  addUser: (req, res) => {
-    //After input validation using userRegisterValidation middleware try to save the user data
+  addUser: async (req, res) => {
+    // after input validation using userRegisterValidation middleware try to save the user data
     const { body } = req;
     const salt = genSaltSync(10);
     body.password = hashSync(body.password, salt);
-    addUser(body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Error occured in adding a new user',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Error occured in adding a new user',
-        });
-      } else {
-        return res.json({
-          success: true,
-          data: results,
-          message: 'User added Successfully. You can now login.',
-        });
-      }
-    });
+
+    try {
+      await addUser(body);
+
+      return res.json({
+        success: true,
+        message: 'User added Successfully. You can now login.',
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Error occured in adding a new user',
+      });
+    }
   },
 
-  forgotPassword: (req, res) => {
+  forgotPassword: async (req, res) => {
     const { email } = req.body;
+
     if (!email || email.length < 1) {
       return res.json({
         success: false,
@@ -274,15 +273,9 @@ module.exports = {
       });
     }
 
-    //make sure that user exists in the db
-    checkUserByEmail(email, (err, user) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
+    // make sure that user email exists in the db
+    try {
+      const [user] = await checkUserByEmail(email);
 
       if (!user) {
         return res.json({
@@ -291,7 +284,7 @@ module.exports = {
         });
       }
 
-      //user exists now create a one time link valid for 15min
+      // user exists now create a one time link valid for 15min
       const secret = process.env.JWT_SECRET + user.password;
       const payload = {
         uid: user.uid,
@@ -301,9 +294,8 @@ module.exports = {
 
       const token = sign(payload, secret, { expiresIn: '1h' });
       const link = `${process.env.PASSWORD_RESET_URL}?uid=${user.uid}&token=${token}`;
-      //console.log(link);
 
-      //send password reset link as mail
+      // send password reset link as mail
       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
@@ -311,6 +303,8 @@ module.exports = {
           pass: process.env.APP_EMAIL_PASS,
         },
       });
+
+      console.log('RECIPIENT => ', payload.email);
 
       const mailOptions = {
         from: process.env.APP_EMAIL,
@@ -336,17 +330,23 @@ module.exports = {
             message: 'Something went wrong. Try again later',
           });
         } else {
-          //console.log("Email sent: " + info.accepted);
+          // console.log("Email sent: " + info.accepted);
           return res.send({
             success: true,
             message: 'Password reset link has been sent to your email...',
           });
         }
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  resetPassword: (req, res) => {
+  resetPassword: async (req, res) => {
     let { uid, token, password, cpassword } = req.body;
 
     if (!uid || !token) {
@@ -358,108 +358,81 @@ module.exports = {
 
     uid = parseInt(uid);
 
-    //make sure that user exists in the db
-    checkUserById(uid, (err, user) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
+    try {
+      // make sure that user exists in the db
+      const [user] = await checkUserById(uid);
 
       if (!user) {
         return res.json({
           success: false,
-          message: 'Email not found',
+          message: 'User not found',
         });
       }
 
-      //we have a valid user with that id
+      // past above if block we have a valid user with that id
       const secret = process.env.JWT_SECRET + user.password;
-      try {
-        const payload = verify(token, secret);
-        const pUid = payload.uid;
-        const pEmail = payload.email;
-        //validate password and password2 matches
-        if (!password || password.length < 6) {
-          return res.json({
-            success: false,
-            message: 'Password is required and should be min 6 characters long',
-          });
-        } else if (!cpassword) {
-          return res.json({
-            success: false,
-            message: 'Confirm password is required',
-          });
-        } else if (password !== cpassword) {
-          return res.json({
-            success: false,
-            message: 'Passwords do not match.',
-          });
-        } else {
-          //find that user with payload id and email exist and update the password
-          userByEmailAndId({ uid: pUid, email: pEmail }, (err, resp) => {
-            if (err) {
-              console.log(err);
-              return res.json({
-                success: false,
-                message: 'Something went wrong. Try again later',
-              });
-            }
 
-            if (!resp) {
-              return res.json({
-                success: false,
-                message: 'Invalid user id',
-              });
-            }
+      const payload = verify(token, secret);
+      const pUid = payload.uid;
+      const pEmail = payload.email;
 
-            if (resp) {
-              //hash the password
-              const salt = genSaltSync(10);
-              user.password = hashSync(password, salt);
-
-              //save the updated passoword
-              updatePassword(user, (err, resp2) => {
-                if (err) {
-                  console.log(err);
-                  return res.json({
-                    success: false,
-                    message: 'Something went wrong. Try again later',
-                  });
-                }
-
-                if (!resp2) {
-                  return res.json({
-                    success: false,
-                    message: 'Password update Failed. Please Try Again',
-                  });
-                } else {
-                  return res.json({
-                    success: true,
-                    message:
-                      'Successful. You can now use your new password to login',
-                  });
-                }
-              });
-            }
-          });
-        }
-      } catch (error) {
-        res.send({
+      // validate password and password2 matches
+      if (!password || password.length < 6) {
+        return res.json({
           success: false,
-          message: error.message,
+          message: 'Password is required and should be min 6 characters long',
+        });
+      } else if (!cpassword) {
+        return res.json({
+          success: false,
+          message: 'Confirm password is required',
+        });
+      } else if (password !== cpassword) {
+        return res.json({
+          success: false,
+          message: 'Passwords do not match.',
         });
       }
-    });
+
+      // find that user with payload id and email exist and update the password
+      const userFindResponse = await userByEmailAndId({
+        uid: pUid,
+        email: pEmail,
+      });
+
+      // handle no user response
+      if (userFindResponse.length === 0) {
+        return res.json({
+          success: false,
+          message: 'Invalid user id or email',
+        });
+      }
+
+      // finally handle user available reponse
+      // hash the password
+      const salt = genSaltSync(10);
+      user.password = hashSync(password, salt);
+      // save the updated passoword
+      await updatePassword(user);
+
+      // send success reponse
+      return res.json({
+        success: true,
+        message: 'Successful. You can now use your new password to login',
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
   googleOAuthSignin: async (req, res) => {
     const { code } = req.query;
-    //console.log("ACCESS CODE => ", code);
 
-    const googleUser = await getGoogleUser(code);
+    const googleUser = await getGoogleUserSignin(code);
 
     let username = '';
     let { email } = googleUser;
@@ -470,17 +443,11 @@ module.exports = {
 
     let user = { username, email, fullname, photo, provider, providerUserId };
 
-    getUserByAuthProviderId(providerUserId, (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
+    try {
+      const result = await getUserByAuthProviderId(providerUserId);
 
-      if (!result) {
-        //redirect user back to login with success false
+      if (result.length === 0) {
+        // redirect user back to login with success false
         return res.redirect(
           process.env.SIGNIN_CLIENT_URL +
             '?success=' +
@@ -494,67 +461,47 @@ module.exports = {
         );
       }
 
-      if (result) {
-        user.uid = result.uid;
+      user.uid = result[0].uid;
 
-        //console.log("USER => ", user);
+      // successful login
+      // generate token to track user later
+      const token = sign(user, process.env.JWT_SECRET, { expiresIn: '8h' });
 
-        //successful login
-        const token = sign(user, process.env.JWT_SECRET, { expiresIn: '8h' }); //generate token to track user later
-
-        //rdirect user back to login page with a success token
-        return res.redirect(
-          process.env.SIGNIN_CLIENT_URL +
-            '?success=' +
-            true +
-            '&tkn=' +
-            token +
-            '&uid=' +
-            user.uid +
-            '&username=' +
-            username +
-            '&fullname=' +
-            fullname +
-            '&email=' +
-            email +
-            '&photo=' +
-            photo +
-            '&provider=' +
-            provider +
-            '&providerUserId=' +
-            providerUserId
-        );
-      }
-    });
-
-    //get user with code coming from query callback url
-    async function getGoogleUser(code) {
-      const { tokens } = await oauth2ClientSignin.getToken(code);
-
-      // Fetch the user's profile with the access token and bearer
-      const googleUser = await axios
-        .get(
-          `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokens.access_token}`,
-          {
-            headers: {
-              Authorization: `Bearer ${tokens.id_token}`,
-            },
-          }
-        )
-        .then((res) => res.data)
-        .catch((error) => {
-          throw new Error(error.message);
-        });
-
-      return googleUser;
+      // redirect user back to login page with a success token
+      return res.redirect(
+        process.env.SIGNIN_CLIENT_URL +
+          '?success=' +
+          true +
+          '&tkn=' +
+          token +
+          '&uid=' +
+          user.uid +
+          '&username=' +
+          username +
+          '&fullname=' +
+          fullname +
+          '&email=' +
+          email +
+          '&photo=' +
+          photo +
+          '&provider=' +
+          provider +
+          '&providerUserId=' +
+          providerUserId
+      );
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
     }
   },
 
   googleOAuthSignup: async (req, res) => {
     const { code } = req.query;
-    //console.log("ACCESS CODE => ", code);
 
-    const googleUser = await getGoogleUser(code);
+    const googleUser = await getGoogleUserSignup(code);
 
     let username = '';
     let { email } = googleUser;
@@ -565,308 +512,52 @@ module.exports = {
 
     let user = { username, email, fullname, photo, provider, providerUserId };
 
-    getUserByAuthProviderId(providerUserId, (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
+    try {
+      const result = await getUserByAuthProviderId(providerUserId);
 
-      if (result) {
-        //Similar user exists, redirect user to login with google instead
+      // its a new user store info
+      if (result.length === 0) {
+        await addUserByOauth(user);
+
         return res.redirect(
           process.env.SIGNUP_CLIENT_URL +
-            '?success=' +
-            false +
-            '&message=' +
-            'Google Account Already Exists. Sign in with Google Instead' +
-            '&provider=' +
-            provider +
-            '&providerUserId=' +
-            providerUserId
-        );
-      }
-
-      if (!result) {
-        //store user info
-        addUserByOauth(user, (err, results) => {
-          if (err) {
-            console.log(err);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          } else {
-            return res.redirect(
-              process.env.SIGNUP_CLIENT_URL +
-                '?success=' +
-                true +
-                '&message=' +
-                'Sign up success' +
-                '&provider=' +
-                provider +
-                '&providerUserId=' +
-                providerUserId
-            );
-          }
-        });
-      }
-    });
-
-    //get user with code coming from query callback url
-    async function getGoogleUser(code) {
-      const { tokens } = await oauth2ClientSignup.getToken(code);
-
-      // Fetch the user's profile with the access token and bearer
-      const googleUser = await axios
-        .get(
-          `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${tokens.access_token}`,
-          {
-            headers: {
-              Authorization: `Bearer ${tokens.id_token}`,
-            },
-          }
-        )
-        .then((res) => res.data)
-        .catch((error) => {
-          throw new Error(error.message);
-        });
-
-      return googleUser;
-    }
-  },
-
-  facebookOAuthSignup: async (req, res) => {
-    const { code } = req.query;
-    const access_token = await getAccessTokenFromCode(code);
-    const facebookUser = await getFacebookUserData(access_token);
-
-    let username = '';
-    let { email } = facebookUser;
-    let fullname = facebookUser.name;
-    let photo = facebookUser.picture.data.url;
-    let provider = 'Facebook';
-    let providerUserId = facebookUser.id;
-
-    let user = { username, email, fullname, photo, provider, providerUserId };
-    //return res.send(user);
-
-    getUserByAuthProviderId(providerUserId, (err, result) => {
-      if (err) {
-        console.log('Error : ', err.message);
-      }
-
-      if (result) {
-        //Similar user exists, redirect user to login with google instead
-        return res.redirect(
-          process.env.SIGNUP_CLIENT_URL +
-            '?success=' +
-            false +
-            '&message=' +
-            'Facebook Account Already Exists. Sign in with Facebook Instead' +
-            '&provider=' +
-            provider +
-            '&providerUserId' +
-            providerUserId
-        );
-      }
-
-      if (!result) {
-        //store user info
-        addUserByOauth(user, (err, results) => {
-          if (err) {
-            console.log(err);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          } else {
-            return res.redirect(
-              process.env.SIGNUP_CLIENT_URL +
-                '?success=' +
-                true +
-                '&message=' +
-                'Sign up success' +
-                '&provider=' +
-                provider +
-                '&providerUserId' +
-                providerUserId
-            );
-          }
-        });
-      }
-    });
-
-    //get user with code coming from query callback url
-    async function getFacebookUserData(access_token) {
-      try {
-        const { data } = await axios({
-          url: 'https://graph.facebook.com/me',
-          method: 'GET',
-          params: {
-            fields: [
-              'id',
-              'email',
-              'name',
-              'first_name',
-              'last_name',
-              'picture',
-            ].join(','), //id, firstname, last_name, middle_name, name, name_format, picture, short_name,
-            access_token,
-          },
-        });
-        //console.log(data); // { id, email, first_name, last_name }
-        return data;
-      } catch (error) {
-        console.log('Error : ', error.message);
-      }
-    }
-
-    async function getAccessTokenFromCode(code) {
-      try {
-        const { data } = await axios({
-          url: 'https://graph.facebook.com/v4.0/oauth/access_token',
-          method: 'GET',
-          params: {
-            client_id: process.env.FACEBOOK_APP_ID,
-            client_secret: process.env.FACEBOOK_APP_SECRET,
-            redirect_uri: process.env.SIGNUP_FACEBOOK_CALLBACK_URL + '/',
-            code,
-          },
-        });
-        //console.log(data); // { access_token, token_type, expires_in }
-        return data.access_token;
-      } catch (error) {
-        console.log('Error : ', error.message);
-      }
-    }
-  },
-
-  facebookOAuthSignin: async (req, res) => {
-    const { code } = req.query;
-    const access_token = await getAccessTokenFromCode(code);
-    const facebookUser = await getFacebookUserData(access_token);
-    console.log('FACEBOOK USER => ', facebookUser);
-
-    let username = '';
-    let email = facebookUser.email;
-    let fullname = facebookUser.name;
-    let photo = facebookUser.picture.data.url;
-    let provider = 'Facebook';
-    let providerUserId = facebookUser.id;
-
-    let user = { username, email, fullname, photo, provider, providerUserId };
-    //return res.send(user);
-
-    getUserByAuthProviderId(providerUserId, (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-
-      if (!result) {
-        //redirect user back to login with success false
-        return res.redirect(
-          process.env.SIGNIN_CLIENT_URL +
-            '?success=' +
-            false +
-            '&message=' +
-            'Sign in Error. Please Sign up with Facebook First' +
-            '&provider=' +
-            provider +
-            '&providerUserId=' +
-            providerUserId
-        );
-      }
-
-      if (result) {
-        user.uid = result.uid;
-        const token = sign(user, process.env.JWT_SECRET, { expiresIn: '8h' }); //generate token to track user later
-
-        //rdirect user back to login page with a success token
-        return res.redirect(
-          process.env.SIGNIN_CLIENT_URL +
             '?success=' +
             true +
+            '&message=' +
+            'Sign up success' +
             '&provider=' +
             provider +
             '&providerUserId=' +
-            providerUserId +
-            '&tkn=' +
-            token +
-            '&uid=' +
-            user.uid +
-            '&username=' +
-            username +
-            '&fullname=' +
-            fullname +
-            '&email=' +
-            email +
-            '&photo=' +
-            photo
+            providerUserId
         );
       }
-    });
 
-    //get user with code coming from query callback url
-    async function getFacebookUserData(access_token) {
-      try {
-        const { data } = await axios({
-          url: 'https://graph.facebook.com/me',
-          method: 'GET',
-          params: {
-            fields: [
-              'id',
-              'email',
-              'name',
-              'first_name',
-              'last_name',
-              'picture',
-            ].join(','), //id, firstname, last_name, middle_name, name, name_format, picture, short_name,
-            access_token,
-          },
-        });
-        //console.log(data); // { id, email, first_name, last_name }
-        return data;
-      } catch (error) {
-        console.log(error);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-    }
-
-    async function getAccessTokenFromCode(code) {
-      try {
-        const { data } = await axios({
-          url: 'https://graph.facebook.com/v4.0/oauth/access_token',
-          method: 'GET',
-          params: {
-            client_id: process.env.FACEBOOK_APP_ID,
-            client_secret: process.env.FACEBOOK_APP_SECRET,
-            redirect_uri: process.env.SIGNIN_FACEBOOK_CALLBACK_URL + '/',
-            code,
-          },
-        });
-        //console.log(data); // { access_token, token_type, expires_in }
-        return data.access_token;
-      } catch (error) {
-        console.log(error);
-        return res.json({ success: false, message: error.message });
-      }
+      // past above if block, means similar user exists,
+      // redirect user to login with google instead
+      return res.redirect(
+        process.env.SIGNUP_CLIENT_URL +
+          '?success=' +
+          false +
+          '&message=' +
+          'Google Account Already Exists. Sign in with Google Instead' +
+          '&provider=' +
+          provider +
+          '&providerUserId=' +
+          providerUserId
+      );
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
     }
   },
 
   githubOAuthSignin: async (req, res) => {
     const { code } = req.query;
 
-    const accessToken = await getAccessToken(code);
+    const accessToken = await getAccessTokenSignin(code);
     const githubUser = await getGithubUser(accessToken);
 
     let username = githubUser.login;
@@ -885,10 +576,13 @@ module.exports = {
       providerUserId,
     };
 
-    //db check
-    getUserByAuthProviderId(providerUserId, (err, result) => {
-      if (!result) {
-        //redirect user back to login with success false
+    try {
+      // user check from db
+      const result = await getUserByAuthProviderId(providerUserId);
+
+      // handle case when user doesn't exist
+      if (result.length === 0) {
+        // redirect user back to login with success false
         return res.redirect(
           process.env.SIGNIN_CLIENT_URL +
             '?success=' +
@@ -902,37 +596,44 @@ module.exports = {
         );
       }
 
-      if (result) {
-        user.uid = result.uid;
-        //successful login
-        const token = sign(user, process.env.JWT_SECRET, { expiresIn: '8h' }); //generate token to track user later
+      // past above if block means user exist in the db
 
-        //rdirect user back to login page with a success token
-        return res.redirect(
-          process.env.SIGNIN_CLIENT_URL +
-            '?success=' +
-            true +
-            '&tkn=' +
-            token +
-            '&uid=' +
-            user.uid +
-            '&username=' +
-            username +
-            '&fullname=' +
-            fullname +
-            '&email=' +
-            email +
-            '&photo=' +
-            photo +
-            '&provider=' +
-            provider +
-            '&providerUserId = ' +
-            providerUserId
-        );
-      }
-    });
+      user.uid = result[0].uid;
 
-    ///get exchange code with access token
+      // generate token to track user later
+      const token = sign(user, process.env.JWT_SECRET, { expiresIn: '8h' });
+
+      // redirect user back to login page with a success token
+      return res.redirect(
+        process.env.SIGNIN_CLIENT_URL +
+          '?success=' +
+          true +
+          '&tkn=' +
+          token +
+          '&uid=' +
+          user.uid +
+          '&username=' +
+          username +
+          '&fullname=' +
+          fullname +
+          '&email=' +
+          email +
+          '&photo=' +
+          photo +
+          '&provider=' +
+          provider +
+          '&providerUserId = ' +
+          providerUserId
+      );
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
+
+    // reusable function to get exchange code with access token from github
     async function getAccessToken(code) {
       const { data } = await axios({
         method: 'post',
@@ -949,7 +650,7 @@ module.exports = {
       return data.access_token;
     }
 
-    //exchange user info with access token
+    // reusable function to exchange user info with access token
     async function getGithubUser(accessToken) {
       const { data } = await axios({
         method: 'get',
@@ -967,7 +668,7 @@ module.exports = {
   githubOAuthSignup: async (req, res) => {
     const { code } = req.query;
 
-    const accessToken = await getAccessToken(code);
+    const accessToken = await getAccessTokenSignup(code);
     const githubUser = await getGithubUser(accessToken);
 
     let username = githubUser.login;
@@ -976,7 +677,6 @@ module.exports = {
     let photo = githubUser.avatar_url;
     let provider = 'Github';
     let providerUserId = githubUser.id;
-    console.log('GITHUB USER ID => ', providerUserId);
 
     let user = {
       username,
@@ -987,84 +687,45 @@ module.exports = {
       providerUserId,
     };
 
-    //db check
-    getUserByAuthProviderId(providerUserId, (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
+    try {
+      // check user from db
+      const result = await getUserByAuthProviderId(providerUserId);
 
-      if (result) {
-        //Similar user exists, redirect user to login with google instead
+      // handle case when user dosen't exist in db
+      if (result.length === 0) {
+        // store user info
+        await addUserByOauth(user);
+
         return res.redirect(
           process.env.SIGNUP_CLIENT_URL +
             '?success=' +
-            false +
+            true +
             '&message=' +
-            'Github Account Already Exists. Sign in with Github Instead' +
+            'Sign up success' +
             '&provider=' +
-            provider +
-            '&providerUserId' +
-            providerUserId
+            provider
         );
       }
 
-      if (!result) {
-        //store user info
-        addUserByOauth(user, (err, results) => {
-          if (err) {
-            console.log(err);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          } else {
-            return res.redirect(
-              process.env.SIGNUP_CLIENT_URL +
-                '?success=' +
-                true +
-                '&message=' +
-                'Sign up success' +
-                '&provider=' +
-                provider
-            );
-          }
-        });
-      }
-    });
-
-    //get exchange code with access token
-    async function getAccessToken(code) {
-      const { data } = await axios({
-        method: 'post',
-        url:
-          'https://github.com/login/oauth/access_token?' +
-          `client_id=${process.env.SIGNUP_GITHUB_CLIENT_ID}&` +
-          `client_secret=${process.env.SIGNUP_GITHUB_CLIENT_SECRET}&` +
-          `code=${code}`,
-        headers: {
-          accept: 'application/json',
-        },
+      // past above if block means, a similar user exists,
+      // redirect user to login with github instead
+      return res.redirect(
+        process.env.SIGNUP_CLIENT_URL +
+          '?success=' +
+          false +
+          '&message=' +
+          'Github Account Already Exists. Sign in with Github Instead' +
+          '&provider=' +
+          provider +
+          '&providerUserId' +
+          providerUserId
+      );
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
       });
-
-      return data.access_token;
-    }
-
-    //exchange user info with access token
-    async function getGithubUser(accessToken) {
-      const { data } = await axios({
-        method: 'get',
-        url: `https://api.github.com/user`,
-        headers: {
-          accept: 'application/json',
-          Authorization: `token ${accessToken}`,
-        },
-      });
-
-      return data;
     }
   },
 };

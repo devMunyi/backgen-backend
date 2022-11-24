@@ -3,7 +3,7 @@ const { checkCommentId } = require('../helpers/comment');
 module.exports = {
   commentAddValidation: (req, res, next) => {
     let { code_snippet_id, comment_body, added_by, replying_to } = req.body;
-    comment_body = comment_body.trim();
+    comment_body = comment_body?.trim();
 
     if (code_snippet_id < 1) {
       return res.json({
@@ -33,8 +33,10 @@ module.exports = {
 
   commentEditValidation: (req, res, next) => {
     let { comment_body, comment_id } = req.body;
+
     comment_id = parseInt(comment_id);
-    comment_body = comment_body.trim();
+
+    comment_body = comment_body?.trim();
 
     if (!comment_id || comment_id < 1) {
       return res.json({
@@ -53,24 +55,23 @@ module.exports = {
     }
   },
 
-  commentIdValidation: (req, res, next) => {
+  commentIdValidation: async (req, res, next) => {
     const comment_id = req.body.comment_id;
-    console.log('COMMENNT ID =>', comment_id);
-    checkCommentId(comment_id, (err, row) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      } else if (!row) {
+
+    try {
+      const rows = await checkCommentId(comment_id);
+      if (rows.length === 0) {
         return res.json({
           success: false,
           message: 'Invalid comment id',
         });
-      } else {
-        next();
       }
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 };

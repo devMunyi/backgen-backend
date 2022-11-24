@@ -7,7 +7,7 @@ const {
 const { encode } = require('html-entities');
 
 module.exports = {
-  codesnippetAddValidation: (req, res, next) => {
+  codesnippetAddValidation: async (req, res, next) => {
     let {
       func_id,
       subfunc_id,
@@ -26,10 +26,10 @@ module.exports = {
     language_id = parseInt(language_id);
     lang_impl_type_id = parseInt(lang_impl_type_id);
     user_impl_type_id = parseInt(user_impl_type_id);
-    title = encode(title.trim());
-    row_code = encode(row_code.trim());
-    file_extension = file_extension.trim();
-    instructions = instructions.trim();
+    title = encode(title?.trim());
+    row_code = encode(row_code?.trim());
+    file_extension = file_extension?.trim();
+    instructions = instructions?.trim();
     added_by = parseInt(added_by);
 
     if (!func_id || func_id < 1) {
@@ -82,40 +82,41 @@ module.exports = {
         success: false,
         message: 'Contributer id is required',
       });
-    } else {
-      checkCodeAddDuplicate(row_code, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        }
-        if (result) {
-          return res.json({
-            success: false,
-            message: 'A similar code already exists',
-          });
-        } else {
-          //update request body with sanitized data
-          req.body.func_id = func_id;
-          req.body.subfunc_id = subfunc_id;
-          req.body.language_id = language_id;
-          req.body.framework_id = parseInt(framework_id);
-          req.body.lang_impl_type_id = lang_impl_type_id;
-          req.body.user_impl_type_id = user_impl_type_id;
-          req.body.title = title;
-          req.body.row_code = row_code;
-          req.body.file_extension = file_extension;
-          req.body.instructions = instructions;
-          req.body.added_by = added_by;
-          next();
-        }
+    }
+
+    try {
+      const result = await checkCodeAddDuplicate(row_code);
+
+      if (result.length) {
+        return res.json({
+          success: false,
+          message: 'A similar code already exists',
+        });
+      }
+      // update request body with sanitized data
+      req.body.func_id = func_id;
+      req.body.subfunc_id = subfunc_id;
+      req.body.language_id = language_id;
+      req.body.framework_id = parseInt(framework_id);
+      req.body.lang_impl_type_id = lang_impl_type_id;
+      req.body.user_impl_type_id = user_impl_type_id;
+      req.body.title = title;
+      req.body.row_code = row_code;
+      req.body.file_extension = file_extension;
+      req.body.instructions = instructions;
+      req.body.added_by = added_by;
+
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
       });
     }
   },
 
-  codesnippetEditValidation: (req, res, next) => {
+  codesnippetEditValidation: async (req, res, next) => {
     let {
       func_id,
       subfunc_id,
@@ -129,9 +130,10 @@ module.exports = {
       instructions,
       added_by,
       codesnippet_id,
+      archive_row_code = '',
     } = req.body;
 
-    //check if code edit id is present, terminate the program execution if not there
+    // check if code edit id is present, terminate the program execution if not there
     if (!codesnippet_id) {
       return res.json({
         success: false,
@@ -143,10 +145,11 @@ module.exports = {
     language_id = parseInt(language_id);
     lang_impl_type_id = parseInt(lang_impl_type_id);
     user_impl_type_id = parseInt(user_impl_type_id);
-    title = encode(title.trim());
-    row_code = encode(row_code.trim());
-    file_extension = file_extension.trim();
-    instructions = instructions.trim();
+    title = encode(title?.trim());
+    row_code = encode(row_code?.trim());
+    archive_row_code = encode(archive_row_code?.trim());
+    file_extension = file_extension?.trim();
+    instructions = instructions?.trim();
     added_by = parseInt(added_by);
     codesnippet_id = parseInt(codesnippet_id);
 
@@ -200,56 +203,59 @@ module.exports = {
         success: false,
         message: 'Contributer id is required',
       });
-    } else {
-      checkCodeEditDuplicate(row_code, codesnippet_id, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        } else if (result) {
-          return res.json({
-            success: false,
-            message: 'A similar code already exists',
-          });
-        } else {
-          //update request body with sanitinized data
-          req.body.func_id = func_id;
-          req.body.subfunc_id = subfunc_id;
-          req.body.language_id = language_id;
-          req.body.framework_id = parseInt(framework_id);
-          req.body.lang_impl_type_id = lang_impl_type_id;
-          req.body.user_impl_type_id = user_impl_type_id;
-          req.body.title = title;
-          req.body.row_code = row_code;
-          req.body.file_extension = file_extension;
-          req.body.instructions = instructions;
-          req.body.added_by = added_by;
-          req.body.codesnippet_id = codesnippet_id;
-          next();
-        }
+    }
+    try {
+      const result = await checkCodeEditDuplicate(row_code, codesnippet_id);
+
+      if (result.length) {
+        return res.json({
+          success: false,
+          message: 'A similar code already exists',
+        });
+      }
+      // update request body with sanitinized data
+      req.body.func_id = func_id;
+      req.body.subfunc_id = subfunc_id;
+      req.body.language_id = language_id;
+      req.body.framework_id = parseInt(framework_id);
+      req.body.lang_impl_type_id = lang_impl_type_id;
+      req.body.user_impl_type_id = user_impl_type_id;
+      req.body.title = title;
+      req.body.row_code = row_code;
+      req.body.file_extension = file_extension;
+      req.body.instructions = instructions;
+      req.body.added_by = added_by;
+      req.body.codesnippet_id = codesnippet_id;
+
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
       });
     }
   },
 
-  codesnippetIdValidation: (req, res, next) => {
+  codesnippetIdValidation: async (req, res, next) => {
     const impId = parseInt(req.body.codesnippet_id);
-    checkCodesnippetId(impId, (err, row) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      } else if (!row) {
+
+    try {
+      const results = await checkCodesnippetId(impId);
+      if (results.length === 0) {
         return res.json({
           success: false,
           message: 'Invalid code snippet id',
         });
-      } else {
-        next();
       }
-    });
+
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 };

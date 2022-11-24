@@ -6,10 +6,9 @@ const {
 } = require('../helpers/platform');
 
 module.exports = {
-  platformAddValidation: (req, res, next) => {
+  platformAddValidation: async (req, res, next) => {
     let { name, added_by } = req.body;
-    //console.log(req.body.name);
-    name = name.trim();
+    name = name?.trim();
 
     if (!name || name.length < 1) {
       return res.json({
@@ -22,30 +21,31 @@ module.exports = {
         message: 'Author is required',
       });
     } else if (name.length > 0) {
-      checkPlatformsByName(name, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        }
-        if (result) {
+      try {
+        const result = await checkPlatformsByName(name);
+
+        if (result.length) {
           return res.json({
             success: false,
             message: 'Platform name already exists',
           });
-        } else {
-          req.body.name = name;
-          next();
         }
-      });
+
+        req.body.name = name;
+        next();
+      } catch (error) {
+        console.log(error);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
+      }
     }
   },
 
-  platformEditValidation: (req, res, next) => {
+  platformEditValidation: async (req, res, next) => {
     let { name, added_by, platform_id } = req.body;
-    name = name.trim();
+    name = name?.trim();
 
     if (!name || name.length < 1) {
       return res.json({
@@ -59,47 +59,53 @@ module.exports = {
       });
     } else if (name.length > 0) {
       const platformId = parseInt(platform_id);
-      checkIfSimilarNameExist(name, platformId, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        } else if (result) {
+
+      try {
+        const result = await checkIfSimilarNameExist(name, platformId);
+
+        if (result.length) {
           return res.json({
             success: false,
             message: 'Platform name already exists',
           });
-        } else {
-          req.body.name = name;
-          next();
         }
-      });
+
+        req.body.name = name;
+        next();
+      } catch (error) {
+        console.log(error);
+        return res.json({
+          success: false,
+          message: 'Platform name already exists',
+        });
+      }
     }
   },
 
-  platformIdValidation: (req, res, next) => {
+  platformIdValidation: async (req, res, next) => {
     const userid = parseInt(req.body.platform_id);
-    checkPlatformId(userid, (err, row) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      } else if (!row) {
+
+    try {
+      const result = await checkPlatformId(userid);
+
+      if (result.length === 0) {
         return res.json({
           success: false,
           message: 'Invalid platform id',
         });
-      } else {
-        next();
       }
-    });
+
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  validateImg: (req, res, next) => {
+  validateImg: async (req, res, next) => {
     if (!req.files) {
       req.body.icon = '';
       return next();

@@ -6,11 +6,10 @@ const {
 } = require('../helpers/framework');
 
 module.exports = {
-  frameworkAddValidation: (req, res, next) => {
+  frameworkAddValidation: async (req, res, next) => {
     let { language_id, name, added_by } = req.body;
-    //console.log(req.body.name);
     language_id = parseInt(language_id);
-    name = name.trim();
+    name = name?.trim();
 
     if (!name || name.length < 1) {
       return res.json({
@@ -28,32 +27,35 @@ module.exports = {
         message: 'Author is required',
       });
     } else if (name.length > 0) {
-      checkFrameworksByName(name, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        }
-        if (result) {
+      try {
+        const result = await checkFrameworksByName(name);
+
+        if (result.length) {
           return res.json({
             success: false,
             message: 'Framework name already exists',
           });
-        } else {
-          req.body.name = name;
-          next();
         }
-      });
+
+        req.body.name = name;
+
+        next();
+      } catch (error) {
+        console.log(error);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
+      }
     }
   },
 
-  frameworkEditValidation: (req, res, next) => {
+  frameworkEditValidation: async (req, res, next) => {
     let { language_id, name, added_by, framework_id } = req.body;
 
     language_id = parseInt(language_id);
-    name = name.trim();
+
+    name = name?.trim();
 
     if (!language_id || language_id < 1) {
       return res.json({
@@ -72,44 +74,50 @@ module.exports = {
       });
     } else if (name.length > 0) {
       let framId = parseInt(framework_id);
-      checkIfSimilarNameExist(name, framId, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        } else if (result) {
+
+      try {
+        const result = await checkIfSimilarNameExist(name, framId);
+
+        if (result.length) {
           return res.json({
             success: false,
             message: 'Framework name already exists',
           });
-        } else {
-          req.body.name = name;
-          next();
         }
-      });
-    }
-  },
+        req.body.name = name;
 
-  frameworkIdValidation: (req, res, next) => {
-    const framId = parseInt(req.body.framework_id);
-    checkFrameworkId(framId, (err, row) => {
-      if (err) {
-        console.log(err);
+        next();
+      } catch (error) {
+        console.log(error);
         return res.json({
           success: false,
           message: 'Something went wrong. Try again later',
         });
-      } else if (!row) {
+      }
+    }
+  },
+
+  frameworkIdValidation: async (req, res, next) => {
+    const framId = parseInt(req.body.framework_id);
+
+    try {
+      const result = await checkFrameworkId(framId);
+
+      if (result.length === 0) {
         return res.json({
           success: false,
           message: 'Invalid framework id',
         });
-      } else {
-        next();
       }
-    });
+
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
   validateImg: (req, res, next) => {
@@ -152,8 +160,8 @@ module.exports = {
             message: 'Something went wrong. Try again later',
           });
         } else {
-          //console.log("File uploaded to => ", file_destination);
           req.body.icon = sanitizedFileName;
+
           next();
         }
       });

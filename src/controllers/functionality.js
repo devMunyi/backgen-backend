@@ -1,3 +1,4 @@
+// require functionality models to avail its featured methods
 const {
   addFunc,
   getFuncByFuncId,
@@ -5,32 +6,34 @@ const {
   updateFunc,
   deleteFunc,
   reactivateFunc,
-  getTotalRecords,
-} = require('../models/functionality'); //require functionality models to avail its featured methods
-//const async = require("async");
-const { inputAvailable } = require('../../helpers/common'); //require common helper functions
+} = require('../models/functionality');
+
+// require common helper functions
+const { inputAvailable, parseToInt } = require('../../helpers/common');
+
+const { totalRecords } = require('../models/common');
 
 module.exports = {
-  addFunc: (req, res) => {
+  addFunc: async (req, res) => {
     const { body } = req;
 
-    addFunc(body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Error occured in adding a new functionality',
-        });
-      }
+    try {
+      await addFunc(body);
+
       return res.json({
         success: true,
-        data: results,
         message: 'Functionality added Successfully',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Error occured in adding a new functionality',
+      });
+    }
   },
 
-  getFuncs: (req, res) => {
+  getFuncs: async (req, res) => {
     let queryObj = {};
 
     let { where_, search_, orderby, dir, offset, rpp } = req.query;
@@ -38,14 +41,10 @@ module.exports = {
       where_ = 'status = 1';
     }
 
-    let andsearch;
     search_ = inputAvailable(search_);
     if (search_ != undefined) {
-      andsearch = `AND name LIKE '%${search_}%'`;
-    } else {
-      andsearch = '';
+      where_ += `AND name LIKE '%${search_}%'`;
     }
-
     if (!orderby) {
       orderby = 'name';
     }
@@ -60,114 +59,87 @@ module.exports = {
       rpp = 10;
     }
 
-    //add data to queryObj object
+    // add data to queryObj object
     queryObj.where_ = where_;
-    queryObj.andsearch = andsearch;
-    queryObj.orderby = orderby;
-    queryObj.dir = dir;
+    queryObj.orderby = `${orderby} ${dir}`;
     queryObj.offset = parseInt(offset);
     queryObj.rpp = parseInt(rpp);
-    getFuncs(queryObj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'No record(s) found',
-        });
-      }
 
-      if (results) {
-        results.map((result) => {
-          const icon = `/images/functionality/${result.icon}`;
-          result.icon = icon;
-        });
+    try {
+      const results = await getFuncs(queryObj);
 
-        //get all total records
-        getTotalRecords(queryObj, (err2, results2) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          }
+      results.map((result) => {
+        const icon = `/images/functionality/${result.icon}`;
+        result.icon = icon;
+      });
 
-          if (results2) {
-            return res.json({
-              success: true,
-              all_totals: results2.all_totals,
-              data: results,
-            });
-          }
-        });
-      }
-    });
+      // get total functionalities
+      const { all_totals } = totalRecords({
+        table: 'pr_functionalities',
+        field: 'uid',
+        where_,
+      });
+
+      return res.json({
+        success: true,
+        all_totals,
+        data: results,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  getFuncByFuncId: (req, res) => {
+  getFuncByFuncId: async (req, res) => {
     let { where_, func_id } = req.query;
     if (!where_) {
       where_ = `status = 1`;
     }
 
     if (!func_id) {
-      return res.json();
+      return res.json({ success: false, message: 'Function Id is required' });
     }
 
     let obj = {
       where_,
-      func_id: parseInt(func_id),
+      func_id: parseToInt(func_id),
     };
 
-    getFuncByFuncId(obj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record not found',
-        });
-      }
+    try {
+      const result = await getFuncByFuncId(obj);
 
-      if (results) {
-        const { icon } = results;
-        results.icon = `/images/functionality/${icon}`;
+      const { icon } = result;
+      result.icon = `/images/functionality/${icon}`;
 
-        return res.json({
-          success: true,
-          data: results,
-        });
-      }
-    });
+      return res.json({
+        success: true,
+        data: result[0],
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  updateFunc: (req, res) => {
+  updateFunc: async (req, res) => {
     const { body } = req;
-    const { func_id } = req.body;
-    updateFunc(parseInt(func_id), body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
 
-      if (!results) {
+    const { func_id } = req.body;
+
+    try {
+      const result = await updateFunc(parseToInt(func_id), body);
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Failed to update functionality',
+          message: 'Record not found!',
         });
       }
 
@@ -175,51 +147,63 @@ module.exports = {
         success: true,
         message: 'Functionality updated successfully',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
-  deleteFunc: (req, res) => {
+  deleteFunc: async (req, res) => {
     const { func_id } = req.body;
-    deleteFunc(parseInt(func_id), (err, results) => {
-      if (err) {
-        console.log(err);
+
+    try {
+      const result = await deleteFunc(parseInt(func_id));
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
+          message: 'Record not found!',
         });
       }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record Not Found',
-        });
-      }
+
       return res.json({
         success: true,
         message: 'Functionality deleted successfully',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  reactivateFunc: (req, res) => {
+  reactivateFunc: async (req, res) => {
     const { func_id } = req.body;
-    reactivateFunc(parseInt(func_id), (err, results) => {
-      if (err) {
-        console.log(err);
+
+    try {
+      const result = await reactivateFunc(parseInt(func_id));
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
+          message: 'Record not found!',
         });
       }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record Not Found',
-        });
-      }
+
       return res.json({
         success: true,
         message: 'Functionality activated successfully',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 };
