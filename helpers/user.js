@@ -108,8 +108,8 @@ module.exports = {
         method: 'post',
         url:
           'https://github.com/login/oauth/access_token?' +
-          `client_id=${process.env.SIGNUP_GITHUB_CLIENT_ID}&` +
-          `client_secret=${process.env.SIGNUP_GITHUB_CLIENT_SECRET}&` +
+          `client_id=${process.env.SIGNIN_GITHUB_CLIENT_ID}&` +
+          `client_secret=${process.env.SIGNIN_GITHUB_CLIENT_SECRET}&` +
           `code=${code}`,
         headers: {
           accept: 'application/json',

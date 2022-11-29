@@ -20,7 +20,6 @@ const { sign, verify } = require('jsonwebtoken'); //require jwt to handle issuin
 const axios = require('axios'); //require axios to handle API call using get, post, delete, put
 //const async = require("async");
 const nodemailer = require('nodemailer'); //require nodemailer to handle sending emails
-const { promisify } = require('util');
 
 // require helper methods
 const { inputAvailable } = require('../../helpers/common');
@@ -633,7 +632,7 @@ module.exports = {
       });
     }
 
-    // reusable function to get exchange code with access token from github
+    // // reusable function to get exchange code with access token from github
     // async function getAccessToken(code) {
     //   const { data } = await axios({
     //     method: 'post',
@@ -650,7 +649,7 @@ module.exports = {
     //   return data.access_token;
     // }
 
-    // reusable function to exchange user info with access token
+    // // reusable function to exchange user info with access token
     // async function getGithubUser(accessToken) {
     //   const { data } = await axios({
     //     method: 'get',
