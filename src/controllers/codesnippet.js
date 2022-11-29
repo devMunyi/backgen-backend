@@ -9,6 +9,7 @@ const {
   reactivateCode,
   archiveCode,
   getCodeArchives,
+  getRowCodeOnly,
 } = require('../models/codesnippet'); // avails methods from codesnippet models
 
 const { totalRecords, incrementCounter } = require('../models/common');
@@ -41,18 +42,20 @@ module.exports = {
 
   updateCodeSnippet: async (req, res) => {
     const { body } = req;
-    const { codesnippet_id, title, added_by, archive_row_code } = req.body;
+    const { codesnippet_id, title, added_by } = req.body;
 
     if (!codesnippet_id) {
       return res.json({ success: false, message: 'Not Found' });
     }
 
     try {
+      const { row_code } = await getRowCodeOnly(codesnippet_id);
+
       // archive old version of the code
       await archiveCode({
         codesnippet_id,
         title,
-        archive_row_code: '',
+        archive_row_code: row_code,
         archived_by: added_by,
       });
 

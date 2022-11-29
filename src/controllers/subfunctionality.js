@@ -71,8 +71,8 @@ module.exports = {
 
       // get total subfunctionalities
       const { all_totals } = totalRecords({
-        table: 'pr_subfunctions',
-        field: 'uid',
+        table: 'pr_subfunctions sf',
+        field: 'sf.uid',
         where_,
       });
 

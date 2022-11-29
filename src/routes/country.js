@@ -1,5 +1,5 @@
 const apicache = require('apicache');
-let cache = apicache.middleware;
+// let cache = apicache.middleware;
 const {
   addCountry,
   getCountries,
@@ -26,7 +26,7 @@ router.post(
   countryAddValidation,
   addCountry
 );
-router.get('/countries', cache('1 hour'), getCountries);
+router.get('/countries', getCountries);
 router.get('/country', getCountryByCountryId);
 router.put(
   '/edit-country',

@@ -1,5 +1,5 @@
 const apicache = require('apicache');
-let cache = apicache.middleware;
+// let cache = apicache.middleware;
 const {
   addPlatform,
   getPlatforms,
@@ -20,7 +20,7 @@ const {
 
 //////---------------------------Begin Routes defination
 router.post('/add-platform', validateImg, platformAddValidation, addPlatform);
-router.get('/platforms', cache('1 hour'), getPlatforms);
+router.get('/platforms', getPlatforms);
 router.get('/platform', getPlatformByPlatformId);
 router.put(
   '/edit-platform',

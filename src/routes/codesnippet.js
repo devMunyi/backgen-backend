@@ -1,5 +1,5 @@
 const apicache = require('apicache');
-let cache = apicache.middleware;
+// let cache = apicache.middleware;
 const {
   addCodeSnippet,
   getCodeSnippetByCodeSnippetId,

@@ -232,20 +232,39 @@ module.exports = {
         ON c.lang_impl_type_id = lit.uid
           LEFT JOIN  pr_user_implementation_type uit
         ON c.user_impl_type_id = uit.uid
-          LEFT JOIN pr_users u ON c.added_by = u.uid
+          LEFT JOIN pr_users u 
+        ON c.added_by = u.uid
           LEFT JOIN  pr_languages l
         ON c.language_id = l.uid
           LEFT JOIN  pr_frameworks f
         ON c.framework_id = f.uid
-        LEFT JOIN  pr_functionalities fn
+          LEFT JOIN  pr_functionalities fn
         ON c.func_id = fn.uid
-        LEFT JOIN pr_subfunctions sb
+          LEFT JOIN pr_subfunctions sb
         ON c.subfunc_id = sb.uid
         WHERE ${where_}`,
         []
       );
 
       return result[0];
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getRowCodeOnly: async (uid) => {
+    try {
+      const results = await pool.query(
+        `SELECT
+          row_code
+        FROM
+          pr_code_snippets
+        WHERE
+          uid = ?`,
+        [uid]
+      );
+
+      return results[0][0];
     } catch (error) {
       throw error;
     }

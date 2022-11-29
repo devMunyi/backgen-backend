@@ -193,6 +193,8 @@ module.exports = {
     try {
       const results = await reactivatePlatform(parseInt(platform_id));
 
+      console.log('reactivate respo => ', results);
+
       if (results.affectedRows === 0 && results.changedRows === 0) {
         return res.json({
           success: false,

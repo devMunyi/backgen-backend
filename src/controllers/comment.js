@@ -146,6 +146,7 @@ module.exports = {
         await decrementCounter({
           uid: code_snippet_id,
           table: 'pr_code_snippets',
+          field: 'total_comments',
         });
       }
 
@@ -154,6 +155,7 @@ module.exports = {
         await decrementCounter({
           uid: replying_to,
           table: 'pr_comments',
+          field: 'total_replies',
         });
       }
 
@@ -334,10 +336,10 @@ module.exports = {
 
     try {
       // check if the vote is already casted
-      const result = await voteCheckByPostIdUserIdAndTable(body);
+      const [result] = await voteCheckByPostIdUserIdAndTable(body);
 
       // when db result.length equal to zero will mean not vote record seen, thus can be recorded
-      if (result.length === 0) {
+      if (!result) {
         body.downvote = -1;
         // add a downvote
         await addDownvote(body);
@@ -352,7 +354,7 @@ module.exports = {
       }
 
       // if downvote = 0 => upvote = 1, meaning user now intends to revert the upvote and downvote instead
-      if (result[0].downvote == 0 && result[0].upvote == 1) {
+      if (result.downvote == 0 && result.upvote == 1) {
         body.upvote = 0;
         body.downvote = -1;
 
@@ -372,7 +374,7 @@ module.exports = {
       }
 
       // if downvote = -1 => upvote = 0, meaning user now intends to revert the downvote
-      if (result[0].downvote == -1 && result[0].upvote == 0) {
+      if (result.downvote == -1 && result.upvote == 0) {
         body.downvote = 0;
 
         // update downvote
@@ -388,7 +390,7 @@ module.exports = {
       }
 
       // if upvote = 0 => downvote = 0, meaning user intends to downvote
-      if (result[0].upvote == 0 && result[0].downvote == 0) {
+      if (result.upvote == 0 && result.downvote == 0) {
         body.downvote = -1;
 
         // update downvote

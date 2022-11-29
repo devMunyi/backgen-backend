@@ -130,7 +130,6 @@ module.exports = {
       instructions,
       added_by,
       codesnippet_id,
-      archive_row_code = '',
     } = req.body;
 
     // check if code edit id is present, terminate the program execution if not there
@@ -147,7 +146,6 @@ module.exports = {
     user_impl_type_id = parseInt(user_impl_type_id);
     title = encode(title?.trim());
     row_code = encode(row_code?.trim());
-    archive_row_code = encode(archive_row_code?.trim());
     file_extension = file_extension?.trim();
     instructions = instructions?.trim();
     added_by = parseInt(added_by);
