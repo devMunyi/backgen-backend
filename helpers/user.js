@@ -103,52 +103,67 @@ module.exports = {
   // resusable function to exchange code with access token from github
   // when user is using github to sign in or login
   getAccessTokenSignin: async (code) => {
-    const { data } = await axios({
-      method: 'post',
-      url:
-        'https://github.com/login/oauth/access_token?' +
-        `client_id=${process.env.SIGNUP_GITHUB_CLIENT_ID}&` +
-        `client_secret=${process.env.SIGNUP_GITHUB_CLIENT_SECRET}&` +
-        `code=${code}`,
-      headers: {
-        accept: 'application/json',
-      },
-    });
+    try {
+      const { data } = await axios({
+        method: 'post',
+        url:
+          'https://github.com/login/oauth/access_token?' +
+          `client_id=${process.env.SIGNUP_GITHUB_CLIENT_ID}&` +
+          `client_secret=${process.env.SIGNUP_GITHUB_CLIENT_SECRET}&` +
+          `code=${code}`,
+        headers: {
+          accept: 'application/json',
+        },
+      });
 
-    return data.access_token;
+      return data.access_token;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   },
 
   // resusable function to exchange code with access token from github
   // when user is using github to sign up or register
   getAccessTokenSignup: async (code) => {
-    const { data } = await axios({
-      method: 'post',
-      url:
-        'https://github.com/login/oauth/access_token?' +
-        `client_id=${process.env.SIGNUP_GITHUB_CLIENT_ID}&` +
-        `client_secret=${process.env.SIGNUP_GITHUB_CLIENT_SECRET}&` +
-        `code=${code}`,
-      headers: {
-        accept: 'application/json',
-      },
-    });
+    try {
+      const { data } = await axios({
+        method: 'post',
+        url:
+          'https://github.com/login/oauth/access_token?' +
+          `client_id=${process.env.SIGNUP_GITHUB_CLIENT_ID}&` +
+          `client_secret=${process.env.SIGNUP_GITHUB_CLIENT_SECRET}&` +
+          `code=${code}`,
+        headers: {
+          accept: 'application/json',
+        },
+      });
 
-    return data.access_token;
+      return data.access_token;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   },
 
   // reusable function to exchange user info with access token from Github
   // applicable for both when user want to sign in and sign up with Github
   getGithubUser: async (accessToken) => {
-    const { data } = await axios({
-      method: 'get',
-      url: `https://api.github.com/user`,
-      headers: {
-        accept: 'application/json',
-        Authorization: `token ${accessToken}`,
-      },
-    });
+    try {
+      const { data } = await axios({
+        method: 'get',
+        url: `https://api.github.com/user`,
+        headers: {
+          accept: 'application/json',
+          Authorization: `token ${accessToken}`,
+        },
+      });
 
-    return data;
+      return data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   },
 
   // reusable function to get user using code when user waant to sign up (register) with google

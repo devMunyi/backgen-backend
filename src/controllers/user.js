@@ -634,35 +634,35 @@ module.exports = {
     }
 
     // reusable function to get exchange code with access token from github
-    async function getAccessToken(code) {
-      const { data } = await axios({
-        method: 'post',
-        url:
-          'https://github.com/login/oauth/access_token?' +
-          `client_id=${process.env.SIGNIN_GITHUB_CLIENT_ID}&` +
-          `client_secret=${process.env.SIGNIN_GITHUB_CLIENT_SECRET}&` +
-          `code=${code}`,
-        headers: {
-          accept: 'application/json',
-        },
-      });
+    // async function getAccessToken(code) {
+    //   const { data } = await axios({
+    //     method: 'post',
+    //     url:
+    //       'https://github.com/login/oauth/access_token?' +
+    //       `client_id=${process.env.SIGNIN_GITHUB_CLIENT_ID}&` +
+    //       `client_secret=${process.env.SIGNIN_GITHUB_CLIENT_SECRET}&` +
+    //       `code=${code}`,
+    //     headers: {
+    //       accept: 'application/json',
+    //     },
+    //   });
 
-      return data.access_token;
-    }
+    //   return data.access_token;
+    // }
 
     // reusable function to exchange user info with access token
-    async function getGithubUser(accessToken) {
-      const { data } = await axios({
-        method: 'get',
-        url: `https://api.github.com/user`,
-        headers: {
-          accept: 'application/json',
-          Authorization: `token ${accessToken}`,
-        },
-      });
+    // async function getGithubUser(accessToken) {
+    //   const { data } = await axios({
+    //     method: 'get',
+    //     url: `https://api.github.com/user`,
+    //     headers: {
+    //       accept: 'application/json',
+    //       Authorization: `token ${accessToken}`,
+    //     },
+    //   });
 
-      return data;
-    }
+    //   return data;
+    // }
   },
 
   githubOAuthSignup: async (req, res) => {
