@@ -6,17 +6,14 @@ const {
   updateComment,
   deleteComment,
   getCommentsByCodesnippetId,
-  getTotalCommentsCodeId,
-  incrementRepliesTotal,
-  decrementRepliesTotal,
-  incrementCommentVotes,
-  decrementCommentVotes,
   commentVotes,
-} = require('../models/comment'); //require comment models to avail its featured methods
+} = require('../models/comment'); // require comment models to avail its featured methods
+
 const {
-  incrementCommentsTotal,
-  decrementCommentsTotal,
-} = require('../models/codesnippet');
+  totalRecords,
+  incrementCounter,
+  decrementCounter,
+} = require('../models/common');
 const {
   addUpvote,
   addDownvote,
@@ -24,72 +21,50 @@ const {
   updateDownvote,
   voteCheckByPostIdUserIdAndTable,
 } = require('../models/votes');
-//const { inputAvailable } = require("../../helpers/common"); //require common helper functions
-//const { json } = require("express");
 
 module.exports = {
-  addComment: (req, res) => {
+  addComment: async (req, res) => {
     const { body } = req;
-    addComment(body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Error occured in adding a new comment',
+
+    try {
+      await addComment(body);
+
+      let { code_snippet_id, replying_to } = body;
+
+      if (replying_to == 0) {
+        // its a new comment for codesnippet
+        // increment total_comments in the pr_code_snippets table
+        await incrementCounter({
+          uid: code_snippet_id,
+          table: 'pr_code_snippets',
+          field: 'total_comments',
         });
       }
 
-      let { code_snippet_id, replying_to } = body;
-      if (results) {
-        if (replying_to == 0) {
-          console.log('replying to == 0');
-          //increment total_comments in the pr_code_snippets table
-          incrementCommentsTotal(code_snippet_id, (err2, results2) => {
-            if (err2) {
-              console.log(err2);
-              return res.json({
-                success: false,
-                message: 'Something went wrong. Try again later',
-              });
-            }
-
-            //ready to give a response for successful comment save
-            if (results2) {
-              return res.json({
-                success: true,
-                message: 'Added Successfully',
-              });
-            }
-          });
-        }
-
-        if (replying_to > 0) {
-          //increment total_replies in the pr_comments table
-          incrementRepliesTotal(
-            { code_snippet_id, replying_to },
-            (err3, results3) => {
-              if (err3) {
-                console.log(err3);
-                return res.json({
-                  success: false,
-                  message: 'Something went wrong. Try again later',
-                });
-              }
-
-              //ready to give a response for successful comment save
-              if (results3) {
-                return res.json({
-                  success: true,
-                  message: 'Added Successfully',
-                });
-              }
-            }
-          );
-        }
+      if (replying_to > 0) {
+        // its a reply to a comment
+        // increment total_replies in the pr_code_snippets table
+        await incrementCounter({
+          uid: replying_to,
+          table: 'pr_comments',
+          field: 'total_replies',
+        });
       }
-    });
+
+      return res.json({
+        success: true,
+        message: 'Added Successfully',
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Error occured in adding a new comment',
+      });
+    }
   },
-  getCommentByCommentId: (req, res) => {
+
+  getCommentByCommentId: async (req, res) => {
     const { comment_id } = req.query;
 
     if (!comment_id) {
@@ -99,62 +74,49 @@ module.exports = {
       });
     }
 
-    getCommentByCommentId(parseInt(comment_id), (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record not found',
-        });
-      }
-      return res.json({
-        success: true,
-        data: results,
-      });
-    });
-  },
-  getComments: (req, res) => {
-    getComments((err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'No record(s) found',
-        });
-      }
-      return res.json({
-        success: true,
-        data: results,
-      });
-    });
-  },
-  updateComment: (req, res) => {
-    const { body } = req;
-    updateComment(body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
+    try {
+      const results = await getCommentByCommentId(parseInt(comment_id));
 
-      if (!results) {
+      return res.json({
+        success: true,
+        data: results[0],
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
+  },
+
+  getComments: async (req, res) => {
+    try {
+      const results = await getComments();
+
+      return res.json({
+        success: true,
+        data: results,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
+  },
+
+  updateComment: async (req, res) => {
+    const { body } = req;
+
+    try {
+      const result = await updateComment(body);
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Failed to update',
+          message: 'Record not found!',
         });
       }
 
@@ -162,97 +124,71 @@ module.exports = {
         success: true,
         message: 'Updated successfully!',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
-  deleteComment: (req, res) => {
+
+  deleteComment: async (req, res) => {
     const { comment_id } = req.body;
+
     const { replying_to, code_snippet_id } = req.query;
-    deleteComment(parseInt(comment_id), (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
+
+    try {
+      const result = await deleteComment(parseInt(comment_id));
+
+      if (replying_to == 0) {
+        // decrement total_comments in the pr_code_snippets table
+        await decrementCounter({
+          uid: code_snippet_id,
+          table: 'pr_code_snippets',
+          field: 'total_comments',
         });
       }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record Not Found',
+
+      if (replying_to > 0) {
+        // decrement total_replies in the pr_comments table
+        await decrementCounter({
+          uid: replying_to,
+          table: 'pr_comments',
+          field: 'total_replies',
         });
       }
 
-      if (results) {
-        if (replying_to == 0) {
-          //decrement total_comments in the pr_code_snippets table
-          decrementCommentsTotal(code_snippet_id, (err2, results2) => {
-            if (err2) {
-              console.log(err2);
-              return res.json({
-                success: false,
-                message: 'Something went wrong. Try again later',
-              });
-            }
-
-            //ready to give a response for successful comment delete
-            if (results2) {
-              return res.json({
-                success: true,
-                data: results,
-                message: 'Deleted Successfully',
-              });
-            }
-          });
-        } else {
-          if (replying_to > 0) {
-            //decrement total_replies in the pr_comments table
-            decrementRepliesTotal(
-              { code_snippet_id, replying_to },
-              (err3, results3) => {
-                if (err3) {
-                  console.log(err3);
-                  return res.json({
-                    success: false,
-                    message: 'Something went wrong. Try again later',
-                  });
-                }
-
-                //ready to give a response for successful comment delete
-                if (results3) {
-                  return res.json({
-                    success: true,
-                    message: 'Deleted Successfully',
-                  });
-                }
-              }
-            );
-          } else {
-            return res.json({
-              success: true,
-              message: 'Deleted Successfully',
-            });
-          }
-        }
+      if (result.affectedRows === 0 && result.changedRows === 0) {
+        return res.json({
+          success: false,
+          message: 'Record not found!',
+        });
       }
-    });
+
+      return res.json({
+        success: true,
+        message: 'Deleted Successfully',
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  getCommentsByCodesnippetId: (req, res) => {
+  getCommentsByCodesnippetId: async (req, res) => {
     let queryObj = {};
     let { where_, orderby, dir, offset, rpp } = req.query;
-    let { code_snippet_id } = where_;
 
     if (!where_) {
-      return res.json();
+      return res.json({
+        success: false,
+        message: 'Code snippet id required!',
+      });
     }
-
-    // let andsearch;
-    // search_ = inputAvailable(search_);
-    // if (search_ != undefined) {
-    //   andsearch = `AND sf.name LIKE '%${search_}%'`;
-    // } else {
-    //   andsearch = "";
-    // }
 
     if (!orderby) {
       orderby = 'cmt.uid';
@@ -264,500 +200,228 @@ module.exports = {
       offset = 0;
     }
 
-    if (!rpp > 1) {
-      rpp = 10;
+    if (!rpp) {
+      rpp = 5;
     }
 
     queryObj.where_ = where_;
-    queryObj.orderby = orderby;
-    queryObj.dir = dir;
+    queryObj.orderby = `${orderby} ${dir}`;
     queryObj.offset = parseInt(offset);
     queryObj.rpp = parseInt(rpp);
 
-    getCommentsByCodesnippetId(queryObj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'No record(s) found',
-        });
-      }
+    console.log('where clause=> ', where_);
 
-      if (results) {
-        getTotalCommentsCodeId(where_, (err2, results2) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          }
+    try {
+      const results = await getCommentsByCodesnippetId(queryObj);
 
-          if (results2) {
-            return res.json({
-              success: true,
-              total_records: results2.total_comments,
-              data: results,
-            });
-          }
-        });
-      }
-    });
+      // get total comments
+      const { total_comments: total_records } = await totalRecords({
+        table: 'pr_comments cmt',
+        field: 'cmt.uid',
+        where_,
+        desiredName: 'total_comments',
+      });
+
+      return res.json({
+        success: true,
+        total_records,
+        data: results,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  upvoteComment: (req, res) => {
+  upvoteComment: async (req, res) => {
     const { post_id } = req.body;
+
     const { body } = req;
 
-    //check if the vote is already casted
-    voteCheckByPostIdUserIdAndTable(body, (err1, result1) => {
-      if (err1) {
-        console.log(err1);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      //when db result = undefined will mean not vote record seen, thus can be recorded
-      if (result1 == undefined) {
-        //means user has not upvoted or downvoted before, hence record his vote
-        addUpvote(body, (err2, result2) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          }
+    // check if the vote is already casted
 
-          if (result2) {
-            //increment comment identified with post_id by 1
-            incrementCommentVotes(
-              { comment_id: post_id, step: 1 },
-              (err3, result3) => {
-                if (err3) {
-                  console.log(err3);
-                  return res.json({
-                    success: false,
-                    message: 'Something went wrong. Try again later',
-                  });
-                }
+    try {
+      const result = await voteCheckByPostIdUserIdAndTable(body);
 
-                if (result3) {
-                  commentVotes(post_id, (err4, result4) => {
-                    if (err4) {
-                      console.log(err4);
-                      return res.json({
-                        success: false,
-                        message: 'Something went wrong. Try again later',
-                      });
-                    }
+      if (result.length === 0) {
+        body.upvote = 1;
 
-                    if (result4) {
-                      return res.json({
-                        success: true,
-                        message: 'Upvote recorded',
-                        votes: result4.votes,
-                      });
-                    }
-                  });
-                }
-              }
-            );
-          }
+        // means user has not upvoted or downvoted before, hence record his vote
+        await addUpvote(body);
+
+        // increment comment votes identified with post_id by 1
+        await incrementCounter({
+          uid: post_id,
+          table: 'pr_comments',
+          field: 'votes',
+          step: 1,
         });
       }
 
-      //if upvote = 0 => downvote = -1, meaning user now intends to revert the downvote and upvote instead
-      if (result1 && result1.upvote == 0 && result1.downvote == -1) {
-        updateUpvote(body, (err2, result2) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          }
-
-          if (result2) {
-            //now revert the downvote
-            updateDownvote(body, (err3, result3) => {
-              if (err3) {
-                console.log(err3);
-                return res.json({
-                  success: false,
-                  message: 'Something went wrong. Try again later',
-                });
-              }
-
-              if (result3) {
-                incrementCommentVotes(
-                  { comment_id: post_id, step: 2 },
-                  (err4, result4) => {
-                    if (err4) {
-                      console.log(err4);
-                      return res.json({
-                        success: false,
-                        message: 'Something went wrong. Try again later',
-                      });
-                    }
-
-                    if (result4) {
-                      //now get the updated votes
-                      commentVotes(post_id, (err5, result5) => {
-                        if (err5) {
-                          console.log(err5);
-                          return res.json({
-                            success: false,
-                            message: 'Something went wrong. Try again later',
-                          });
-                        }
-
-                        if (result5) {
-                          return res.json({
-                            success: true,
-                            message: 'Upvote recorded',
-                            votes: result5.votes,
-                          });
-                        }
-                      });
-                    }
-                  }
-                );
-              }
-            });
-          }
-        });
-      }
-
-      //if upvote = 1 => downvote = 0, meaning user now intends to revert the upvote
-      if (result1 && result1.upvote == 1 && result1.downvote == 0) {
-        body.upvote = 0;
-        updateUpvote(body, (err2, result2) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          }
-
-          if (result2) {
-            decrementCommentVotes(
-              { comment_id: post_id, step: 1 },
-              (err3, result3) => {
-                if (err3) {
-                  console.log(err3);
-                  return res.json({
-                    success: false,
-                    message: 'Something went wrong. Try again later',
-                  });
-                }
-
-                if (result3) {
-                  //now get the updated votes
-                  commentVotes(post_id, (err4, result4) => {
-                    if (err4) {
-                      console.log(err4);
-                      return res.json({
-                        success: false,
-                        message: 'Something went wrong. Try again later',
-                      });
-                    }
-
-                    if (result4) {
-                      return res.json({
-                        success: true,
-                        message: 'Upvote reverted',
-                        votes: result4.votes,
-                      });
-                    }
-                  });
-                }
-              }
-            );
-          }
-        });
-      }
-
-      //if upvote = 0 => downvote = 0, meaning user intends to upvote
-      if (result1 && result1.upvote == 0 && result1.downvote == 0) {
-        updateUpvote(body, (err2, result2) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          }
-
-          if (result2) {
-            incrementCommentVotes(
-              { comment_id: post_id, step: 1 },
-              (err3, result3) => {
-                if (err3) {
-                  console.log(err3);
-                  return res.json({
-                    success: false,
-                    message: 'Something went wrong. Try again later',
-                  });
-                }
-
-                if (result3) {
-                  //now get the updated votes
-                  commentVotes(post_id, (err4, result4) => {
-                    if (err4) {
-                      console.log(err4);
-                      return res.json({
-                        success: false,
-                        message: 'Something went wrong. Try again later',
-                      });
-                    }
-
-                    if (result4) {
-                      return res.json({
-                        success: true,
-                        message: 'Upvote recorded',
-                        votes: result4.votes,
-                      });
-                    }
-                  });
-                }
-              }
-            );
-          }
-        });
-      }
-    });
-  },
-  downvoteComment: (req, res) => {
-    const { post_id } = req.body;
-    const { body } = req;
-
-    //check if the vote is already casted
-    voteCheckByPostIdUserIdAndTable(body, (err1, result1) => {
-      if (err1) {
-        console.log(err1);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      //when db result = undefined will mean not vote record seen, thus can be recorded
-      if (result1 == undefined) {
-        //means user has not upvoted or downvoted before, hence record his vote
-        addDownvote(body, (err2, result2) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          }
-
-          if (result2) {
-            //decrement votes for comment identified with variable post_id by 1
-            decrementCommentVotes(
-              { comment_id: post_id, step: 1 },
-              (err3, result3) => {
-                if (err3) {
-                  console.log(err3);
-                  return res.json({
-                    success: false,
-                    message: 'Something went wrong. Try again later',
-                  });
-                }
-
-                if (result3) {
-                  commentVotes(post_id, (err4, result4) => {
-                    if (err4) {
-                      console.log(err4);
-                      return res.json({
-                        success: false,
-                        message: 'Something went wrong. Try again later',
-                      });
-                    }
-
-                    if (result4) {
-                      return res.json({
-                        success: true,
-                        message: 'Downvote recorded',
-                        votes: result4.votes,
-                      });
-                    }
-                  });
-                }
-              }
-            );
-          }
-        });
-      }
-
-      //if downvote = 0 => upvote = 1, meaning user now intends to revert the upvote and downvote instead
-      if (result1.downvote == 0 && result1.upvote == 1) {
-        updateDownvote(body, (err2, result2) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          }
-
-          if (result2) {
-            //now revert the downvote
-            updateUpvote(body, (err3, result3) => {
-              if (err3) {
-                console.log(err3);
-                return res.json({
-                  success: false,
-                  message: 'Something went wrong. Try again later',
-                });
-              }
-
-              if (result3) {
-                decrementCommentVotes(
-                  { comment_id: post_id, step: 2 },
-                  (err4, result4) => {
-                    if (err4) {
-                      console.log(err4);
-                      return res.json({
-                        success: false,
-                        message: 'Something went wrong. Try again later',
-                      });
-                    }
-                    if (result4) {
-                      //now get the updated post votes
-                      commentVotes(post_id, (err5, result5) => {
-                        if (err5) {
-                          console.log(err5);
-                          return res.json({
-                            success: false,
-                            message: 'Something went wrong. Try again later',
-                          });
-                        }
-                        if (result5) {
-                          return res.json({
-                            success: true,
-                            message: 'Downvote recorded',
-                            votes: result5.votes,
-                          });
-                        }
-                      });
-                    }
-                  }
-                );
-              }
-            });
-          }
-        });
-      }
-
-      //if downvote = -1 => upvote = 0, meaning user now intends to revert the downvote
-      if (result1.downvote == -1 && result1.upvote == 0) {
+      // if upvote = 0 => downvote = -1, meaning user now intends to revert the downvote and upvote instead
+      if (result.length && result[0].upvote == 0 && result[0].downvote == -1) {
         body.downvote = 0;
-        updateDownvote(body, (err2, result2) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          }
 
-          if (result2) {
-            incrementCommentVotes(
-              { comment_id: post_id, step: 1 },
-              (err3, result3) => {
-                if (err3) {
-                  console.log(err3);
-                  return res.json({
-                    success: false,
-                    message: 'Something went wrong. Try again later',
-                  });
-                }
+        body.upvote = 1;
 
-                if (result3) {
-                  //now get the updated votes
-                  commentVotes(post_id, (err4, result4) => {
-                    if (err4) {
-                      console.log(err4);
-                      return res.json({
-                        success: false,
-                        message: 'Something went wrong. Try again later',
-                      });
-                    }
+        await updateUpvote(body);
 
-                    if (result4) {
-                      return res.json({
-                        success: true,
-                        message: 'Downvote reverted',
-                        votes: result4.votes,
-                      });
-                    }
-                  });
-                }
-              }
-            );
-          }
+        // now revert the downvote
+        await updateDownvote(body);
+
+        // increment votes count by 2
+        await incrementCounter({
+          uid: post_id,
+          table: 'pr_comments',
+          field: 'votes',
+          step: 2,
         });
       }
 
-      //if upvote = 0 => downvote = 0, meaning user intends to downvote
-      if (result1 && result1.upvote == 0 && result1.downvote == 0) {
-        updateDownvote(body, (err2, result2) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          }
+      // if upvote = 1 => downvote = 0, meaning user now intends to revert the upvote
+      if (result.length && result[0].upvote == 1 && result[0].downvote == 0) {
+        body.upvote = 0;
 
-          if (result2) {
-            decrementCommentVotes(
-              { comment_id: post_id, step: 1 },
-              (err3, result3) => {
-                if (err3) {
-                  console.log(err3);
-                  return res.json({
-                    success: false,
-                    message: 'Something went wrong. Try again later',
-                  });
-                }
+        // update upvotes
+        await updateUpvote(body);
 
-                if (result3) {
-                  //now get the updated votes
-                  commentVotes(post_id, (err4, result4) => {
-                    if (err4) {
-                      console.log(err4);
-                      return res.json({
-                        success: false,
-                        message: 'Something went wrong. Try again later',
-                      });
-                    }
-
-                    if (result4) {
-                      return res.json({
-                        success: true,
-                        message: 'Downvote recorded',
-                        votes: result4.votes,
-                      });
-                    }
-                  });
-                }
-              }
-            );
-          }
+        // decrement votes by 1
+        await decrementCounter({
+          uid: post_id,
+          table: 'pr_comments',
+          field: 'votes',
+          step: 1,
         });
       }
-    });
+
+      // if upvote = 0 => downvote = 0, meaning user intends to upvote
+      if (result.length && result[0].upvote == 0 && result[0].downvote == 0) {
+        body.upvote = 1;
+        // update upvote
+        await updateUpvote(body);
+
+        // increment comment votes by 1
+        await incrementCounter({
+          uid: post_id,
+          table: 'pr_comments',
+          field: 'votes',
+          step: 1,
+        });
+      }
+
+      // now get the updated votes
+      const { votes } = await commentVotes(post_id);
+
+      return res.json({
+        success: true,
+        message: 'Upvote recorded',
+        votes,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
+  },
+
+  downvoteComment: async (req, res) => {
+    const { post_id } = req.body;
+
+    const { body } = req;
+
+    try {
+      // check if the vote is already casted
+      const [result] = await voteCheckByPostIdUserIdAndTable(body);
+
+      // when db result.length equal to zero will mean not vote record seen, thus can be recorded
+      if (!result) {
+        body.downvote = -1;
+        // add a downvote
+        await addDownvote(body);
+
+        // decrement votes for comment identified with variable post_id by 1
+        await decrementCounter({
+          uid: post_id,
+          table: 'pr_comments',
+          field: 'votes',
+          step: 1,
+        });
+      }
+
+      // if downvote = 0 => upvote = 1, meaning user now intends to revert the upvote and downvote instead
+      if (result.downvote == 0 && result.upvote == 1) {
+        body.upvote = 0;
+        body.downvote = -1;
+
+        // update downvote
+        await updateDownvote(body);
+
+        // now revert the downvote
+        await updateUpvote(body);
+
+        // decrement comment votes
+        await decrementCounter({
+          uid: post_id,
+          table: 'pr_comments',
+          field: 'votes',
+          step: 2,
+        });
+      }
+
+      // if downvote = -1 => upvote = 0, meaning user now intends to revert the downvote
+      if (result.downvote == -1 && result.upvote == 0) {
+        body.downvote = 0;
+
+        // update downvote
+        await updateDownvote(body);
+
+        // increment comment votes
+        await incrementCounter({
+          uid: post_id,
+          table: 'pr_comments',
+          field: 'votes',
+          step: 1,
+        });
+      }
+
+      // if upvote = 0 => downvote = 0, meaning user intends to downvote
+      if (result.upvote == 0 && result.downvote == 0) {
+        body.downvote = -1;
+
+        // update downvote
+        await updateDownvote(body);
+
+        // decrement comment votes
+
+        await decrementCounter({
+          uid: post_id,
+          table: 'pr_comments',
+          field: 'votes',
+          step: 1,
+        });
+      }
+
+      // now get the updated votes
+      const { votes } = await commentVotes(post_id);
+
+      // return response
+      return res.json({
+        success: true,
+        message: 'Downvote recorded',
+        votes,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
   uploadImg: (req, res) => {

@@ -6,10 +6,10 @@ const {
 } = require('../helpers/language');
 
 module.exports = {
-  languageAddValidation: (req, res, next) => {
+  languageAddValidation: async (req, res, next) => {
     let { name, added_by } = req.body;
-    //console.log(req.body.name);
-    name = name.trim();
+
+    name = name?.trim();
 
     if (!name || name.length < 1) {
       return res.json({
@@ -22,30 +22,32 @@ module.exports = {
         message: 'Author is required',
       });
     } else if (name.length > 0) {
-      checkLanguagesByName(name, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        }
-        if (result) {
+      try {
+        const results = await checkLanguagesByName(name);
+
+        if (results.length) {
           return res.json({
             success: false,
             message: 'Language name already exists',
           });
-        } else {
-          req.body.name = name;
-          next();
         }
-      });
+
+        req.body.name = name;
+        next();
+      } catch (error) {
+        console.log(error);
+
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
+      }
     }
   },
 
-  languageEditValidation: (req, res, next) => {
+  languageEditValidation: async (req, res, next) => {
     let { name, added_by, language_id } = req.body;
-    name = name.trim();
+    name = name?.trim();
 
     if (!name || name.length < 1) {
       return res.json({
@@ -59,47 +61,55 @@ module.exports = {
       });
     } else if (name.length > 0) {
       const langId = parseInt(language_id);
-      checkIfSimilarNameExist(name, langId, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        } else if (result) {
+
+      try {
+        const results = await checkIfSimilarNameExist(name, langId);
+
+        if (results.length) {
           return res.json({
             success: false,
             message: 'Language name already exists',
           });
-        } else {
-          req.body.name = name;
-          next();
         }
-      });
-    }
-  },
 
-  languageIdValidation: (req, res, next) => {
-    const langId = parseInt(req.body.language_id);
-    checkLanguageId(langId, (err, row) => {
-      if (err) {
-        console.log(err);
+        req.body.name = name;
+
+        next();
+      } catch (error) {
+        console.log(error);
+
         return res.json({
           success: false,
           message: 'Something went wrong. Try again later',
         });
-      } else if (!row) {
+      }
+    }
+  },
+
+  languageIdValidation: async (req, res, next) => {
+    const langId = parseInt(req.body.language_id);
+
+    try {
+      const row = await checkLanguageId(langId);
+
+      if (row.length === 0) {
         return res.json({
           success: false,
           message: 'Invalid language id',
         });
-      } else {
-        next();
       }
-    });
+
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  validateImg: (req, res, next) => {
+  validateImg: async (req, res, next) => {
     if (!req.files) {
       req.body.icon = '';
       return next();
@@ -139,7 +149,6 @@ module.exports = {
             message: 'Something went wrong. Try again later',
           });
         } else {
-          //console.log("File uploaded to => ", file_destination);
           req.body.icon = sanitizedFileName;
           next();
         }

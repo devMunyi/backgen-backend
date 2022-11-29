@@ -5,34 +5,35 @@ const {
   updateDbms,
   deleteDbms,
   reactivateDbms,
-  getTotalRecords,
-} = require('../models/dbms'); //require dbms models to avail its featured methods
-const { inputAvailable } = require('../../helpers/common'); //require common helper functions
+} = require('../models/dbms'); // require dbms models to avail its featured methods
+const { inputAvailable } = require('../../helpers/common'); // require common helper functions
+const { totalRecords } = require('../models/common');
 
 module.exports = {
-  addDbms: (req, res) => {
+  addDbms: async (req, res) => {
     const { body } = req;
 
-    addDbms(body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Error occured in adding a new dbms',
-        });
-      }
+    try {
+      await addDbms(body);
+
       return res.json({
         success: true,
-        data: results,
         message: 'Dbms added Successfully',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Error occured in adding a new dbms',
+      });
+    }
   },
 
-  getDbmses: (req, res) => {
+  getDbmses: async (req, res) => {
     let queryObj = {};
 
     let { where_, search_, orderby, dir, offset, rpp } = req.query;
+
     if (!where_) {
       where_ = 'status = 1';
     }
@@ -40,9 +41,7 @@ module.exports = {
     let andsearch;
     search_ = inputAvailable(search_);
     if (search_ != undefined) {
-      andsearch = `AND name LIKE '%${search_}%'`;
-    } else {
-      andsearch = '';
+      where_ += `AND name LIKE '%${search_}%'`;
     }
 
     if (!orderby) {
@@ -59,59 +58,44 @@ module.exports = {
       rpp = 10;
     }
 
-    //add data to queryObj object
+    // add data to queryObj object
     queryObj.where_ = where_;
-    queryObj.andsearch = andsearch;
-    queryObj.orderby = orderby;
-    queryObj.dir = dir;
+    queryObj.orderby = `${orderby} ${dir}`;
     queryObj.offset = parseInt(offset);
     queryObj.rpp = parseInt(rpp);
 
-    getDbmses(queryObj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'No record(s) found',
-        });
-      }
+    try {
+      const results = await getDbmses(queryObj);
 
-      if (results) {
-        results.map((result) => {
-          const icon = `/images/dbms/${result.icon}`;
-          result.icon = icon;
-        });
+      results.map((result) => {
+        const icon = `/images/dbms/${result.icon}`;
+        result.icon = icon;
+      });
 
-        //get all total records
-        getTotalRecords(queryObj, (err2, results2) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          }
+      // dbmses count
+      const { all_totals } = await totalRecords({
+        table: 'pr_dbms',
+        field: 'uid',
+        where_,
+      });
 
-          if (results2) {
-            return res.json({
-              success: true,
-              all_totals: results2.all_totals,
-              data: results,
-            });
-          }
-        });
-      }
-    });
+      return res.json({
+        success: true,
+        all_totals,
+        data: results,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  getDbmsByDbmsId: (req, res) => {
+  getDbmsByDbmsId: async (req, res) => {
     let { where_, dbms_id } = req.query;
+
     if (!where_) {
       where_ = `status = 1`;
     }
@@ -128,105 +112,102 @@ module.exports = {
       dbms_id: parseInt(dbms_id),
     };
 
-    getDbmsByDbmsId(obj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record not found',
-        });
-      }
+    try {
+      const result = await getDbmsByDbmsId(obj);
 
-      if (results) {
-        const { icon } = results;
-        results.icon = `/images/dbms/${icon}`;
+      const { icon } = result;
+      result.icon = `/images/dbms/${icon}`;
 
-        return res.json({
-          success: true,
-          data: results,
-        });
-      }
-    });
+      return res.json({
+        success: true,
+        data: result[0],
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  updateDbms: (req, res) => {
+  updateDbms: async (req, res) => {
     const { body } = req;
 
     const { dbms_id } = req.body;
-    updateDbms(parseInt(dbms_id), body, (err, results) => {
-      if (err) {
-        console.log(err);
+
+    try {
+      const result = await updateDbms(parseInt(dbms_id), body);
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
+          message: 'Record not found!',
         });
       }
 
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Failed to update dbms',
-        });
-      }
-
-      if (results) {
-        return res.json({
-          success: true,
-          message: 'Dbms updated successfully!',
-        });
-      }
-    });
+      return res.json({
+        success: true,
+        message: 'Dbms updated successfully!',
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  deleteDbms: (req, res) => {
+  deleteDbms: async (req, res) => {
     const { dbms_id } = req.body;
-    deleteDbms(parseInt(dbms_id), (err, results) => {
-      if (err) {
-        console.log(err);
+
+    try {
+      const result = await deleteDbms(parseInt(dbms_id, 10));
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
+          message: 'Record not found!',
         });
       }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record Not Found',
-        });
-      }
+
       return res.json({
         success: true,
         message: 'Dbms deleted successfully!',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  reactivateDbms: (req, res) => {
+  reactivateDbms: async (req, res) => {
     const { dbms_id } = req.body;
-    reactivateDbms(parseInt(dbms_id), (err, results) => {
-      if (err) {
-        console.log(err);
+
+    try {
+      const result = await reactivateDbms(parseInt(dbms_id, 10));
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
+          message: 'Record not found!',
         });
       }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record Not Found',
-        });
-      }
+
       return res.json({
         success: true,
         message: 'Dbms activated successfully',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 };

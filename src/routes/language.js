@@ -1,5 +1,5 @@
 const apicache = require('apicache');
-let cache = apicache.middleware;
+// let cache = apicache.middleware;
 const {
   addLanguage,
   getLanguages,
@@ -18,9 +18,9 @@ const {
 } = require('../../middlewares/language'); //avail langauage add/edit validation middlewares
 /////--------------------------End imported custom middlewares
 
-///---------------------------Routes defination
+///---------------------------Routes definition
 router.post('/add-language', validateImg, languageAddValidation, addLanguage);
-router.get('/languages', cache('1 hour'), getLanguages);
+router.get('/languages', getLanguages);
 router.get('/language', getLanguageByLanguageId);
 router.put(
   '/edit-language',

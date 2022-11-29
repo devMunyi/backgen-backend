@@ -43,10 +43,10 @@ module.exports = {
     }
   },
 
-  //email validation middleware
-  emailValidation: (req, res, next) => {
+  // email validation middleware
+  emailValidation: async (req, res, next) => {
     let { email } = req.body;
-    email = email.trim();
+    email = email?.trim();
 
     if (!email || email.length < 1) {
       return res.send({
@@ -55,35 +55,43 @@ module.exports = {
       });
     }
 
-    //check if the email exist in the database
-    checkUsersByEmail(email, (err, result) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      } else if (!result) {
+    // check if the email exist in the database
+    try {
+      const result = await checkUsersByEmail(email);
+
+      if (result.length === 0) {
         return res.json({
           success: false,
           message: 'User email not registered',
         });
-      } else {
-        req.body.email = email;
-        next();
       }
-    });
+
+      req.body.email = email;
+
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  userRegisterValidation: (req, res, next) => {
+  userRegisterValidation: async (req, res, next) => {
     let { username, fullname, email, country, password, cpassword } = req.body;
 
-    username = username.trim();
-    fullname = fullname.trim();
-    email = email.trim();
+    username = username?.trim();
+
+    fullname = fullname?.trim();
+
+    email = email?.trim();
+
     country = parseInt(country);
-    password = password.trim();
-    cpassword = cpassword.trim();
+
+    password = password?.trim();
+
+    cpassword = cpassword?.trim();
 
     if (!username || username.length < 1) {
       return res.json({
@@ -121,59 +129,56 @@ module.exports = {
         message: 'Passwords do not match.',
       });
     } else if (username.length > 0) {
-      checkUsersByUsername(username, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        } else if (result) {
+      try {
+        const usernameResult = await checkUsersByUsername(username);
+
+        if (usernameResult.length) {
           return res.json({
             success: false,
             message: 'Username already taken',
           });
-        } else {
-          if (email.length > 0) {
-            checkUsersByEmail(email, (err, result) => {
-              if (err) {
-                console.log(err);
-                return res.json({
-                  success: false,
-                  message: 'Something went wrong. Try again later',
-                });
-              } else if (result) {
-                return res.json({
-                  success: false,
-                  message: 'Email already taken',
-                });
-              } else {
-                req.body.username = username;
-                req.body.email = email;
-                req.body.password = password;
-                req.body.cpassword = cpassword;
-                next();
-              }
-            });
-          }
         }
-      });
+
+        const emailEmail = await checkUsersByEmail(email);
+
+        if (emailEmail.length) {
+          return res.json({
+            success: false,
+            message: 'Email already taken',
+          });
+        }
+
+        req.body.username = username;
+
+        req.body.email = email;
+
+        req.body.password = password;
+
+        req.body.cpassword = cpassword;
+
+        next();
+      } catch (error) {
+        console.log(error);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
+      }
     }
   },
 
-  userEditValidation: (req, res, next) => {
+  userEditValidation: async (req, res, next) => {
     let { username, fullname, email, country, password, cpassword, user_id } =
       req.body;
 
-    username = username.trim();
-    fullname = fullname.trim();
-    email = email.trim();
+    username = username?.trim();
+    fullname = fullname?.trim();
+    email = email?.trim();
     country = parseInt(country);
-    password = password.trim();
-    cpassword = cpassword.trim();
+    password = password?.trim();
+    cpassword = cpassword?.trim();
+    user_id = parseInt(user_id);
 
-    userid = parseInt(user_id);
-    //console.log(userid);
     if (!username || username.length < 1) {
       return res.json({
         success: false,
@@ -210,47 +215,47 @@ module.exports = {
         message: 'Passwords do not match.',
       });
     } else if (username.length > 0) {
-      checkIfSimilarUsernameExist(username, userid, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        } else if (result) {
+      try {
+        const usernameCheckResult = await checkIfSimilarUsernameExist(
+          username,
+          user_id
+        );
+
+        if (usernameCheckResult.length) {
           return res.json({
             success: false,
             message: 'Username already taken',
           });
-        } else if (username.length > 0) {
-          checkIfSimilarEmailExist(email, userid, (err, result) => {
-            if (err) {
-              console.log(err);
-              return res.json({
-                success: false,
-                message: 'Something went wrong. Try again later',
-              });
-            } else if (result) {
-              return res.json({
-                success: false,
-                message: 'Email already taken',
-              });
-            } else {
-              req.body.username = username;
-              req.body.email = email;
-              req.body.password = password;
-              req.body.cpassword = cpassword;
-              next();
-            }
+        }
+
+        const emailCheckResult = await checkIfSimilarEmailExist(email, user_id);
+
+        if (emailCheckResult.length) {
+          return res.json({
+            success: false,
+            message: 'Email already taken',
           });
         }
-      });
+
+        req.body.username = username;
+        req.body.email = email;
+        req.body.password = password;
+        req.body.cpassword = cpassword;
+
+        next();
+      } catch (error) {
+        console.log(error);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
+      }
     }
   },
 
-  validateUserLogin: (req, res, next) => {
+  validateUserLogin: async (req, res, next) => {
     let { username, password } = req.body;
-    //console.log("REQUEST BODY => ", req.body);
+
     if (username.length < 1) {
       return res.send({
         success: false,
@@ -262,33 +267,38 @@ module.exports = {
         message: 'Password is required',
       });
     } else {
-      getUserByUsernameOrByEmail(username, (err, user) => {
-        if (err) {
-          console.log(err); //when some errors occur
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        }
-        if (!user) {
+      //
+
+      try {
+        const user = await getUserByUsernameOrByEmail(username);
+
+        if (user.length === 0) {
           return res.json({
             success: false,
             message: 'Invalid username',
           });
         }
-        //invalid password
-        if (!compareSync(password, user.password)) {
+
+        // validate password
+        if (!compareSync(password, user[0].password)) {
           return res.json({
             success: false,
             message: 'Incorrect password',
           });
         } else {
-          let { password, ...rest } = user;
+          let { password, ...rest } = user[0];
           user = rest;
           req.user = user;
+
           next();
         }
-      });
+      } catch (error) {
+        console.log(error); // when some errors occur
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
+      }
     }
   },
 };

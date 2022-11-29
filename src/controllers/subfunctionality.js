@@ -1,3 +1,4 @@
+// require subfunctionality models to avail its featured methods
 const {
   addSubfunc,
   getSubfuncBySubfuncId,
@@ -5,44 +6,44 @@ const {
   updateSubfunc,
   deleteSubfunc,
   reactivateSubfunc,
-  getTotalRecords,
-} = require('../models/subfunctionality'); //require subfunctionality models to avail its featured methods
-const { inputAvailable } = require('../../helpers/common'); //require helper functions
+} = require('../models/subfunctionality');
+
+const { inputAvailable, parseToInt } = require('../../helpers/common');
+
+const { totalRecords } = require('../models/common');
 
 module.exports = {
-  addSubfunc: (req, res) => {
+  addSubfunc: async (req, res) => {
     const { body } = req;
 
-    addSubfunc(body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Error occured in adding a new sub-functionality',
-        });
-      }
+    try {
+      await addSubfunc(body);
+
       return res.json({
         success: true,
-        data: results,
         message: 'Sub-functionality added Successfully',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Error occured in adding a new sub-functionality',
+      });
+    }
   },
 
-  getSubfuncs: (req, res) => {
+  getSubfuncs: async (req, res) => {
     let queryObj = {};
+
     let { where_, search_, orderby, dir, offset, rpp } = req.query;
 
     if (!where_) {
       where_ = 'sf.status = 1';
     }
 
-    let andsearch;
     search_ = inputAvailable(search_);
     if (search_ != undefined) {
-      andsearch = `AND sf.name LIKE '%${search_}%'`;
-    } else {
-      andsearch = '';
+      where_ += `AND sf.name LIKE '%${search_}%'`;
     }
 
     if (!orderby) {
@@ -59,54 +60,39 @@ module.exports = {
       rpp = 10;
     }
 
-    //add data to queryObj object
+    // add data to queryObj object
     queryObj.where_ = where_;
-    queryObj.andsearch = andsearch;
-    queryObj.orderby = orderby;
-    queryObj.dir = dir;
+    queryObj.orderby = `${orderby} ${dir}`;
     queryObj.offset = parseInt(offset);
     queryObj.rpp = parseInt(rpp);
 
-    getSubfuncs(queryObj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        console.log(queryObj);
-        console.log(results);
-        return res.json({
-          success: false,
-          message: 'No record(s) found',
-        });
-      }
+    try {
+      const results = await getSubfuncs(queryObj);
 
-      if (results) {
-        getTotalRecords(queryObj, (err2, result2) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          }
-          if (result2) {
-            return res.json({
-              success: true,
-              all_totals: result2.all_totals,
-              data: results,
-            });
-          }
-        });
-      }
-    });
+      // get total subfunctionalities
+      const { all_totals } = totalRecords({
+        table: 'pr_subfunctions sf',
+        field: 'sf.uid',
+        where_,
+      });
+
+      return res.json({
+        success: true,
+        all_totals,
+        data: results,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  getSubfuncBySubfuncId: (req, res) => {
+  getSubfuncBySubfuncId: async (req, res) => {
     let { where_, subfun_id } = req.query;
+
     if (!where_) {
       where_ = `sf.status = 1`;
     }
@@ -120,51 +106,39 @@ module.exports = {
 
     let obj = {
       where_,
-      subfun_id: parseInt(subfun_id),
+      subfun_id: parseToInt(subfun_id),
     };
 
-    getSubfuncBySubfuncId(obj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record not found',
-        });
-      }
+    try {
+      const result = await getSubfuncBySubfuncId(obj);
 
-      if (results) {
-        return res.json({
-          success: true,
-          data: results,
-        });
-      }
-    });
+      return res.json({
+        success: true,
+        data: result[0],
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  updateSubfunc: (req, res) => {
+  updateSubfunc: async (req, res) => {
     const { body } = req;
 
-    const { subfun_id } = req.body;
+    let { subfun_id } = req.body;
 
-    updateSubfunc(parseInt(subfun_id), body, (err, results) => {
-      if (err) {
-        console.log(err);
+    subfun_id = parseToInt(subfun_id);
+
+    try {
+      const result = await updateSubfunc(subfun_id, body);
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Failed to update sub-functionality',
+          message: 'Record not found!',
         });
       }
 
@@ -172,23 +146,25 @@ module.exports = {
         success: true,
         message: 'Sub-functionality updated successfully',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  deleteSubfunc: (req, res) => {
+  deleteSubfunc: async (req, res) => {
     const { subfun_id } = req.body;
-    deleteSubfunc(parseInt(subfun_id), (err, results) => {
-      if (err) {
-        console.log(err);
+
+    try {
+      const result = await deleteSubfunc(parseInt(subfun_id));
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record Not Found',
+          message: 'Record not found!',
         });
       }
 
@@ -196,23 +172,25 @@ module.exports = {
         success: true,
         message: 'Sub-functionality deleted successfully',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  reactivateSubfunc: (req, res) => {
+  reactivateSubfunc: async (req, res) => {
     const { subfun_id } = req.body;
-    reactivateSubfunc(parseInt(subfun_id), (err, results) => {
-      if (err) {
-        console.log(err);
+
+    try {
+      const result = await reactivateSubfunc(parseInt(subfun_id));
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record Not Found',
+          message: 'Record not found!',
         });
       }
 
@@ -220,6 +198,12 @@ module.exports = {
         success: true,
         message: 'Sub-functionality activated successfully',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 };

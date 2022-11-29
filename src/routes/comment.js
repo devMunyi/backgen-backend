@@ -23,7 +23,7 @@ const {
 
 ////----Begin routes defination
 router.post('/add-comment', checkToken, commentAddValidation, addComment);
-router.get('/comments', cache('5 minutes'), getComments);
+router.get('/comments', getComments);
 router.get('/comment', getCommentByCommentId);
 router.put('/edit-comment', checkToken, commentEditValidation, updateComment);
 router.delete('/del-comment', checkToken, deleteComment);

@@ -1,5 +1,5 @@
 const apicache = require('apicache');
-let cache = apicache.middleware;
+// let cache = apicache.middleware;
 const {
   addSubfunc,
   getSubfuncs,
@@ -19,7 +19,7 @@ const {
 
 ////-------------------------------Begin routes defination
 router.post('/add-subfunctionality', subfunAddValidation, addSubfunc);
-router.get('/subfunctionalities', cache('1 hour'), getSubfuncs);
+router.get('/subfunctionalities', getSubfuncs);
 router.get('/subfunctionality', getSubfuncBySubfuncId);
 router.put('/edit-subfunctionality', subfunEditValidation, updateSubfunc);
 router.delete('/del-subfunctionality', deleteSubfunc);

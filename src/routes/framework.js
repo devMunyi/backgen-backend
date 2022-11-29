@@ -1,5 +1,5 @@
 const apicache = require('apicache');
-let cache = apicache.middleware;
+// let cache = apicache.middleware;
 const {
   addFramework,
   getFrameworks,
@@ -25,7 +25,7 @@ router.post(
   frameworkAddValidation,
   addFramework
 );
-router.get('/frameworks', cache('1 hour'), getFrameworks);
+router.get('/frameworks', getFrameworks);
 router.get('/framework', getFrameworkByFrameworkId);
 router.put(
   '/edit-framework',

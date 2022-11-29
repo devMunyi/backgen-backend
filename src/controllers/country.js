@@ -7,61 +7,61 @@ const {
 } = require('../models/country'); //require country models to avail its featured methods
 
 module.exports = {
-  addCountry: (req, res) => {
+  addCountry: async (req, res) => {
     const { body } = req;
-    //console.log(body);
-    addCountry(body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
+
+    try {
+      await addCountry(body);
+
       return res.json({
         success: true,
-        data: results,
         message: 'Country added Successfully',
       });
-    });
-  },
-  getCountryByCountryId: (req, res) => {
-    const { country_id } = req.query;
-
-    if (!country_id) {
+    } catch (error) {
+      console.log(error);
       return res.json({
         success: false,
         message: 'Something went wrong. Try again later',
       });
     }
+  },
 
-    getCountryByCountryId(parseInt(country_id), (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
+  getCountryByCountryId: async (req, res) => {
+    const { country_id } = req.query;
+
+    if (!country_id) {
+      return res.json({
+        success: false,
+        message: 'Country Id is required',
+      });
+    }
+
+    try {
+      const results = await getCountryByCountryId(parseInt(country_id));
+
+      if (results.length === 0) {
         return res.json({
           success: false,
           message: 'Record not found',
         });
       }
 
-      if (results) {
-        const { flag } = results;
-        results.flag = `images/country/${flag}`;
+      const { flag } = results;
+      results.flag = `images/country/${flag}`;
 
-        return res.json({
-          success: true,
-          data: results,
-        });
-      }
-    });
+      return res.json({
+        success: true,
+        data: results[0],
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
-  getCountries: (req, res) => {
+  getCountries: async (req, res) => {
     let queryObj = {};
 
     let { status, orderby, dir, offset, rpp } = req.query;
@@ -69,6 +69,9 @@ module.exports = {
     if (!status) {
       status = 1;
     }
+
+    let where_ = `status = ${status}`;
+
     if (!orderby) {
       orderby = 'name';
     }
@@ -83,58 +86,52 @@ module.exports = {
       rpp = 10;
     }
 
-    //add data to queryObj object
-    queryObj.status = parseInt(status);
-    queryObj.orderby = orderby;
-    queryObj.dir = dir;
+    // add data to queryObj object
+    queryObj.orderby = `${orderby} ${dir}`;
     queryObj.offset = parseInt(offset);
     queryObj.rpp = parseInt(rpp);
-    getCountries(queryObj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
+    queryObj.where_ = where_;
+
+    try {
+      const results = await getCountries(queryObj);
+
+      if (results.length === 0) {
         return res.json({
           success: false,
           message: 'No record(s) found',
         });
       }
 
-      if (results) {
-        results.map((result) => {
-          const flag = `images/country/${result.flag}`;
-          result.flag = flag;
-          //console.log(result);
-        });
+      results.map((result) => {
+        const flag = `images/country/${result.flag}`;
+        result.flag = flag;
+      });
 
-        return res.json({
-          success: true,
-          data: results,
-        });
-      }
-    });
+      return res.json({
+        success: true,
+        data: results,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
-  updateCountry: (req, res) => {
+
+  updateCountry: async (req, res) => {
     const { body } = req;
 
     const { country_id } = req.body;
-    updateCountry(parseInt(country_id), body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
 
-      if (!results) {
+    try {
+      const result = await updateCountry(parseInt(country_id), body);
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Failed to update country',
+          message: 'Record to update not found!',
         });
       }
 
@@ -142,28 +139,38 @@ module.exports = {
         success: true,
         message: 'Country updated successfully!',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
-  deleteCountry: (req, res) => {
+
+  deleteCountry: async (req, res) => {
     const { country_id } = req.body;
-    deleteCountry(parseInt(country_id), (err, results) => {
-      if (err) {
-        console.log(err);
+
+    try {
+      const result = await deleteCountry(parseInt(country_id));
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
+          message: 'Record to delete not found!',
         });
       }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record Not Found',
-        });
-      }
+
       return res.json({
         success: true,
         message: 'Country deleted successfully!',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 };

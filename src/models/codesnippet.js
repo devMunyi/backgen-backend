@@ -1,24 +1,21 @@
 const pool = require('../../config/db.config'); //require database configurations for CRUD operations
-
 module.exports = {
-  addCodeSnippet: (
-    {
-      func_id,
-      subfunc_id,
-      language_id,
-      framework_id,
-      lang_impl_type_id,
-      user_impl_type_id,
-      title,
-      row_code,
-      file_extension,
-      instructions,
-      added_by,
-    },
-    callback
-  ) => {
-    pool.query(
-      `INSERT INTO
+  addCodeSnippet: async ({
+    func_id,
+    subfunc_id,
+    language_id,
+    framework_id,
+    lang_impl_type_id,
+    user_impl_type_id,
+    title,
+    row_code,
+    file_extension,
+    instructions,
+    added_by,
+  }) => {
+    try {
+      const result = await pool.query(
+        `INSERT INTO
         pr_code_snippets(
           title,
           row_code,
@@ -34,29 +31,29 @@ module.exports = {
         )
       VALUES
       (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        title,
-        row_code,
-        file_extension,
-        func_id,
-        subfunc_id,
-        language_id,
-        framework_id,
-        lang_impl_type_id,
-        user_impl_type_id,
-        instructions,
-        added_by,
-      ],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
+        [
+          title,
+          row_code,
+          file_extension,
+          func_id,
+          subfunc_id,
+          language_id,
+          framework_id,
+          lang_impl_type_id,
+          user_impl_type_id,
+          instructions,
+          added_by,
+        ]
+      );
+
+      return result[0];
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   },
 
-  updateCodeSnippet: (
+  updateCodeSnippet: async (
     id,
     {
       func_id,
@@ -69,367 +66,345 @@ module.exports = {
       row_code,
       file_extension,
       instructions,
-    },
-    callback
+    }
   ) => {
-    pool.query(
-      `UPDATE
-        pr_code_snippets
-      SET
-        title = ?,
-        row_code = ?,
-        file_extension = ?,
-        func_id = ?,
-        subfunc_id = ?,
-        language_id = ?,
-        framework_id = ?,
-        lang_impl_type_id = ?,
-        user_impl_type_id = ?,
-        instructions = ?
-      WHERE
-        uid = ?`,
-      [
-        title,
-        row_code,
-        file_extension,
-        func_id,
-        subfunc_id,
-        language_id,
-        framework_id,
-        lang_impl_type_id,
-        user_impl_type_id,
-        instructions,
-        id,
-      ],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
+    try {
+      const result = await pool.query(
+        `UPDATE
+          pr_code_snippets
+        SET
+          title = ?,
+          row_code = ?,
+          file_extension = ?,
+          func_id = ?,
+          subfunc_id = ?,
+          language_id = ?,
+          framework_id = ?,
+          lang_impl_type_id = ?,
+          user_impl_type_id = ?,
+          instructions = ?
+        WHERE
+          uid = ?`,
+        [
+          title,
+          row_code,
+          file_extension,
+          func_id,
+          subfunc_id,
+          language_id,
+          framework_id,
+          lang_impl_type_id,
+          user_impl_type_id,
+          instructions,
+          id,
+        ]
+      );
+
+      return result[0];
+    } catch (error) {
+      throw error;
+    }
   },
 
-  getCodeSnippets: ({ where_, offset, rpp, orderby }, callback) => {
-    pool.query(
-      `SELECT
-        c.uid,
-        c.title,
-        c.func_id,
-        fn.name AS 'fun_name',
-        c.subfunc_id,
-        sb.name AS 'subfun_name',
-        c.language_id,
-        l.name AS 'language_name',
-        c.framework_id,
-        lit.title AS 'language_implementation_type',
-        uit.title AS 'user_implementation_type',
-        uit.uid AS 'codestyle_id',
-        uit.title AS 'codestyle_name',
-        f.name AS 'framework',
-        c.status,
-        c.added_date,
-        c.views
-      FROM
-        pr_code_snippets c
-      LEFT JOIN  pr_language_implementation_type lit
-      ON c.lang_impl_type_id = lit.uid
-      LEFT JOIN  pr_user_implementation_type uit
-      ON c.user_impl_type_id = uit.uid
-      LEFT JOIN  pr_frameworks f
-      ON c.framework_id = f.uid
-      LEFT JOIN  pr_languages l
-      ON c.language_id = l.uid
-      LEFT JOIN pr_users u ON c.added_by = u.uid
-      LEFT JOIN  pr_functionalities fn
-      ON c.func_id = fn.uid
-      LEFT JOIN pr_subfunctions sb
-      ON c.subfunc_id = sb.uid
-      WHERE
-        ${where_}
-      ORDER BY ${orderby}
-      LIMIT
-        ?, ?`,
-      [offset, rpp],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
-  },
-
-  getRelatedSolns: ({ where_, offset, rpp }, callback) => {
-    pool.query(
-      `SELECT
-        c.uid,
-        c.title,
-        c.func_id,
-        c.subfunc_id,
-        c.language_id,
-        l.name AS 'language_name',
-        c.framework_id,
-        lit.title AS 'language_implementation_type',
-        uit.title AS 'user_implementation_type',
-        uit.uid AS 'codestyle_id',
-        uit.title AS 'codestyle_name',
-        f.name AS 'framework',
-        c.views
-      FROM
-        pr_code_snippets c
-      LEFT JOIN  pr_language_implementation_type lit
-      ON c.lang_impl_type_id = lit.uid
-      LEFT JOIN  pr_user_implementation_type uit
-      ON c.user_impl_type_id = uit.uid
-      LEFT JOIN  pr_frameworks f
-      ON c.framework_id = f.uid
-      LEFT JOIN  pr_languages l
-      ON c.language_id = l.uid
-      LEFT JOIN pr_users u ON c.added_by = u.uid
-      WHERE
-        ${where_}
-      ORDER BY
-        c.uid DESC
-      LIMIT
-        ?, ?`,
-      [offset, rpp],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
-  },
-
-  getCodeSnippetByCodeSnippetId: (where_, callback) => {
-    pool.query(
-      `SELECT
-        c.uid,
-        c.title,
-        c.row_code,
-        c.file_extension,
-        c.func_id,
-        fn.name AS 'fun_name',
-        c.subfunc_id,
-        sb.name AS 'subfun_name',
-        c.language_id,
-        l.name AS 'language_name',
-        c.framework_id,
-        f.name AS 'framework_name',
-        c.instructions,
-        c.added_by,
-        u.fullname,
-        u.username,
-        u.auth_provider AS 'provider',
-        lit.title AS 'language_implementation_type',
-        uit.title AS 'user_implementation_type',
-        uit.uid AS 'codestyle_id',
-        uit.title AS 'codestyle_name',
-        c.added_date,
-        c.total_comments,
-        c.views
-      FROM
-        pr_code_snippets c
+  getCodeSnippets: async ({ where_, offset, rpp, orderby }) => {
+    try {
+      const result = await pool.query(
+        `SELECT
+          c.uid,
+          c.title,
+          c.func_id,
+          fn.name AS 'fun_name',
+          c.subfunc_id,
+          sb.name AS 'subfun_name',
+          c.language_id,
+          l.name AS 'language_name',
+          c.framework_id,
+          lit.title AS 'language_implementation_type',
+          uit.title AS 'user_implementation_type',
+          uit.uid AS 'codestyle_id',
+          uit.title AS 'codestyle_name',
+          f.name AS 'framework',
+          c.status,
+          c.added_date,
+          c.views
+        FROM
+          pr_code_snippets c
         LEFT JOIN  pr_language_implementation_type lit
-      ON c.lang_impl_type_id = lit.uid
+        ON c.lang_impl_type_id = lit.uid
         LEFT JOIN  pr_user_implementation_type uit
-      ON c.user_impl_type_id = uit.uid
-        LEFT JOIN pr_users u ON c.added_by = u.uid
-        LEFT JOIN  pr_languages l
-      ON c.language_id = l.uid
+        ON c.user_impl_type_id = uit.uid
         LEFT JOIN  pr_frameworks f
-      ON c.framework_id = f.uid
-      LEFT JOIN  pr_functionalities fn
-      ON c.func_id = fn.uid
-      LEFT JOIN pr_subfunctions sb
-      ON c.subfunc_id = sb.uid
-      WHERE ${where_}`,
-      [],
-      (error, results) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results[0]);
-      }
-    );
-  },
-
-  searchCodesnippet: ({ where_, offset, rpp, orderby }, callback) => {
-    pool.query(
-      `SELECT
-        c.uid,
-        c.title,
-        c.func_id,
-        fn.name AS 'fun_name',
-        c.subfunc_id,
-        sb.name AS 'subfun_name',
-        c.language_id,
-        l.name AS 'language_name',
-        c.framework_id,
-        f.name AS 'framework_name',
-        c.added_by,
-        c.added_date,
-        u.fullname,
-        u.username,
-        u.auth_provider AS 'provider',
-        lit.title AS 'language_implementation_type',
-        uit.title AS 'user_implementation_type',
-        uit.uid AS 'codestyle_id'
-      FROM
-        pr_code_snippets c
-        LEFT JOIN  pr_language_implementation_type lit
-      ON c.lang_impl_type_id = lit.uid
-        LEFT JOIN  pr_user_implementation_type uit
-      ON c.user_impl_type_id = uit.uid
-        LEFT JOIN pr_users u ON c.added_by = u.uid
+        ON c.framework_id = f.uid
         LEFT JOIN  pr_languages l
-      ON c.language_id = l.uid
-      LEFT JOIN  pr_frameworks f
-      ON c.framework_id = f.uid
-      LEFT JOIN  pr_functionalities fn
-      ON c.func_id = fn.uid
-      LEFT JOIN pr_subfunctions sb
-      ON c.subfunc_id = sb.uid
-      WHERE ${where_} ORDER BY ${orderby}
-      LIMIT
-        ?, ?`,
-      [offset, rpp],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        //console.log(results);
-        return callback(null, results);
-      }
-    );
+        ON c.language_id = l.uid
+        LEFT JOIN pr_users u ON c.added_by = u.uid
+        LEFT JOIN  pr_functionalities fn
+        ON c.func_id = fn.uid
+        LEFT JOIN pr_subfunctions sb
+        ON c.subfunc_id = sb.uid
+        WHERE
+          ${where_}
+        ORDER BY ${orderby}
+        LIMIT
+          ?, ?`,
+        [offset, rpp]
+      );
+      return result[0];
+    } catch (error) {
+      throw error;
+    }
   },
 
-  getTotalRecords: ({ where_ }, callback) => {
-    pool.query(
-      `SELECT
-        COUNT(c.uid) AS all_totals
-      FROM
-        pr_code_snippets c
-      WHERE
-        ${where_}`,
-      [],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results[0]);
-      }
-    );
+  getRelatedSolns: async ({ where_, offset, rpp, orderby = 'c.uid DESC' }) => {
+    try {
+      const results = await pool.query(
+        `SELECT
+          c.uid,
+          c.title,
+          c.func_id,
+          c.subfunc_id,
+          c.language_id,
+          l.name AS 'language_name',
+          c.framework_id,
+          lit.title AS 'language_implementation_type',
+          uit.title AS 'user_implementation_type',
+          uit.uid AS 'codestyle_id',
+          uit.title AS 'codestyle_name',
+          f.name AS 'framework',
+          c.views
+        FROM
+          pr_code_snippets c
+        LEFT JOIN  pr_language_implementation_type lit
+        ON c.lang_impl_type_id = lit.uid
+        LEFT JOIN  pr_user_implementation_type uit
+        ON c.user_impl_type_id = uit.uid
+        LEFT JOIN  pr_frameworks f
+        ON c.framework_id = f.uid
+        LEFT JOIN  pr_languages l
+        ON c.language_id = l.uid
+        LEFT JOIN pr_users u ON c.added_by = u.uid
+        WHERE
+          ${where_}
+        ORDER BY
+          ${orderby}
+        LIMIT
+          ?, ?`,
+        [offset, rpp]
+      );
+
+      return results[0];
+    } catch (error) {
+      throw error;
+    }
   },
 
-  searchTotals: ({ where_ }, callback) => {
-    pool.query(
-      `SELECT
-        count(c.uid) AS "search_totals"
-      FROM
-        pr_code_snippets c
-      WHERE ${where_}`,
-      [],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        //console.log(results);
-        return callback(null, results[0]);
-      }
-    );
+  getCodeSnippetByCodeSnippetId: async (where_) => {
+    try {
+      const result = await pool.query(
+        `SELECT
+          c.uid,
+          c.title,
+          c.row_code,
+          c.file_extension,
+          c.func_id,
+          fn.name AS 'fun_name',
+          c.subfunc_id,
+          sb.name AS 'subfun_name',
+          c.language_id,
+          l.name AS 'language_name',
+          c.framework_id,
+          f.name AS 'framework_name',
+          c.instructions,
+          c.added_by,
+          u.fullname,
+          u.username,
+          u.auth_provider AS 'provider',
+          lit.title AS 'language_implementation_type',
+          uit.title AS 'user_implementation_type',
+          uit.uid AS 'codestyle_id',
+          uit.title AS 'codestyle_name',
+          c.added_date,
+          c.total_comments,
+          c.views
+        FROM
+          pr_code_snippets c
+          LEFT JOIN  pr_language_implementation_type lit
+        ON c.lang_impl_type_id = lit.uid
+          LEFT JOIN  pr_user_implementation_type uit
+        ON c.user_impl_type_id = uit.uid
+          LEFT JOIN pr_users u 
+        ON c.added_by = u.uid
+          LEFT JOIN  pr_languages l
+        ON c.language_id = l.uid
+          LEFT JOIN  pr_frameworks f
+        ON c.framework_id = f.uid
+          LEFT JOIN  pr_functionalities fn
+        ON c.func_id = fn.uid
+          LEFT JOIN pr_subfunctions sb
+        ON c.subfunc_id = sb.uid
+        WHERE ${where_}`,
+        []
+      );
+
+      return result[0];
+    } catch (error) {
+      throw error;
+    }
   },
 
-  deleteCodeSnippet: (id, callback) => {
-    pool.query(
-      `UPDATE
-        pr_code_snippets
-      SET
-        status = ?
-      WHERE
-        uid = ?`,
-      [3, id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        //console.log("delete response => ", results[0]);
-        return callback(null, results);
-      }
-    );
+  getRowCodeOnly: async (uid) => {
+    try {
+      const results = await pool.query(
+        `SELECT
+          row_code
+        FROM
+          pr_code_snippets
+        WHERE
+          uid = ?`,
+        [uid]
+      );
+
+      return results[0][0];
+    } catch (error) {
+      throw error;
+    }
   },
 
-  incrementViewsTotal: (code_snippet_id, callback) => {
-    pool.query(
-      `UPDATE
-        pr_code_snippets
-      SET
-      views = views + 1
-      WHERE
-        uid = ?`,
-      [code_snippet_id],
-      (error, results) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
+  searchCodesnippet: async ({ where_, offset, rpp, orderby }) => {
+    try {
+      const results = await pool.query(
+        `SELECT
+          c.uid,
+          c.title,
+          c.func_id,
+          fn.name AS 'fun_name',
+          c.subfunc_id,
+          sb.name AS 'subfun_name',
+          c.language_id,
+          l.name AS 'language_name',
+          c.framework_id,
+          f.name AS 'framework_name',
+          c.added_by,
+          c.added_date,
+          u.fullname,
+          u.username,
+          u.auth_provider AS 'provider',
+          lit.title AS 'language_implementation_type',
+          uit.title AS 'user_implementation_type',
+          uit.uid AS 'codestyle_id'
+        FROM
+          pr_code_snippets c
+          LEFT JOIN  pr_language_implementation_type lit
+        ON c.lang_impl_type_id = lit.uid
+          LEFT JOIN  pr_user_implementation_type uit
+        ON c.user_impl_type_id = uit.uid
+          LEFT JOIN pr_users u ON c.added_by = u.uid
+          LEFT JOIN  pr_languages l
+        ON c.language_id = l.uid
+        LEFT JOIN  pr_frameworks f
+        ON c.framework_id = f.uid
+        LEFT JOIN  pr_functionalities fn
+        ON c.func_id = fn.uid
+        LEFT JOIN pr_subfunctions sb
+        ON c.subfunc_id = sb.uid
+        WHERE ${where_} ORDER BY ${orderby}
+        LIMIT
+          ?, ?`,
+        [offset, rpp]
+      );
+
+      return results[0];
+    } catch (error) {
+      throw error;
+    }
   },
 
-  incrementCommentsTotal: (code_snippet_id, callback) => {
-    pool.query(
-      `UPDATE
-        pr_code_snippets
-      SET
-      total_comments = total_comments + 1
-      WHERE
-        uid = ?`,
-      [code_snippet_id],
-      (error, results) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
+  deleteCodeSnippet: async (id) => {
+    try {
+      const results = await pool.query(
+        `UPDATE
+          pr_code_snippets
+        SET
+          status = ?
+        WHERE
+          uid = ?`,
+        [3, id]
+      );
+
+      return results[0];
+    } catch (error) {
+      throw error;
+    }
   },
 
-  decrementCommentsTotal: (code_snippet_id, callback) => {
-    pool.query(
-      `UPDATE
-        pr_code_snippets
-      SET
-      total_comments = total_comments - 1
-      WHERE
-        uid = ?`,
-      [code_snippet_id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
+  reactivateCode: async (id) => {
+    try {
+      const results = await pool.query(
+        `UPDATE
+          pr_code_snippets
+        SET
+          status = ?
+        WHERE
+          uid = ?`,
+        [1, id]
+      );
+
+      return results[0];
+    } catch (error) {
+      throw error;
+    }
   },
 
-  reactivateCode: (id, callback) => {
-    pool.query(
-      `UPDATE
-        pr_code_snippets
-      SET
-        status = ?
-      WHERE
-        uid = ?`,
-      [1, id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
+  // codesnippets archives
+  archiveCode: async ({
+    codesnippet_id,
+    title,
+    archive_row_code,
+    archived_by,
+  }) => {
+    try {
+      const results = await pool.query(
+        `INSERT INTO
+        pr_codesnippets_archive(
+          codesnippet_id,
+          title,
+          archive_row_code,
+          archived_by
+          )
+        VALUES
+        (?, ?, ?, ?)`,
+        [codesnippet_id, title, archive_row_code, archived_by]
+      );
+
+      return results[0];
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // get archived particular codesnippets
+  getCodeArchives: async ({ where_, orderby = 'uid', offset, rpp }) => {
+    try {
+      const results = await pool.query(
+        `SELECT
+          uid,
+          codesnippet_id,
+          title,
+          archive_row_code,	
+          archived_by
+        FROM
+        pr_codesnippets_archive 
+        WHERE
+          ${where_}
+        ORDER BY ${orderby}
+        LIMIT
+          ?, ?`,
+        [offset, rpp]
+      );
+
+      return results[0];
+    } catch (error) {
+      throw error;
+    }
   },
 };

@@ -6,9 +6,9 @@ const {
 } = require('../helpers/functionality');
 
 module.exports = {
-  funAddValidation: (req, res, next) => {
+  funAddValidation: async (req, res, next) => {
     let { name, added_by } = req.body;
-    name = name.trim();
+    name = name?.trim();
 
     if (!name || name.length < 1) {
       return res.json({
@@ -21,80 +21,88 @@ module.exports = {
         message: 'Author is required',
       });
     } else if (name.length > 0) {
-      checkFunsByName(name, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        }
-        if (result) {
+      try {
+        const result = await checkFunsByName(name);
+
+        if (result.length) {
           return res.json({
             success: false,
             message: 'Functionality name already exists',
           });
-        } else {
-          req.body.name = name;
-          next();
         }
-      });
-    }
-  },
 
-  funEditValidation: (req, res, next) => {
-    let { name, added_by, func_id } = req.body;
-    name = name.trim();
+        req.body.name = name;
 
-    if (!name || name.length < 1) {
-      return res.json({
-        success: false,
-        message: 'Functionality name is required',
-      });
-    } else if (!added_by) {
-      return res.json({
-        success: false,
-        message: 'Author is required',
-      });
-    } else if (name.length > 0) {
-      checkIfSimilarNameExist(name, func_id, (err, result) => {
-        if (err) {
-          console.log(err);
-          return res.json({
-            success: false,
-            message: 'Something went wrong. Try again later',
-          });
-        } else if (result) {
-          return res.json({
-            success: false,
-            message: 'Functionality name already exists',
-          });
-        } else {
-          req.body.name = name;
-          next();
-        }
-      });
-    }
-  },
-
-  funIdValidation: (req, res, next) => {
-    const funId = parseInt(req.body.func_id);
-    checkFunId(funId, (err, row) => {
-      if (err) {
-        console.log(err);
+        next();
+      } catch (error) {
+        console.log(error);
         return res.json({
           success: false,
           message: 'Something went wrong. Try again later',
         });
-      } else if (!row) {
+      }
+    }
+  },
+
+  funEditValidation: async (req, res, next) => {
+    let { name, added_by, func_id } = req.body;
+    name = name?.trim();
+
+    if (!name || name.length < 1) {
+      return res.json({
+        success: false,
+        message: 'Functionality name is required',
+      });
+    } else if (!added_by) {
+      return res.json({
+        success: false,
+        message: 'Author is required',
+      });
+    } else if (name.length > 0) {
+      try {
+        const result = await checkIfSimilarNameExist(name, func_id);
+
+        if (result.length) {
+          return res.json({
+            success: false,
+            message: 'Functionality name already exists',
+          });
+        }
+
+        req.body.name = name;
+
+        next();
+      } catch (error) {
+        console.log(error);
+        return res.json({
+          success: false,
+          message: 'Something went wrong. Try again later',
+        });
+      }
+    }
+  },
+
+  funIdValidation: async (req, res, next) => {
+    const funId = parseInt(req.body.func_id);
+
+    try {
+      const result = await checkFunId(funId);
+
+      if (result.length === 0) {
         return res.json({
           success: false,
           message: 'Invalid functionality id',
         });
-      } else {
-        next();
       }
-    });
+
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
   validateImg: (req, res, next) => {
     if (!req.files) {
@@ -136,8 +144,8 @@ module.exports = {
             message: 'Something went wrong. Try again later',
           });
         } else {
-          //console.log("File uploaded to => ", file_destination);
           req.body.icon = sanitizedFileName;
+
           next();
         }
       });

@@ -4,32 +4,35 @@ const {
   getLanguages,
   updateLanguage,
   deleteLanguage,
-  getTotalRecords,
   reactivateLanguage,
 } = require('../models/language'); //require language models to avail its featured methods
 const { inputAvailable } = require('../../helpers/common'); //require common helper functions
 
+const { totalRecords } = require('../models/common');
+
 module.exports = {
-  addLanguage: (req, res) => {
+  addLanguage: async (req, res) => {
     const { body } = req;
 
-    addLanguage(body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Error occured in adding a new language',
-        });
-      }
+    try {
+      await addLanguage(body);
+
       return res.json({
         success: true,
-        data: results,
         message: 'Language added Successfully',
       });
-    });
+    } catch (error) {
+      console.log(error);
+
+      return res.json({
+        success: false,
+        message: 'Error occured in adding a new language',
+      });
+    }
   },
 
-  getLanguages: (req, res) => {
+  getLanguages: async (req, res) => {
+    // initialize an empty object
     let queryObj = {};
 
     let { where_, search_, orderby, dir, offset, rpp } = req.query;
@@ -59,56 +62,43 @@ module.exports = {
       rpp = 10;
     }
 
-    //add data to queryObj object
+    // add data to queryObj object
     queryObj.where_ = where_;
     queryObj.andsearch = andsearch;
-    queryObj.orderby = orderby;
-    queryObj.dir = dir;
+    queryObj.orderby = `${orderby} ${dir}`;
     queryObj.offset = parseInt(offset);
     queryObj.rpp = parseInt(rpp);
-    getLanguages(queryObj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'No record(s) found',
-        });
-      }
-      if (results) {
-        results.map((result) => {
-          const icon = `/images/language/${result.icon}`;
-          result.icon = icon;
-        });
 
-        //get all total records
-        getTotalRecords(queryObj, (err2, results2) => {
-          if (err2) {
-            console.log(err2);
-            return res.json({
-              success: false,
-              message: 'Something went wrong. Try again later',
-            });
-          }
+    try {
+      const results = await getLanguages(queryObj);
 
-          if (results2) {
-            return res.json({
-              success: true,
-              all_totals: results2.all_totals,
-              data: results,
-            });
-          }
-        });
-      }
-    });
+      results.map((result) => {
+        const icon = `/images/language/${result.icon}`;
+        result.icon = icon;
+      });
+
+      // languages count
+      const { all_totals } = await totalRecords({
+        table: 'pr_languages',
+        field: 'uid',
+        where_,
+      });
+
+      return res.json({
+        success: true,
+        all_totals,
+        data: results,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  getLanguageByLanguageId: (req, res) => {
+  getLanguageByLanguageId: async (req, res) => {
     let { where_, language_id } = req.query;
     if (!where_) {
       where_ = `status = 1`;
@@ -126,50 +116,39 @@ module.exports = {
       language_id: parseInt(language_id),
     };
 
-    getLanguageByLanguageId(obj, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record not found',
-        });
-      }
+    try {
+      const results = await getLanguageByLanguageId(obj);
 
-      if (results) {
+      if (results.length) {
         const { icon } = results;
         results.icon = `/images/language/${icon}`;
 
         return res.json({
           success: true,
-          data: results,
+          data: results[0],
         });
       }
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
   updateLanguage: (req, res) => {
     const { body } = req;
 
     const { language_id } = req.body;
-    updateLanguage(parseInt(language_id), body, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.json({
-          success: false,
-          message: 'Something went wrong. Try again later',
-        });
-      }
 
-      if (!results) {
+    try {
+      const result = updateLanguage(parseInt(language_id), body);
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Failed to update language',
+          message: 'Record not found!',
         });
       }
 
@@ -177,52 +156,64 @@ module.exports = {
         success: true,
         message: 'Language updated successfully!',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  deleteLanguage: (req, res) => {
+  deleteLanguage: async (req, res) => {
     const { language_id } = req.body;
-    deleteLanguage(parseInt(language_id), (err, results) => {
-      if (err) {
-        console.log(err);
+
+    try {
+      const result = await deleteLanguage(parseInt(language_id));
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
+          message: 'Record not found!',
         });
       }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record Not Found',
-        });
-      }
+
       return res.json({
         success: true,
         message: 'Langauage deleted successfully!',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 
-  reactivateLanguage: (req, res) => {
+  reactivateLanguage: async (req, res) => {
     const { language_id } = req.body;
-    reactivateLanguage(parseInt(language_id), (err, results) => {
-      if (err) {
-        console.log(err);
+
+    try {
+      const result = await reactivateLanguage(parseInt(language_id));
+
+      if (result.affectedRows === 0 && result.changedRows === 0) {
         return res.json({
           success: false,
-          message: 'Something went wrong. Try again later',
+          message: 'Record not found!',
         });
       }
-      if (!results) {
-        return res.json({
-          success: false,
-          message: 'Record Not Found',
-        });
-      }
+
       return res.json({
         success: true,
         message: 'Language activated successfully',
       });
-    });
+    } catch (error) {
+      console.log(error);
+      return res.json({
+        success: false,
+        message: 'Something went wrong. Try again later',
+      });
+    }
   },
 };

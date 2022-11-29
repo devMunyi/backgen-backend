@@ -1,57 +1,60 @@
-const pool = require("../../config/db.config"); //require database configurations for CRUD operations
-//const util = require("util");
-// node native promisify
-//const query = util.promisify(pool.query).bind(pool);
+// require database configurations for CRUD operations
+const pool = require('../../config/db.config');
 
 module.exports = {
-  addComment: (
-    { code_snippet_id, comment_body, replying_to, tag, added_by },
-    callback
-  ) => {
-    pool.query(
-      `INSERT INTO
-        pr_comments(code_snippet_id, comment_body, replying_to, tag, added_by)
-      VALUES
-        (?, ?, ?, ?, ?)`,
-      [code_snippet_id, comment_body, replying_to, tag, added_by],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
-  },
-  getComments: (callback) => {
-    pool.query(
-      `SELECT
-        uid,
-        code_snippet_id,
-        comment_body,
-        replying_to,
-        tag,
-        added_by,
-        added_date,
-        votes
-      FROM
-        pr_comments`,
-      [],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
+  addComment: async ({
+    code_snippet_id,
+    comment_body,
+    replying_to,
+    tag,
+    added_by,
+  }) => {
+    try {
+      const results = await pool.query(
+        `INSERT INTO
+          pr_comments(code_snippet_id, comment_body, replying_to, tag, added_by)
+        VALUES
+          (?, ?, ?, ?, ?)`,
+        [code_snippet_id, comment_body, replying_to, tag, added_by]
+      );
+
+      return results[0];
+    } catch (error) {
+      throw error;
+    }
   },
 
-  getCommentsByCodesnippetId: (
-    { where_, orderby, dir, offset, rpp },
-    callback
-  ) => {
-    console.log(where_, orderby, dir, offset, rpp);
+  getComments: async () => {
     try {
-      pool.query(
+      const results = await pool.query(
+        `SELECT
+          uid,
+          code_snippet_id,
+          comment_body,
+          replying_to,
+          tag,
+          added_by,
+          added_date,
+          votes
+        FROM
+          pr_comments`,
+        []
+      );
+
+      return results[0];
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getCommentsByCodesnippetId: async ({
+    where_,
+    orderby = 'cmt.uid DESC',
+    offset,
+    rpp,
+  }) => {
+    try {
+      const results = await pool.query(
         `
       SELECT
         cmt.uid,
@@ -70,188 +73,91 @@ module.exports = {
         pr_comments cmt
       LEFT JOIN pr_users u ON cmt.added_by = u.uid
       LEFT JOIN pr_tags t ON cmt.tag = t.uid
-      WHERE ${where_} ORDER BY cmt.uid ${dir} LIMIT ?,?`,
-        [offset, rpp],
-        (error, results, fields) => {
-          if (error) {
-            return callback(error);
-          }
-          return callback(null, results);
-        }
+      WHERE ${where_} ORDER BY ${orderby} LIMIT ?,?`,
+        [offset, rpp]
       );
+
+      return results[0];
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   },
 
-  getTotalCommentsCodeId: (where_, callback) => {
+  getCommentByCommentId: async (id) => {
     try {
-      pool.query(
-        `
-      SELECT
-        COUNT(cmt.uid) AS total_comments
-      FROM
-        pr_comments cmt
-      WHERE ${where_}`,
-        [],
-        (error, results, fields) => {
-          if (error) {
-            return callback(error);
-          }
-          return callback(null, results[0]);
-        }
+      const results = await pool.query(
+        `SELECT
+          uid,
+          code_snippet_id,
+          comment_body,
+          replying_to,
+          added_by,
+          added_date,
+          votes
+        FROM
+          pr_comments
+        WHERE
+          uid = ?`,
+        [id]
       );
+
+      return results[0];
     } catch (error) {
-      console.log(error);
+      throw error;
     }
   },
 
-  getCommentByCommentId: (id, callback) => {
-    pool.query(
-      `SELECT
-        uid,
-        code_snippet_id,
-        comment_body,
-        replying_to,
-        added_by,
-        added_date,
-        votes
-      FROM
-        pr_comments
-      WHERE
-        uid = ?`,
-      [id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results[0]);
-      }
-    );
-  },
-  updateComment: ({ comment_body, comment_id }, callback) => {
-    pool.query(
-      `UPDATE
-        pr_comments
-      SET
-        comment_body = ?
-      WHERE
-        uid = ?`,
-      [comment_body, comment_id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
+  updateComment: async ({ comment_body, comment_id }) => {
+    try {
+      const results = await pool.query(
+        `UPDATE
+          pr_comments
+        SET
+          comment_body = ?
+        WHERE
+          uid = ?`,
+        [comment_body, comment_id]
+      );
+
+      return results[0];
+    } catch (error) {
+      throw error;
+    }
   },
 
-  deleteComment: (id, callback) => {
-    pool.query(
-      `UPDATE
-        pr_comments
-      SET
-        status = ?
-      WHERE
-        uid = ?`,
-      [0, id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
+  deleteComment: async (id) => {
+    try {
+      const results = await pool.query(
+        `UPDATE
+          pr_comments
+        SET
+          status = ?
+        WHERE
+          uid = ?`,
+        [0, id]
+      );
+
+      return results[0];
+    } catch (error) {
+      throw error;
+    }
   },
 
-  incrementRepliesTotal: ({ replying_to, code_snippet_id }, callback) => {
-    pool.query(
-      `UPDATE
-      pr_comments
-      SET
-      total_replies = total_replies + 1
-      WHERE
-        uid = ? AND code_snippet_id = ?`,
-      [replying_to, code_snippet_id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
-  },
+  commentVotes: async (comment_id) => {
+    try {
+      const results = await pool.query(
+        `SELECT
+          votes
+        FROM
+          pr_comments
+        WHERE
+          uid = ?`,
+        [comment_id]
+      );
 
-  decrementRepliesTotal: ({ replying_to, code_snippet_id }, callback) => {
-    pool.query(
-      `UPDATE
-      pr_comments
-      SET
-      total_replies = total_replies - 1
-      WHERE
-        uid = ? AND code_snippet_id = ?`,
-      [replying_to, code_snippet_id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
-  },
-
-  incrementCommentVotes: ({ comment_id, step }, callback) => {
-    pool.query(
-      `UPDATE
-      pr_comments
-      SET
-      votes = votes + ${step}
-      WHERE
-        uid = ?`,
-      [comment_id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
-  },
-  decrementCommentVotes: ({ comment_id, step }, callback) => {
-    pool.query(
-      `UPDATE
-      pr_comments
-      SET
-      votes = votes - ${step}
-      WHERE
-        uid = ?`,
-      [comment_id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        return callback(null, results);
-      }
-    );
-  },
-
-  commentVotes: (comment_id, callback) => {
-    pool.query(
-      `SELECT
-        votes
-      FROM
-        pr_comments
-      WHERE
-        uid = ?`,
-      [comment_id],
-      (error, results, fields) => {
-        if (error) {
-          return callback(error);
-        }
-        //console.log("RESULTS TOTAL =>", results);
-        return callback(null, results[0]);
-      }
-    );
+      return results[0][0];
+    } catch (error) {
+      throw error;
+    }
   },
 };

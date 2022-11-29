@@ -1,5 +1,5 @@
 const apicache = require('apicache');
-let cache = apicache.middleware;
+// let cache = apicache.middleware;
 const {
   addDbms,
   getDbmses,
@@ -21,7 +21,7 @@ const {
 
 ////---------------------------------Begin routes defination
 router.post('/add-dbms', validateImg, dbmsAddValidation, addDbms);
-router.get('/dbmses', cache('1 hour'), getDbmses);
+router.get('/dbmses', getDbmses);
 router.get('/dbms', getDbmsByDbmsId);
 router.put('/edit-dbms', validateImg, dbmsEditValidation, updateDbms);
 router.delete('/del-dbms', deleteDbms);
