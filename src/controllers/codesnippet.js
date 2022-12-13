@@ -130,12 +130,14 @@ module.exports = {
     try {
       const results = await searchCodesnippet(queryObj);
 
-      const { search_totals } = totalRecords({
+      const { search_totals } = await totalRecords({
         table: 'pr_code_snippets c',
         field: 'c.uid',
         where_,
         desiredName: 'search_totals',
       });
+
+      console.log(search_totals);
 
       // get all total records
       return res.json({
