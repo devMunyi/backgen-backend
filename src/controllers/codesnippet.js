@@ -137,8 +137,6 @@ module.exports = {
         desiredName: 'search_totals',
       });
 
-      console.log(search_totals);
-
       // get all total records
       return res.json({
         success: true,
